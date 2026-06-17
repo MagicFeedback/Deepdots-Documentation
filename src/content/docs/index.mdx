@@ -1,0 +1,33 @@
+---
+title: Deepdots Documentation
+description: Official documentation for the Deepdots SDK ecosystem — Popup Web, Popup Native (KMP), and Surveys.
+template: splash
+hero:
+  tagline: Choose the SDK you are integrating.
+  actions:
+    - text: Popup Web SDK
+      link: /popup-web/
+      icon: right-arrow
+    - text: Popup Native (KMP)
+      link: /popup-native/
+      icon: right-arrow
+      variant: minimal
+    - text: Surveys SDK
+      link: /surveys/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Popup Web SDK" icon="rocket">
+    Show Deepdots surveys as popups in your web product. [Read the docs](/popup-web/).
+  </Card>
+  <Card title="Popup Native (KMP)" icon="phone">
+    Native popups for Android and iOS via Kotlin Multiplatform. [Read the docs](/popup-native/).
+  </Card>
+  <Card title="Surveys SDK" icon="comment">
+    Render and submit Deepdots survey feedback. [Read the docs](/surveys/).
+  </Card>
+</CardGrid>
