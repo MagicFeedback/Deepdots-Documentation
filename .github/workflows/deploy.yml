@@ -37,9 +37,6 @@ jobs:
 
       - name: Build
         env:
-          GITHUB_PAGES: "true"
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           ASTRO_TELEMETRY_DISABLED: "1"
         run: npm run build
 

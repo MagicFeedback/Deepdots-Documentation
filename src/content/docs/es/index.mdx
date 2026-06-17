@@ -6,16 +6,20 @@ hero:
   tagline: Elige el SDK que vas a integrar.
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
 
 ## Popups
 
 <CardGrid>
   <Card title="SDK Popup Web" icon="rocket">
-    Muestra encuestas de Deepdots como popups en tu producto web. [Ver la documentación](/es/popup-web/).
+    Muestra encuestas de Deepdots como popups en tu producto web.
+
+    <LinkButton href="/es/popup-web/" icon="right-arrow">Ver la documentación</LinkButton>
   </Card>
   <Card title="Popup Nativo (KMP)" icon="phone">
-    Popups nativos para Android e iOS mediante Kotlin Multiplatform. [Ver la documentación](/es/popup-native/).
+    Popups nativos para Android e iOS mediante Kotlin Multiplatform.
+
+    <LinkButton href="/es/popup-native/" icon="right-arrow">Ver la documentación</LinkButton>
   </Card>
 </CardGrid>
 
@@ -23,6 +27,8 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 <CardGrid>
   <Card title="SDK de Surveys" icon="comment">
-    Renderiza y envía feedback de encuestas de Deepdots. [Ver la documentación](/es/surveys/).
+    Renderiza y envía feedback de encuestas de Deepdots.
+
+    <LinkButton href="/es/surveys/" icon="right-arrow">Ver la documentación</LinkButton>
   </Card>
 </CardGrid>

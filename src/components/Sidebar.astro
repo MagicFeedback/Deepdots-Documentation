@@ -1,0 +1,9 @@
+---
+// Custom Starlight Sidebar override: renders the topics as a dropdown selector
+// (instead of the default vertical topic list) above the regular sidebar.
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import TopicsDropdown from './TopicsDropdown.astro';
+---
+
+<TopicsDropdown />
+<Default><slot /></Default>

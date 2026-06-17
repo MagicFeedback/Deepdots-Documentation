@@ -2,22 +2,10 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 
-const vercelSite =
-  process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : undefined;
-const githubPagesSite =
-  process.env.GITHUB_PAGES === 'true' && process.env.GITHUB_REPOSITORY_OWNER
-    ? `https://${process.env.GITHUB_REPOSITORY_OWNER}.github.io`
-    : undefined;
-const site = process.env.SITE_URL || vercelSite || githubPagesSite;
-const base =
-  process.env.BASE_PATH
-  || (process.env.GITHUB_PAGES === 'true' && process.env.GITHUB_REPOSITORY
-    ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}`
-    : undefined);
+// Served at the root of the custom domain (docs.deepdots.com), so there is no base path.
+// All absolute links (`/popup-web/…`) resolve correctly without a prefix.
+const site = process.env.SITE_URL || 'https://docs.deepdots.com';
+const base = process.env.BASE_PATH; // undefined → served at domain root
 
 export default defineConfig({
   site,
@@ -26,6 +14,7 @@ export default defineConfig({
     starlight({
       title: 'Deepdots Documentation',
       description: 'Official documentation for the Deepdots SDK ecosystem.',
+      customCss: ['./src/styles/landing.css'],
       favicon: '/favicon.ico',
       logo: {
         light: './src/assets/logo-dark-long.svg',
@@ -42,6 +31,10 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/MagicFeedback' },
       ],
+      components: {
+        // Render the product topics as a dropdown selector (see src/components/TopicsDropdown.astro).
+        Sidebar: './src/components/Sidebar.astro',
+      },
       plugins: [
         starlightSidebarTopics([
           {

@@ -1,0 +1,74 @@
+/* Landing-page polish. Card/grid rules are global (cards only appear where the
+   <Card> component is used), while the typographic rhythm is scoped to hero/splash
+   pages via [data-has-hero] so regular docs pages are untouched. */
+
+/* ---- Section rhythm (Popups / Surveys headings) ---- */
+[data-has-hero] .sl-markdown-content h2 {
+  margin-top: 4rem;
+  margin-bottom: 0.25rem;
+  /* Full-bleed divider: cancel the content's horizontal padding so the rule spans
+     the whole width, while padding-inline keeps the heading text aligned with the cards. */
+  margin-inline: calc(var(--sl-content-pad-x) * -1);
+  padding-inline: var(--sl-content-pad-x);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+}
+
+[data-has-hero] .sl-markdown-content h2:first-of-type {
+  margin-top: 2.5rem;
+}
+
+/* ---- Card grid: more breathing room between cards ---- */
+.card-grid {
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 50rem) {
+  .card-grid {
+    gap: 2rem;
+  }
+}
+
+/* ---- Google/Material-style cards ---- */
+.card {
+  border: 1px solid var(--sl-color-gray-6);
+  border-radius: 16px;
+  padding: clamp(1.5rem, calc(0.5rem + 2vw), 2rem);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 1px 3px 1px rgba(0, 0, 0, 0.06);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Accent the card with its own colour on hover (Starlight sets a per-card
+   --sl-card-border: orange / purple / green …). */
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--sl-card-border);
+  box-shadow:
+    0 4px 12px 2px rgba(0, 0, 0, 0.14),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme='dark'] .card {
+  border-color: var(--sl-color-gray-5);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 1px 3px 1px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme='dark'] .card:hover {
+  border-color: var(--sl-card-border);
+  box-shadow:
+    0 6px 16px 2px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* CTA button inside a card sits on its own line with breathing room. */
+.card .sl-link-button {
+  margin-top: 1rem;
+}

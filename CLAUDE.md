@@ -50,7 +50,8 @@ Each product has exactly three sections: `getting-started/`, `guides/`, `referen
 - Both popup SDKs embed the Surveys SDK.
 
 ## Deploy
-- GitHub Actions (`.github/workflows/deploy.yml`) → GitHub Pages at
-  `https://magicfeedback.github.io/Deepdots-Documentation`.
-- `base` is derived from the repo name at build time. The `docs.deepdots.com` custom domain will
-  be cut over from the old `deepdots-popup-sdk` Pages site in a later migration step.
+- GitHub Actions (`.github/workflows/deploy.yml`) → GitHub Pages, served at the **root** of the
+  custom domain `https://docs.deepdots.com` (`public/CNAME`). No base path.
+- Because the site is at the domain root, all absolute links (`/popup-web/…`) work as-is — do NOT
+  add a base prefix to links.
+- Local dev/build use base `/` too, so links behave the same locally and in production.
