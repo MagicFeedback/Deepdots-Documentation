@@ -26,6 +26,8 @@ Each product has exactly three sections: `getting-started/`, `guides/`, `referen
   `da` uses `/da/popup-web/...`. Always include the topic segment.
 
 ## Adding a new SDK
+> Reusable prompt to document a new product in this same style: `.claude/prompts/new-product.md`.
+
 1. Create `src/content/docs/<new-topic>/{getting-started,guides,reference}/` with an `index.md`.
 2. Mirror it under `es/` and `da/`.
 3. Register the topic in `astro.config.mjs` (`starlightSidebarTopics([...])`) with a `label`
