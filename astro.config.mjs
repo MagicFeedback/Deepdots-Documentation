@@ -40,8 +40,7 @@ export default defineConfig({
         da: { label: 'Dansk', lang: 'da' },
       },
       social: [
-        { icon: 'github', label: 'Popup Web', href: 'https://github.com/MagicFeedback/deepdots-popup-sdk' },
-        { icon: 'github', label: 'Surveys', href: 'https://github.com/MagicFeedback/magicfeedback-sdk' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/MagicFeedback' },
       ],
       plugins: [
         starlightSidebarTopics([
