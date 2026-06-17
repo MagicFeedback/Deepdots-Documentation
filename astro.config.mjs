@@ -27,6 +27,11 @@ export default defineConfig({
       title: 'Deepdots Documentation',
       description: 'Official documentation for the Deepdots SDK ecosystem.',
       favicon: '/favicon.ico',
+      logo: {
+        light: './src/assets/logo-dark-long.svg',
+        dark: './src/assets/logo-light-long.svg',
+        replacesTitle: true,
+      },
       disable404Route: true,
       defaultLocale: 'root',
       locales: {
