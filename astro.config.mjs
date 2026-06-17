@@ -67,6 +67,16 @@ export default defineConfig({
               { label: 'Reference', autogenerate: { directory: 'surveys/reference' } },
             ],
           },
+          {
+            label: { en: 'Python SDK', es: 'SDK Python', da: 'Python SDK' },
+            link: '/python-sdk/',
+            icon: 'puzzle',
+            items: [
+              { label: 'Getting Started', autogenerate: { directory: 'python-sdk/getting-started' } },
+              { label: 'Guides', autogenerate: { directory: 'python-sdk/guides' } },
+              { label: 'Reference', autogenerate: { directory: 'python-sdk/reference' } },
+            ],
+          },
         ]),
       ],
     }),
