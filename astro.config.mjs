@@ -51,7 +51,6 @@ export default defineConfig({
             label: { en: 'Popup Native (KMP)', es: 'Popup Nativo (KMP)', da: 'Popup Native (KMP)' },
             link: '/popup-native/',
             icon: 'phone',
-            badge: { text: 'Beta', variant: 'caution' },
             items: [
               { label: 'Getting Started', autogenerate: { directory: 'popup-native/getting-started' } },
               { label: 'Guides', autogenerate: { directory: 'popup-native/guides' } },
