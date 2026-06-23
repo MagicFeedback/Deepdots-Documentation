@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
 });
 
@@ -32,7 +31,6 @@ Pass a `userId` so popup events are linked to the user in your analytics and in 
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123',
 });
@@ -116,7 +114,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: currentUser.id,
 });
@@ -138,7 +135,7 @@ document.getElementById('feedback-btn')?.addEventListener('click', () => {
 
 ## Live demo
 
-The public demo runs the SDK in server mode against a real Deepdots account.
+The public demo runs the SDK against a real Deepdots account.
 
 [Open the live demo](https://docs.deepdots.com/demo/).
 

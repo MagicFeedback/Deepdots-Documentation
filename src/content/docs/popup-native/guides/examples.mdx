@@ -18,7 +18,7 @@ example-android/
 What it demonstrates:
 
 - consuming the published Android package `com.deepdots.sdk:shared-android:0.3.0`
-- Server Mode initialization with a `publicKey`
+- initialization with a `publicKey`
 - user metadata through `metadata = mapOf("userId" to userId)`
 - path updates for `/login`, `/home`, and detail routes
 - event listeners for popup lifecycle events
@@ -48,7 +48,7 @@ iosApp/
 
 What it demonstrates:
 
-- Server Mode initialization from Swift
+- initialization from Swift
 - attaching `PlatformContext` from a root view controller
 - navigation-driven path updates
 - scroll percentage reporting via `onScroll`
@@ -60,7 +60,7 @@ What it demonstrates:
 1. Use the Android or iOS demo app to validate timing, UX placement, and event behavior.
 2. Confirm path naming with the screens used in the production host app.
 3. Verify popup lifecycle events against analytics expectations.
-4. Decide whether the rollout should start with Server Mode or a smaller Client Mode setup.
+4. Confirm the popups configured in Deepdots load and behave as expected in the app.
 
 ## Public demo status
 

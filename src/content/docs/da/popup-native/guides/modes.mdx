@@ -1,0 +1,44 @@
+---
+title: Sådan indlæses popups
+description: Popups styres altid i Deepdots og hentes fra API'et i runtime.
+---
+
+# Sådan indlæses popups
+
+Popups **styres altid i Deepdots og hentes fra API'et i runtime**. Der findes ingen klient-side mode, og værtsappen definerer aldrig popups manuelt. Du styrer alt omkring en popup i Deepdots, og SDK'et henter den for dig.
+
+## Sådan virker det
+
+Definitioner, tekster, triggers, segmentering og cooldowns ligger alle i Deepdots. I runtime henter SDK'et dem med din `publicKey`:
+
+```text
+/sdk/{publicKey}/popups
+```
+
+Værtsappens opgave er blot at initialisere SDK'et og reagere på dets events. Der er ingen popup-data, der skal samles eller pakkes med appen.
+
+## Minimal konfiguration
+
+```kotlin
+val options = InitOptions(
+    debug = true,                              // kun SDK-logs — ændrer IKKE backend
+    environment = Environment.Development,     // udelad (eller brug Environment.Production) for prod
+    popupOptions = PopupOptions(
+        publicKey = "<din-public-key>"
+    ),
+    autoLaunch = true,
+    provideLang = { "da" },
+    metadata = mapOf("userId" to "demo-user")
+)
+
+val sdk = DeepdotsPopups().apply {
+    initialize(options)
+    setPath("/home")
+}
+```
+
+Det eneste, der kræves for at indlæse popups, er en gyldig `publicKey` i `PopupOptions`.
+
+## Hvorfor ingen klient-side definitioner?
+
+At definere popups i appen ville splitte ejerskabet og binde hver ændring til en app-release. Én kilde til sandhed i Deepdots lader produkt, marketing og customer success ændre tekst, segmentering og triggers uden at skulle udgive et nyt build.

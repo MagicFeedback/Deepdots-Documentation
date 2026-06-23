@@ -11,7 +11,6 @@ Initializes the SDK and fetches the popup definitions from Deepdots.
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123', // optional
 });
@@ -19,9 +18,9 @@ popups.init({
 
 | Field    | Required | Description                                              |
 | -------- | -------- | -------------------------------------------------------- |
-| `mode`   | yes      | Always `'server'` for customer integrations.             |
 | `apiKey` | yes      | Your Deepdots public API key.                            |
 | `userId` | no       | Identifier sent with every popup event.                  |
+| `contactAttributes` | no | Internal user attributes to send to the Contact (requires `userId`). See [`setContactAttributes`](#setcontactattributesattributes). |
 
 ## `autoLaunch()`
 
@@ -72,3 +71,34 @@ popups.off('popup_shown', onShown);
 ```
 
 See [Events](/popup-web/guides/events/) for the full payload shape.
+
+## `setContactAttributes(attributes)`
+
+Sends internal user attributes that only your application knows — language, age, plan, segment, etc. — to the user's **Contact** in Deepdots, so they can be used for popup targeting and segmentation.
+
+Requires a `userId` in `init()`: the attributes are tied to that identity (the same id from your own system). Attribute values must be `string`, `number`, or `boolean`.
+
+```ts
+const sent = await popups.setContactAttributes({
+  language: 'es',
+  age: 34,
+  plan: 'premium',
+});
+```
+
+The SDK only sends when the attributes **changed** since the last send — it keeps a diff in persistent storage — so you can call this on every user identification without generating extra requests. The returned promise resolves to:
+
+- `true` — the attributes were sent to the backend.
+- `false` — nothing changed since the last send (or tracking is disabled, or there is no `userId`).
+
+Under the hood it performs `POST /sdk/popups/contact` with the body `{ publicKey, userId, userAttributes }`. The Contact is created automatically on the first popup fetch, so no ordering is required.
+
+You can also provide the initial attributes directly in `init()` via `contactAttributes` (equivalent to calling `setContactAttributes` right after init):
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  userId: 'customer-123',
+  contactAttributes: { language: 'es', plan: 'premium' },
+});
+```

@@ -10,12 +10,12 @@ description: Common causes of setup or runtime issues based on the current codeb
 Check:
 
 - `initialize(...)` or `init(...)` was called only once on a fresh instance
-- a valid `publicKey` is present in Server Mode
+- a valid `publicKey` is present
 - `attachContext(...)` was called with a valid platform context
 - `setPath(...)` matches the paths expected by popup segmentation
 - `autoLaunch` is enabled, or `autoLaunch()` is called after initialization
 
-## Server Mode loads nothing
+## Popups don't load
 
 Check:
 

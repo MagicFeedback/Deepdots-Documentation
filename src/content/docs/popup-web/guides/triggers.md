@@ -29,7 +29,7 @@ Fires after the user has spent a number of seconds on the page.
 import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 
 const popups = new DeepdotsPopups();
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 // Time triggers configured in Deepdots will now fire on their own.
 ```
@@ -47,7 +47,7 @@ Fires when the user has scrolled past a given percentage of the page height.
 **Host-side code:** none. The SDK attaches its own scroll listener and removes it once the threshold is reached.
 
 ```ts
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 // A scroll trigger configured at 70% in Deepdots fires automatically
 // when the user reaches 70% of the page.
@@ -94,7 +94,7 @@ Queues a popup to appear on the **next** route after the user leaves the current
 **Host-side code:** none for standard SPA navigation. The SDK monkey-patches `history.pushState` / `history.replaceState` and listens to `popstate`, `hashchange`, and same-origin link clicks. Any normal client-side route change is detected.
 
 ```ts
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 // When the user navigates away from a targeted route,
 // the popup is queued and shown on the next route after the configured delay.
@@ -123,7 +123,7 @@ Fires when your application emits a custom business event by name. **This is the
 import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 
 const popups = new DeepdotsPopups();
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 
 // Later, when something interesting happens in your app:

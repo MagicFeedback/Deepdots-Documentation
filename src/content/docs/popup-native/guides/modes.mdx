@@ -1,0 +1,44 @@
+---
+title: How popups load
+description: Popups are always managed in Deepdots and fetched from the API at runtime.
+---
+
+# How popups load
+
+Popups are **always managed in Deepdots and fetched from the API at runtime**. There is no client-side mode, and the host app never defines popups by hand. You manage everything about a popup in Deepdots, and the SDK loads it for you.
+
+## How it works
+
+The definitions, copy, triggers, targeting, and cooldowns all live in Deepdots. At runtime the SDK fetches them using your `publicKey`:
+
+```text
+/sdk/{publicKey}/popups
+```
+
+The host app's job is simply to initialize the SDK and react to its events. There is no popup payload to assemble or ship in the app build.
+
+## Minimum configuration
+
+```kotlin
+val options = InitOptions(
+    debug = true,                              // SDK logs only — does NOT change the backend
+    environment = Environment.Development,     // omit (or use Environment.Production) to hit prod
+    popupOptions = PopupOptions(
+        publicKey = "<your-public-key>"
+    ),
+    autoLaunch = true,
+    provideLang = { "en" },
+    metadata = mapOf("userId" to "demo-user")
+)
+
+val sdk = DeepdotsPopups().apply {
+    initialize(options)
+    setPath("/home")
+}
+```
+
+The only required piece for loading popups is a valid `publicKey` in `PopupOptions`.
+
+## Why no client-side definitions?
+
+Defining popups in the app would split ownership and tie every change to an app release. A single source of truth in Deepdots lets product, marketing, and customer success teams change copy, targeting, and triggers without shipping a new build.

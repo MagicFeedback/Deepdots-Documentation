@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
 });
 
@@ -32,7 +31,6 @@ Send et `userId`, så popup-events bliver knyttet til brugeren i din analytics o
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123',
 });
@@ -116,7 +114,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: currentUser.id,
 });
@@ -138,7 +135,7 @@ document.getElementById('feedback-btn')?.addEventListener('click', () => {
 
 ## Live demo
 
-Den offentlige demo kører SDK'et i server mode mod en rigtig Deepdots-konto.
+Den offentlige demo kører SDK'et mod en rigtig Deepdots-konto.
 
 [Åbn live-demoen](https://docs.deepdots.com/demo/).
 

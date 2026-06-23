@@ -85,7 +85,6 @@ export function DeepdotsPopupHost({ userId }: { userId?: string }) {
     });
 
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
       userId,
     });

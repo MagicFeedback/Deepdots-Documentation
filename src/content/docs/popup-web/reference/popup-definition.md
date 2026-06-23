@@ -3,7 +3,7 @@ title: Popup Definition
 description: The shape of a popup as delivered by the Deepdots API. Informational — you don't build this yourself.
 ---
 
-This page documents the shape of a popup as **delivered by the Deepdots API**. You do not need to build these objects in your application code — Deepdots stores them and the SDK loads them at runtime in server mode.
+This page documents the shape of a popup as **delivered by the Deepdots API**. You do not need to build these objects in your application code — Deepdots stores them and the SDK loads them at runtime.
 
 It is published here so that integrators can understand what arrives at the SDK and what fields drive behavior.
 

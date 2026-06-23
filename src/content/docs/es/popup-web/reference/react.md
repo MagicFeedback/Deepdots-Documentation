@@ -32,7 +32,6 @@ export function useDeepdotsPopups(userId?: string) {
 
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
       userId,
     });
@@ -71,7 +70,6 @@ export function DeepdotsProvider({ userId }: { userId?: string }) {
   useEffect(() => {
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: process.env.NEXT_PUBLIC_DEEPDOTS_API_KEY!,
       userId,
     });
@@ -114,7 +112,6 @@ export function FeedbackButton() {
   useEffect(() => {
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
     });
     popups.autoLaunch();
@@ -143,7 +140,7 @@ Suscríbete dentro de `useEffect` y cancela la suscripción en el cleanup para e
 ```tsx
 useEffect(() => {
   const popups = new DeepdotsPopups();
-  popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+  popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 
   const onShown = (event: unknown) => console.log('shown', event);
   const onCompleted = (event: unknown) => console.log('completed', event);

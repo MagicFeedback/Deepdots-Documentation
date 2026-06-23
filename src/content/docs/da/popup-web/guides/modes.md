@@ -1,15 +1,15 @@
 ---
-title: Server Mode
-description: SDK'et kører i server mode — popups styres i Deepdots og hentes i runtime.
+title: Sådan indlæses popups
+description: Popups styres altid i Deepdots og hentes fra API'et i runtime.
 ---
 
-Deepdots Popup SDK kører i **server mode**. Der er ikke nogen anden understøttet mode til kundeintegrationer.
+Popups **styres altid i Deepdots og hentes fra API'et i runtime**. Der er ingen klient-side mode: din kode definerer aldrig popups manuelt.
 
-## Hvad server mode betyder
+## Sådan virker det
 
 - Popup-definitioner, tekst, triggers, targeting og cooldowns lever i **Deepdots**.
-- SDK'et henter dem i runtime ved hjælp af din `apiKey`.
-- Din kode definerer aldrig popups manuelt — den monterer kun SDK'et og reagerer på dets events.
+- SDK'et henter dem i runtime ved hjælp af din `apiKey` (`GET /sdk/{apiKey}/popups`).
+- Din kode monterer kun SDK'et og reagerer på dets events.
 
 ## Minimal konfiguration
 
@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
 });
 
@@ -34,4 +33,4 @@ popups.autoLaunch();
 
 ## Hvorfor ingen klient-side definitioner?
 
-At definere popups i din kode ville dele ejerskabet af oplevelsen mellem din kodebase og Deepdots. Server mode bevarer én sandhedskilde, så produkt-, marketing- og CS-teams kan ændre tekst, targeting og triggers uden et kode-deploy fra din side.
+At definere popups i din kode ville dele ejerskabet af oplevelsen mellem din kodebase og Deepdots. At bevare én sandhedskilde i Deepdots lader produkt-, marketing- og CS-teams ændre tekst, targeting og triggers uden et kode-deploy fra din side.

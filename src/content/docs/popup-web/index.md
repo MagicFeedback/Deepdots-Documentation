@@ -32,7 +32,7 @@ You install the SDK, give it your API key, and the popups, triggers, targeting, 
 
 ## How it works at a glance
 
-1. You call `popups.init({ mode: 'server', apiKey: '…' })` once when your app boots.
+1. You call `popups.init({ apiKey: '…' })` once when your app boots.
 2. You call `popups.autoLaunch()` to activate the triggers that come from the Deepdots API.
 3. Optionally, you call `popups.triggerEvent('your_event_name')` from your code when a business event happens.
 4. You subscribe to SDK events to track popup interactions in your analytics.

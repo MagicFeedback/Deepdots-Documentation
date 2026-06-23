@@ -1,0 +1,31 @@
+---
+title: Cómo se cargan los popups
+description: Los popups se gestionan siempre en Deepdots y se cargan desde la API en tiempo de ejecución.
+---
+
+# Cómo se cargan los popups
+
+Los popups se **gestionan siempre en Deepdots y se cargan desde la API en tiempo de ejecución**. No hay un modo en cliente ni una elección entre modos: la app host nunca define popups a mano.
+
+## Cómo funciona
+
+- Las definiciones, los copys, los triggers, la segmentación y los cooldowns viven en Deepdots.
+- El SDK carga esas definiciones en tiempo de ejecución usando tu `publicKey` (`GET /sdk/{publicKey}/popups`).
+- La app host solo inicializa el SDK y reacciona a sus eventos (mostrado, click, encuesta completada).
+
+## Configuración mínima
+
+```kotlin
+val options = InitOptions(
+    debug = true,                              // solo logs del SDK — NO cambia el backend
+    environment = Environment.Development,     // omite (o usa Environment.Production) para apuntar a prod
+    popupOptions = PopupOptions(publicKey = "<your-public-key>"),
+    autoLaunch = true,
+    provideLang = { "en" },
+    metadata = mapOf("userId" to "demo-user")
+)
+```
+
+## ¿Por qué no se definen popups en cliente?
+
+Definir popups en la app repartiría la propiedad de la experiencia y ataría cada cambio a una release. Mantener una única fuente de verdad en Deepdots permite a producto, marketing y customer success cambiar copys, segmentación y triggers sin publicar una nueva build.

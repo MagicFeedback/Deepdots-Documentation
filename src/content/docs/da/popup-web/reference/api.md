@@ -11,7 +11,6 @@ Initialiserer SDK'et og henter popup-definitionerne fra Deepdots.
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123', // valgfrit
 });
@@ -19,7 +18,6 @@ popups.init({
 
 | Felt     | Påkrævet | Beskrivelse                                                  |
 | -------- | -------- | ------------------------------------------------------------ |
-| `mode`   | ja       | Altid `'server'` for kundeintegrationer.                     |
 | `apiKey` | ja       | Din offentlige Deepdots-API-nøgle.                           |
 | `userId` | nej      | Identifikator sendt med hver popup-event.                    |
 

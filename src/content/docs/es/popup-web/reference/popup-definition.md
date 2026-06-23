@@ -3,7 +3,7 @@ title: Popup Definition
 description: Estructura de un popup tal y como la entrega la API de Deepdots. Informativa — no la construyes tú.
 ---
 
-Esta página documenta la estructura de un popup **tal y como la entrega la API de Deepdots**. No necesitas construir estos objetos en tu código — Deepdots los almacena y el SDK los carga en tiempo de ejecución en modo server.
+Esta página documenta la estructura de un popup **tal y como la entrega la API de Deepdots**. No necesitas construir estos objetos en tu código — Deepdots los almacena y el SDK los carga en tiempo de ejecución.
 
 Se publica aquí para que los integradores puedan entender qué llega al SDK y qué campos determinan el comportamiento.
 

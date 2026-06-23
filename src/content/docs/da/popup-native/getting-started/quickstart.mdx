@@ -5,7 +5,7 @@ description: Hurtig opstart baseret paa de demoer der allerede findes i repoet.
 
 # Quickstart
 
-Demoapps bruger **Server Mode**.
+Popup-definitioner kommer altid fra backend. Demoapps initialiserer blot SDK'et med en gyldig `publicKey` og lader det hente popups i runtime.
 
 ## Grundtrin
 
@@ -29,4 +29,4 @@ at logge eller tjekke det aktive miljø.
 (Send / Cancel / Start survey / Complete survey / Back). Understøttede sprog:
 **en, es, da, no, sv, fi, zh-CN**. Regionsvarianter (`da-DK`, `nb-NO`, `zh-Hans`)
 accepteres. Ukendte sprog falder tilbage til engelsk. Etiketter sat på
-`PopupDefinition.actions` (server eller klient) har altid forrang.
+`PopupDefinition.actions` fra backend har altid forrang.

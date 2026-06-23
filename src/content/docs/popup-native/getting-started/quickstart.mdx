@@ -5,7 +5,7 @@ description: Initialize the SDK, set a path, and let Deepdots start evaluating p
 
 # Quickstart
 
-The examples in this repository use **Server Mode** first. That is the fastest way to validate the SDK because popup definitions come from the backend and the demo apps already use that flow.
+Popup definitions always come from the backend, so the fastest way to validate the SDK is to initialize it with a valid `publicKey` and let it fetch your popups at runtime. The demo apps already use that flow.
 
 ## 1. Initialize the SDK
 
@@ -15,7 +15,6 @@ The examples in this repository use **Server Mode** first. That is the fastest w
 val options = InitOptions(
     debug = true,                              // SDK logs only — does NOT change the backend
     environment = Environment.Development,     // omit (or use Environment.Production) to hit prod
-    mode = Mode.Server,
     popupOptions = PopupOptions(
         publicKey = "<your-public-key>"
     ),
@@ -53,11 +52,9 @@ always take precedence over the built-in defaults.
 let options = InitOptions(
     debug: true,                               // SDK logs only — does NOT change the backend
     environment: Environment.development,      // omit (or use .production) to hit prod
-    mode: Mode.server,
     popupOptions: PopupOptions(
         id: nil,
         publicKey: "<your-public-key>",
-        popups: nil,
         companyId: nil
     ),
     provideLang: { Locale.current.language.languageCode?.identifier ?? "en" },
