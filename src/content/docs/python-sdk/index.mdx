@@ -1,0 +1,33 @@
+---
+title: Python SDK
+description: Server-side Python client for the MagicFeedback API — submit feedback, manage contacts, and run campaigns from any Python backend.
+---
+
+# Python SDK
+
+The MagicFeedback Python SDK is a synchronous HTTP client for the MagicFeedback REST API. Use it from any Python backend, script, or data pipeline to submit feedback, manage contacts, run campaigns, and pull reports — no frontend required.
+
+## What it does
+
+- Submit feedback submissions programmatically from your server
+- Create and manage CRM contacts linked to your company
+- Organise outreach with campaigns and track per-contact sessions
+- Query feedback, metrics, and reports with flexible LoopBack-style filters
+
+## What you don't have to build
+
+The SDK handles authentication (email + password → bearer token via Google Identity), request construction, error propagation, and JSON parsing. Your code only needs to pass the right data dictionaries and read the responses.
+
+## Package details
+
+- **PyPI name:** `MagicFeedback`
+- **Python:** ≥ 3.8
+- **Dependencies:** `requests` ≥ 2.0.0 (auto-installed)
+- **API base URL:** `https://api.magicfeedback.io`
+
+## Start here
+
+- [Installation](/python-sdk/getting-started/installation/)
+- [Quickstart](/python-sdk/getting-started/quickstart/)
+- [Managing Feedback](/python-sdk/guides/feedback/)
+- [API Reference](/python-sdk/reference/api/)
