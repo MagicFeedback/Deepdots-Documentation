@@ -66,6 +66,12 @@ feedbacks = client.feedbacks.get({
 feedback = client.feedbacks.get_id("feedback-uuid-aqui")
 ```
 
+Pasa un filtro como segundo argumento para dar forma a los campos devueltos:
+
+```python
+feedback = client.feedbacks.get_id("feedback-uuid-aqui", {"fields": {"answers": True}})
+```
+
 ## Actualizar una submission
 
 ```python
@@ -85,3 +91,32 @@ client.feedbacks.delete("feedback-uuid-aqui")
 :::caution
 La eliminación es permanente. La API no soporta soft deletes.
 :::
+
+## Adjuntar un archivo
+
+Adjunta un archivo a una submission existente. El archivo se envía como una carga multipart.
+
+```python
+attachment = client.feedbacks.upload_attachment(
+    "feedback-uuid-aqui",
+    file_path="/ruta/al/reporte.pdf",
+)
+```
+
+Pasa argumentos opcionales para controlar el nombre de visualización y adjuntar metadatos adicionales:
+
+```python
+attachment = client.feedbacks.upload_attachment(
+    "feedback-uuid-aqui",
+    file_path="/ruta/al/reporte.pdf",
+    filename="reporte-q3.pdf",
+    extra_data={"fuente": "crm", "año": 2026},
+)
+```
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `feedback_id` | string | ID del feedback al que adjuntar el archivo |
+| `file_path` | string | Ruta absoluta o relativa al archivo en disco |
+| `filename` | string \| None | Nombre de visualización en el panel — por defecto el nombre del archivo |
+| `extra_data` | dict \| None | Cualquier dict JSON-serializable almacenado junto al adjunto |

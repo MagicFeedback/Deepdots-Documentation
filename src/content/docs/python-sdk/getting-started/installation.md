@@ -19,13 +19,13 @@ pip install MagicFeedback
 To pin a specific version in your project:
 
 ```bash
-pip install MagicFeedback==1.0.7
+pip install MagicFeedback==1.0.14
 ```
 
 Or add it to your `requirements.txt`:
 
 ```text
-MagicFeedback>=1.0.7
+MagicFeedback>=1.0.14
 ```
 
 ## Verify

@@ -74,6 +74,17 @@ Retorna el objeto de feedback actualizado.
 
 Retorna el objeto de feedback eliminado.
 
+### `upload_attachment(feedback_id, file_path, filename=None, extra_data=None)`
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `feedback_id` | string | ID del feedback al que adjuntar el archivo |
+| `file_path` | string | Ruta al archivo en disco |
+| `filename` | string \| None | Nombre de visualización — por defecto el nombre del archivo |
+| `extra_data` | dict \| None | Dict JSON-serializable almacenado junto al adjunto |
+
+Sube el archivo como una solicitud multipart. Retorna el objeto de adjunto creado.
+
 ---
 
 ## ContactsAPI
@@ -176,6 +187,15 @@ Retorna datos de reportes generales.
 ### `get_newsletter(filter=None)`
 
 Retorna datos de reportes específicos de newsletter.
+
+### `update(report_id, report)`
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `report_id` | string | ID del reporte a actualizar |
+| `report` | dict | Campos a cambiar |
+
+Retorna el objeto de reporte actualizado.
 
 ---
 

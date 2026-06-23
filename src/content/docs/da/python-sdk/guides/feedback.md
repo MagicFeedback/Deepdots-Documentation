@@ -64,6 +64,12 @@ feedbacks = client.feedbacks.get({
 feedback = client.feedbacks.get_id("feedback-uuid-her")
 ```
 
+Send et filter som andet argument for at forme de returnerede felter:
+
+```python
+feedback = client.feedbacks.get_id("feedback-uuid-her", {"fields": {"answers": True}})
+```
+
 ## Opdater en submission
 
 ```python
@@ -81,3 +87,32 @@ client.feedbacks.delete("feedback-uuid-her")
 :::caution
 Sletning er permanent. API'en understøtter ikke soft deletes.
 :::
+
+## Upload en fil-vedhæftning
+
+Vedhæft en fil til en eksisterende feedback-submission. Filen sendes som en multipart-upload.
+
+```python
+attachment = client.feedbacks.upload_attachment(
+    "feedback-uuid-her",
+    file_path="/sti/til/rapport.pdf",
+)
+```
+
+Send valgfrie argumenter for at styre visningsnavnet og vedhæfte ekstra metadata:
+
+```python
+attachment = client.feedbacks.upload_attachment(
+    "feedback-uuid-her",
+    file_path="/sti/til/rapport.pdf",
+    filename="q3-rapport.pdf",
+    extra_data={"kilde": "crm", "år": 2026},
+)
+```
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `feedback_id` | string | ID på det feedback filen skal vedhæftes |
+| `file_path` | string | Absolut eller relativ sti til filen på disk |
+| `filename` | string \| None | Visningsnavn i dashboardet — standard er filnavnet |
+| `extra_data` | dict \| None | Et JSON-serialiserbart dict gemt sammen med vedhæftningen |

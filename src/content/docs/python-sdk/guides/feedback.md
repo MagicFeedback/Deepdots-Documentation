@@ -93,3 +93,32 @@ Returns the deleted object on success.
 :::caution
 Deletion is permanent. The API does not support soft deletes.
 :::
+
+## Upload a file attachment
+
+Attach a file to an existing feedback submission. The file is sent as a multipart upload.
+
+```python
+attachment = client.feedbacks.upload_attachment(
+    "feedback-uuid-here",
+    file_path="/path/to/report.pdf",
+)
+```
+
+Pass optional arguments to control the display name and attach extra metadata:
+
+```python
+attachment = client.feedbacks.upload_attachment(
+    "feedback-uuid-here",
+    file_path="/path/to/report.pdf",
+    filename="q3-report.pdf",          # overrides the file name shown in the dashboard
+    extra_data={"source": "crm", "year": 2026},
+)
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `feedback_id` | string | ID of the feedback to attach the file to |
+| `file_path` | string | Absolute or relative path to the file on disk |
+| `filename` | string \| None | Display name in the dashboard — defaults to the file's base name |
+| `extra_data` | dict \| None | Any JSON-serialisable dict stored alongside the attachment |

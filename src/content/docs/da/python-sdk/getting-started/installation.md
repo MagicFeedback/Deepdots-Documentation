@@ -19,13 +19,13 @@ pip install MagicFeedback
 For at fastlåse en specifik version i dit projekt:
 
 ```bash
-pip install MagicFeedback==1.0.7
+pip install MagicFeedback==1.0.14
 ```
 
 Eller tilføj den til din `requirements.txt`:
 
 ```text
-MagicFeedback>=1.0.7
+MagicFeedback>=1.0.14
 ```
 
 ## Verificer

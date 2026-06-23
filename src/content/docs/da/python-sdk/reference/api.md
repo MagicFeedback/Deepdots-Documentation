@@ -74,6 +74,17 @@ Returnerer det opdaterede feedback-objekt.
 
 Returnerer det slettede feedback-objekt.
 
+### `upload_attachment(feedback_id, file_path, filename=None, extra_data=None)`
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `feedback_id` | string | ID på det feedback filen skal vedhæftes |
+| `file_path` | string | Sti til filen på disk |
+| `filename` | string \| None | Visningsnavn — standard er filnavnet |
+| `extra_data` | dict \| None | JSON-serialiserbart dict gemt med vedhæftningen |
+
+Uploader filen som en multipart-request. Returnerer det oprettede vedhæftningsobjekt.
+
 ---
 
 ## ContactsAPI
@@ -176,6 +187,15 @@ Returnerer generelle rapportdata.
 ### `get_newsletter(filter=None)`
 
 Returnerer newsletter-specifikke rapportdata.
+
+### `update(report_id, report)`
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `report_id` | string | ID på rapporten der opdateres |
+| `report` | dict | Felter der skal ændres |
+
+Returnerer det opdaterede rapportobjekt.
 
 ---
 

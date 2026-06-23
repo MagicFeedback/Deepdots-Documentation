@@ -96,6 +96,17 @@ Returns the updated feedback object.
 
 Returns the deleted feedback object.
 
+### `upload_attachment(feedback_id, file_path, filename=None, extra_data=None)`
+
+| Parameter | Type | Description |
+|---|---|---|
+| `feedback_id` | string | ID of the feedback to attach the file to |
+| `file_path` | string | Path to the file on disk |
+| `filename` | string \| None | Display name — defaults to the file's base name |
+| `extra_data` | dict \| None | Any JSON-serialisable dict stored with the attachment |
+
+Uploads the file as a multipart request. Returns the created attachment object.
+
 ---
 
 ## ContactsAPI
@@ -230,6 +241,15 @@ Returns general report data.
 ### `get_newsletter(filter=None)`
 
 Returns newsletter-specific report data.
+
+### `update(report_id, report)`
+
+| Parameter | Type | Description |
+|---|---|---|
+| `report_id` | string | ID of the report to update |
+| `report` | dict | Fields to change |
+
+Returns the updated report object.
 
 ---
 
