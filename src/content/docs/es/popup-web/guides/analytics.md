@@ -143,6 +143,42 @@ popups.init({
 
 ---
 
+## Crashes y reporte de errores
+
+El SDK captura errores de la aplicación y los envía como eventos `deepdots_app_crash`, que alimentan las métricas de Stability (usuarios sin crashes, crashes por versión y dispositivo). En cada `init()` se emite un evento `deepdots_session_start` para que el backend pueda calcular la tasa de sesiones sin crash.
+
+### Captura automática
+
+Los errores no manejados se capturan automáticamente — en web vía `window.onerror` / `unhandledrejection`, y en React Native vía `global.ErrorUtils` (cableado por `setupReactNative`). Los crashes capturados se persisten localmente y se reenvían en el siguiente arranque, porque el proceso puede morir antes del siguiente flush — así el crash que terminó una sesión igualmente llega a Deepdots.
+
+### Reportar errores manualmente
+
+Usa `reportError` para errores manejados, con severidad opcional y contexto libre:
+
+```ts
+try {
+  await checkout();
+} catch (e) {
+  popups.reportError(e, { severity: 'error', context: { screen: 'Checkout', order_id: 'o-42' } });
+}
+```
+
+| Opción | Valores | Por defecto |
+| --- | --- | --- |
+| `severity` | `'fatal'` / `'error'` / `'warning'` | `'error'` |
+| `handled` | `boolean` | `true` |
+| `context` | mapa libre clave/valor (prefijado `ctx_` en el payload) | — |
+
+El contexto del crash (versión de la app, OS, dispositivo) se captura en el momento del crash, así que un crash en una versión antigua sigue reportando la versión en la que ocurrió.
+
+:::caution
+La cobertura es para **errores JS gestionados**: errores no manejados en web (`window.onerror` / `unhandledrejection`) y en React Native (`global.ErrorUtils`), además de lo que envíes con `reportError`. Los crashes **nativos** bajo React Native (iOS / Android) **no** se capturan — si ya usas un crash reporter nativo (Crashlytics, Sentry), reenvía sus reportes a `reportError`.
+:::
+
+El reporte de crashes respeta el mismo kill-switch de consentimiento que el resto de la analítica (`trackingEnabled` / `setTrackingEnabled`).
+
+---
+
 ## Privacidad y consentimiento
 
 Establece `trackingEnabled: false` en `init()` para arrancar con toda la analítica y el tracking de contacto desactivados — útil cuando necesitas consentimiento explícito del usuario antes de recopilar datos.

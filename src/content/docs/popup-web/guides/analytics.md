@@ -143,6 +143,42 @@ popups.init({
 
 ---
 
+## Crash & error reporting
+
+The SDK captures application errors and surfaces them as `deepdots_app_crash` events, powering the Stability metrics (crash-free users, crashes by release and device). A `deepdots_session_start` event is emitted on every `init()` so the backend can compute crash-free rates.
+
+### Automatic capture
+
+Unhandled errors are captured automatically — on the web via `window.onerror` / `unhandledrejection`, and in React Native via `global.ErrorUtils` (wired by `setupReactNative`). Captured crashes are persisted locally and replayed on the next launch, because the process may die before the next flush — so the crash that ended a session still reaches Deepdots.
+
+### Reporting errors manually
+
+Use `reportError` for handled errors, with an optional severity and free-form context:
+
+```ts
+try {
+  await checkout();
+} catch (e) {
+  popups.reportError(e, { severity: 'error', context: { screen: 'Checkout', order_id: 'o-42' } });
+}
+```
+
+| Option | Values | Default |
+| --- | --- | --- |
+| `severity` | `'fatal'` / `'error'` / `'warning'` | `'error'` |
+| `handled` | `boolean` | `true` |
+| `context` | free-form key/value map (prefixed `ctx_` in the payload) | — |
+
+Crash context (app version, OS, device) is captured at the moment of the crash, so a crash on an older release still reports the version it happened on.
+
+:::caution
+Coverage is for **managed JS errors**: unhandled errors on the web (`window.onerror` / `unhandledrejection`) and on React Native (`global.ErrorUtils`), plus anything you send via `reportError`. **Native** crashes under React Native (iOS / Android) are **not** captured — if you already run a native crash reporter (Crashlytics, Sentry), forward its reports to `reportError`.
+:::
+
+Crash reporting respects the same consent kill-switch as the rest of analytics (`trackingEnabled` / `setTrackingEnabled`).
+
+---
+
 ## Privacy and consent
 
 Set `trackingEnabled: false` in `init()` to start with all analytics and contact tracking disabled — useful when you need explicit user consent before collecting data.
