@@ -34,8 +34,8 @@ Los siguientes datos se recopilan **sin ningún código adicional** mientras el 
 
 | Dato | Cómo | Dónde aparece |
 | --- | --- | --- |
-| Vistas de pantalla (`page_view`) | History API (pushState / popstate / hashchange) | Eventos |
-| Tiempo activo de engagement (`user_engagement`) | Listener de `visibilitychange` | Eventos |
+| Vistas de pantalla (`deepdots_page_view`) | History API (pushState / popstate / hashchange) | Eventos |
+| Tiempo activo de engagement (`deepdots_user_engagement`) | Listener de `visibilitychange` | Eventos |
 | Identidad persistente del usuario (`user_id`) | Generada en la primera visita, guardada en `localStorage` | Metadata |
 | Tipo de dispositivo | Calculado a partir del User-Agent (mobile / tablet / desktop) | Contexto |
 | User agent | `navigator.userAgent` | Contexto |
@@ -104,7 +104,7 @@ popups.enterMiniService('checkout', 'banner_home');
 popups.exitMiniService('checkout');
 ```
 
-Puede haber varios mini-servicios activos a la vez (p. ej. un chat de soporte abierto durante el pago). Cierra siempre cada uno por **nombre** para que el flujo correcto reciba su `mini_service_exit` y su duración:
+Puede haber varios mini-servicios activos a la vez (p. ej. un chat de soporte abierto durante el pago). Cierra siempre cada uno por **nombre** para que el flujo correcto reciba su `deepdots_mini_service_exit` y su duración:
 
 ```ts
 popups.enterMiniService('checkout', 'banner_home');

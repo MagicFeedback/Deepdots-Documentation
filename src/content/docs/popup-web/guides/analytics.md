@@ -34,8 +34,8 @@ The following data is collected with **zero extra code** as long as the SDK is i
 
 | Data | How | Where it appears |
 | --- | --- | --- |
-| Screen views (`page_view`) | History API (pushState / popstate / hashchange) | Events |
-| Active engagement time (`user_engagement`) | `visibilitychange` listener | Events |
+| Screen views (`deepdots_page_view`) | History API (pushState / popstate / hashchange) | Events |
+| Active engagement time (`deepdots_user_engagement`) | `visibilitychange` listener | Events |
 | Persistent user identity (`user_id`) | Generated on first visit, stored in `localStorage` | Metadata |
 | Device type | Parsed from User-Agent (mobile / tablet / desktop) | Context |
 | User agent | `navigator.userAgent` | Context |
@@ -104,7 +104,7 @@ popups.enterMiniService('checkout', 'home_banner');
 popups.exitMiniService('checkout');
 ```
 
-Multiple mini-services can be active at once (e.g. a support chat opened during checkout). Always close each one by **name** so the right workflow gets its `mini_service_exit` and duration:
+Multiple mini-services can be active at once (e.g. a support chat opened during checkout). Always close each one by **name** so the right workflow gets its `deepdots_mini_service_exit` and duration:
 
 ```ts
 popups.enterMiniService('checkout', 'home_banner');
