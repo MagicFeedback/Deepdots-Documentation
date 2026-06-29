@@ -100,11 +100,19 @@ popups.enterMiniService('checkout', 'home_banner');
 
 // … user completes or abandons the flow …
 
-// User leaves — duration is computed automatically
-popups.exitMiniService();
+// User leaves — pass the same name; duration is computed automatically
+popups.exitMiniService('checkout');
 ```
 
-Any survey shown while a mini-service is active automatically receives a `mini_service` metadata tag, which lets you filter CSAT results by workflow context in Deepdots.
+Multiple mini-services can be active at once (e.g. a support chat opened during checkout). Always close each one by **name** so the right workflow gets its `mini_service_exit` and duration:
+
+```ts
+popups.enterMiniService('checkout', 'home_banner');
+popups.enterMiniService('support_chat', 'fab');   // both active now
+popups.exitMiniService('checkout');               // closes checkout; support_chat stays open
+```
+
+Any survey shown while a mini-service is active automatically receives a `mini_service` metadata tag (the most recently entered one), which lets you filter CSAT results by workflow context in Deepdots.
 
 ---
 

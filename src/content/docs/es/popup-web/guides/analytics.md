@@ -100,11 +100,19 @@ popups.enterMiniService('checkout', 'banner_home');
 
 // … el usuario completa o abandona el flujo …
 
-// El usuario sale — la duración se calcula automáticamente
-popups.exitMiniService();
+// El usuario sale — pasa el mismo nombre; la duración se calcula automáticamente
+popups.exitMiniService('checkout');
 ```
 
-Cualquier encuesta mostrada mientras un mini-servicio está activo recibe automáticamente una etiqueta de metadata `mini_service`, lo que te permite filtrar resultados de CSAT por contexto de flujo en Deepdots.
+Puede haber varios mini-servicios activos a la vez (p. ej. un chat de soporte abierto durante el pago). Cierra siempre cada uno por **nombre** para que el flujo correcto reciba su `mini_service_exit` y su duración:
+
+```ts
+popups.enterMiniService('checkout', 'banner_home');
+popups.enterMiniService('support_chat', 'fab');   // ambos activos ahora
+popups.exitMiniService('checkout');               // cierra checkout; support_chat sigue abierto
+```
+
+Cualquier encuesta mostrada mientras un mini-servicio está activo recibe automáticamente una etiqueta de metadata `mini_service` (el más reciente), lo que te permite filtrar resultados de CSAT por contexto de flujo en Deepdots.
 
 ---
 
