@@ -151,6 +151,39 @@ popups.init({
 
 ---
 
+## Messaging
+
+Rastrea el ciclo de vida de las notificaciones de tu app (push e in-app) para que Deepdots pueda medir entrega, click-through y conversión por mensaje. Usa un único método, `trackMessage(stage, options)`, en cada etapa del funnel del mensaje:
+
+```ts
+// La notificación se entregó (push recibida, o mensaje in-app mostrado)
+popups.trackMessage('delivered', { id: 'msg-42', title: 'Rebajas de verano', channel: 'push', campaign: 'summer_sale' });
+
+// El usuario la pulsó / hizo click
+popups.trackMessage('clicked', { id: 'msg-42', title: 'Rebajas de verano', channel: 'push' });
+
+// El usuario completó la acción prevista (p. ej. compró)
+popups.trackMessage('converted', { id: 'msg-42', title: 'Rebajas de verano', channel: 'push', value: 49.9, currency: 'EUR' });
+```
+
+| Campo | Tipo | Descripción |
+| --- | --- | --- |
+| `stage` (1er arg) | `'delivered'` / `'clicked'` / `'converted'` | Etapa del funnel del mensaje |
+| `id` | string | Correlaciona las etapas del mismo mensaje |
+| `title` | string | Dimensión de agrupación de las métricas de Messaging |
+| `channel` | `'push'` / `'in_app'` | Canal de entrega |
+| `campaign` | string? | Nombre de la campaña (opcional) |
+| `value` / `currency` | number / string | Valor de conversión (típico en `converted`) |
+| `params` | object? | Pares clave/valor adicionales |
+
+Cada llamada emite un evento `deepdots_message`; el backend agrupa por `title` (y desglosa por estado de registro / canal) para calcular entregas, CTR, usuarios únicos con click, tasa de conversión y usuarios que realizaron una acción.
+
+:::note
+Messaging es host-instrumentado — el SDK no puede observar tu sistema de notificaciones automáticamente, así que llamas a `trackMessage` desde tus propios handlers de push/in-app. Para **push**, la señal real de "delivered" suele ser más fiable desde tu proveedor/backend de push; la app sí ve de forma fiable el click/conversión.
+:::
+
+---
+
 ## Crashes y reporte de errores
 
 El SDK captura errores de la aplicación y los envía como eventos `deepdots_app_crash`, que alimentan las métricas de Stability (usuarios sin crashes, crashes por versión y dispositivo). En cada `init()` se emite un evento `deepdots_session_start` para que el backend pueda calcular la tasa de sesiones sin crash.

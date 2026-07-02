@@ -151,6 +151,39 @@ popups.init({
 
 ---
 
+## Messaging
+
+Track the lifecycle of your app's notifications (push and in-app) so Deepdots can measure delivery, click-through, and conversion per message. Use a single method, `trackMessage(stage, options)`, at each stage of the message funnel:
+
+```ts
+// The notification was delivered (push received, or in-app message shown)
+popups.trackMessage('delivered', { id: 'msg-42', title: 'Summer Sale', channel: 'push', campaign: 'summer_sale' });
+
+// The user tapped / clicked it
+popups.trackMessage('clicked', { id: 'msg-42', title: 'Summer Sale', channel: 'push' });
+
+// The user completed the intended action (e.g. purchased)
+popups.trackMessage('converted', { id: 'msg-42', title: 'Summer Sale', channel: 'push', value: 49.9, currency: 'EUR' });
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `stage` (1st arg) | `'delivered'` / `'clicked'` / `'converted'` | Stage of the message funnel |
+| `id` | string | Correlates the stages of the same message |
+| `title` | string | Grouping dimension for the Messaging metrics |
+| `channel` | `'push'` / `'in_app'` | Delivery channel |
+| `campaign` | string? | Campaign name (optional) |
+| `value` / `currency` | number / string | Conversion value (typical on `converted`) |
+| `params` | object? | Any extra key/value pairs |
+
+Each call emits one `deepdots_message` event; the backend groups by `title` (and breaks down by registration status / channel) to compute delivered counts, CTR, unique click-through users, conversion rate, and action users.
+
+:::note
+Messaging is host-instrumented — the SDK can't observe your notification system automatically, so you call `trackMessage` from your own push/in-app handlers. For **push**, the true "delivered" signal is usually most reliable from your push provider/backend; the app reliably sees the click/conversion.
+:::
+
+---
+
 ## Crash & error reporting
 
 The SDK captures application errors and surfaces them as `deepdots_app_crash` events, powering the Stability metrics (crash-free users, crashes by release and device). A `deepdots_session_start` event is emitted on every `init()` so the backend can compute crash-free rates.
