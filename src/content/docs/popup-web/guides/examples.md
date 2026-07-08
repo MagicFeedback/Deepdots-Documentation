@@ -83,25 +83,14 @@ function onSearchAttempt(searchAttempts) {
 }
 ```
 
-## Show a popup manually
+## Trigger a popup from a button
 
-Bypass triggers entirely — useful for a permanent "Feedback" button.
+Configure the popup in Deepdots with an `event` trigger, then fire it from the click handler.
 
 ```ts
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.show({
-    surveyId: 'survey-feedback-001',
-    productId: 'product-main',
-  });
+  popups.triggerEvent('feedback_requested');
 });
-```
-
-## Show a popup by its Deepdots id
-
-When you know the popup's id from the Deepdots dashboard.
-
-```ts
-popups.showByPopupId('popup-footer-feedback');
 ```
 
 ## Full example: feedback button with analytics
@@ -129,7 +118,7 @@ popups.on('survey_completed', (event) => {
 popups.autoLaunch();
 
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.showByPopupId('popup-footer-feedback');
+  popups.triggerEvent('feedback_requested');
 });
 ```
 

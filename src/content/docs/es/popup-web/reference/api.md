@@ -40,25 +40,6 @@ popups.triggerEvent('checkout_completed');
 
 Consulta [Triggers → event](/es/popup-web/guides/triggers/#event) para más detalles.
 
-## `show({ surveyId, productId })`
-
-Muestra un popup directamente, saltándose los triggers. Los cooldowns y la segmentación por ruta se siguen respetando.
-
-```ts
-popups.show({
-  surveyId: 'survey-home-001',
-  productId: 'product-main',
-});
-```
-
-## `showByPopupId(popupId)`
-
-Igual que `show()`, pero direccionando el popup por su `id` de Deepdots en lugar de por el par survey/product.
-
-```ts
-popups.showByPopupId('popup-home-5s');
-```
-
 ## `on(event, listener)` / `off(event, listener)`
 
 Suscríbete a los eventos del SDK: `popup_shown`, `popup_clicked`, `survey_completed`.

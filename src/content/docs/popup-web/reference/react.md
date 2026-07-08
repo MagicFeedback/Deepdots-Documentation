@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Triggering a popup from a React component
 
-You can also keep a reference to the instance and call `show()` or `triggerEvent()` from event handlers.
+You can also keep a reference to the instance and call `triggerEvent()` from event handlers.
 
 ```tsx
 'use client';
@@ -119,14 +119,7 @@ export function FeedbackButton() {
   }, []);
 
   return (
-    <button
-      onClick={() =>
-        popupsRef.current?.show({
-          surveyId: 'survey-home-001',
-          productId: 'product-main',
-        })
-      }
-    >
+    <button onClick={() => popupsRef.current?.triggerEvent('feedback_requested')}>
       Give feedback
     </button>
   );

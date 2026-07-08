@@ -83,25 +83,14 @@ function onSearchAttempt(searchAttempts) {
 }
 ```
 
-## Vis en popup manuelt
+## Udløs en popup fra en knap
 
-Omgå triggers helt — nyttigt til en permanent "Feedback"-knap.
+Konfigurér popup'en i Deepdots med en `event`-trigger og udløs den fra click-handleren.
 
 ```ts
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.show({
-    surveyId: 'survey-feedback-001',
-    productId: 'product-main',
-  });
+  popups.triggerEvent('feedback_requested');
 });
-```
-
-## Vis en popup ud fra dens Deepdots-id
-
-Når du kender popup-id'et fra Deepdots-dashboardet.
-
-```ts
-popups.showByPopupId('popup-footer-feedback');
 ```
 
 ## Fuldt eksempel: feedback-knap med analytics
@@ -129,7 +118,7 @@ popups.on('survey_completed', (event) => {
 popups.autoLaunch();
 
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.showByPopupId('popup-footer-feedback');
+  popups.triggerEvent('feedback_requested');
 });
 ```
 

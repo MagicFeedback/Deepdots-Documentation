@@ -184,18 +184,12 @@ Du behøver ikke gøre noget særligt i kode — sørg bare for, at din applikat
 
 ---
 
-## Vis en popup manuelt uden trigger
+## Udløs en popup fra kode
 
-Hvis du har brug for at omgå triggers helt — for eksempel en "Feedback"-knap altid tilgængelig i footeren — kald `show()` eller `showByPopupId()` direkte:
+Hvis du har brug for at udløse en popup fra kode — for eksempel en "Feedback"-knap altid tilgængelig i footeren — konfigurér popup'en i Deepdots med en `event`-trigger og kald `triggerEvent()`:
 
 ```ts
-popups.show({
-  surveyId: 'survey-feedback-001',
-  productId: 'product-main',
-});
-
-// Eller, hvis du kender popup-id'et fra Deepdots:
-popups.showByPopupId('popup-footer-feedback');
+popups.triggerEvent('feedback_requested');
 ```
 
 Cooldowns og rute-targeting respekteres stadig.

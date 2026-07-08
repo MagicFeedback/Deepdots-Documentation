@@ -156,13 +156,10 @@ export default function App() {
 
 ## Triggering a popup imperatively
 
-Expose the SDK instance via a context or a ref and call `show()` from anywhere:
+Expose the SDK instance via a context or a ref and call `triggerEvent()` from anywhere:
 
 ```tsx
-popupsRef.current?.show({
-  surveyId: 'survey-home-001',
-  productId: 'product-main',
-});
+popupsRef.current?.triggerEvent('feedback_requested');
 ```
 
 ## Bridging events from the WebView

@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Udløs en popup fra en React-komponent
 
-Du kan også gemme en reference til instansen og kalde `show()` eller `triggerEvent()` fra en event handler.
+Du kan også gemme en reference til instansen og kalde `triggerEvent()` fra en event handler.
 
 ```tsx
 'use client';
@@ -119,14 +119,7 @@ export function FeedbackButton() {
   }, []);
 
   return (
-    <button
-      onClick={() =>
-        popupsRef.current?.show({
-          surveyId: 'survey-home-001',
-          productId: 'product-main',
-        })
-      }
-    >
+    <button onClick={() => popupsRef.current?.triggerEvent('feedback_requested')}>
       Giv feedback
     </button>
   );

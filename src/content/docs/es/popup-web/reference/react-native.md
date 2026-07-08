@@ -156,13 +156,10 @@ export default function App() {
 
 ## Disparar un popup de forma imperativa
 
-Expón la instancia del SDK con un contexto o una ref y llama a `show()` desde cualquier sitio:
+Expón la instancia del SDK con un contexto o una ref y llama a `triggerEvent()` desde cualquier sitio:
 
 ```tsx
-popupsRef.current?.show({
-  surveyId: 'survey-home-001',
-  productId: 'product-main',
-});
+popupsRef.current?.triggerEvent('feedback_requested');
 ```
 
 ## Puente de eventos desde el WebView

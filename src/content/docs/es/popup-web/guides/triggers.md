@@ -184,18 +184,12 @@ No tienes que hacer nada especial en código — solo asegúrate de que tu aplic
 
 ---
 
-## Mostrar un popup manualmente sin pasar por triggers
+## Disparar un popup desde código
 
-Si necesitas saltarte los triggers — por ejemplo, un botón "Feedback" siempre disponible en el footer — llama a `show()` o `showByPopupId()` directamente:
+Si necesitas disparar un popup desde código — por ejemplo, un botón "Feedback" siempre disponible en el footer — configura el popup en Deepdots con un trigger de tipo `event` y llama a `triggerEvent()`:
 
 ```ts
-popups.show({
-  surveyId: 'survey-feedback-001',
-  productId: 'product-main',
-});
-
-// O, si conoces el popup id de Deepdots:
-popups.showByPopupId('popup-footer-feedback');
+popups.triggerEvent('feedback_requested');
 ```
 
 Los cooldowns y la segmentación por ruta se siguen respetando.

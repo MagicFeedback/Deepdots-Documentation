@@ -184,18 +184,12 @@ You don't need to do anything special in code — just make sure your applicatio
 
 ---
 
-## Manually showing a popup outside any trigger
+## Manually firing a popup from code
 
-If you need to bypass triggers entirely — for example, a "Feedback" button always available in the footer — call `show()` or `showByPopupId()` directly:
+If you need to fire a popup from code — for example, a "Feedback" button always available in the footer — configure the popup in Deepdots with an `event` trigger, then call `triggerEvent()`:
 
 ```ts
-popups.show({
-  surveyId: 'survey-feedback-001',
-  productId: 'product-main',
-});
-
-// Or, if you know the popup id from Deepdots:
-popups.showByPopupId('popup-footer-feedback');
+popups.triggerEvent('feedback_requested');
 ```
 
 Cooldowns and route targeting are still respected.

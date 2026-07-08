@@ -156,13 +156,10 @@ export default function App() {
 
 ## Udløs en popup imperativt
 
-Eksponér SDK-instansen via en context eller en ref og kald `show()` hvor som helst:
+Eksponér SDK-instansen via en context eller en ref og kald `triggerEvent()` hvor som helst:
 
 ```tsx
-popupsRef.current?.show({
-  surveyId: 'survey-home-001',
-  productId: 'product-main',
-});
+popupsRef.current?.triggerEvent('feedback_requested');
 ```
 
 ## Bro for events fra WebView'et
