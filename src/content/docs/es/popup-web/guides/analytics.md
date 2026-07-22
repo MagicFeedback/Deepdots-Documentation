@@ -39,13 +39,34 @@ Los siguientes datos se recopilan **sin ningún código adicional** mientras el 
 | Identidad persistente del usuario (`user_id`) | Generada en la primera visita, guardada en `localStorage` | Metadata |
 | Tipo de dispositivo | Calculado a partir del User-Agent (mobile / tablet / desktop) | Contexto |
 | User agent | `navigator.userAgent` | Contexto |
-| Idioma del navegador | `navigator.language` | Contexto |
+| Idioma (`deepdots_language`) | Detectado automáticamente (ver [Detección de idioma](#detección-de-idioma)) | Contexto |
 | Versión de la app | `appVersion` pasado en `init()` | Contexto |
 
 Cada flush (pestaña oculta, página cerrada o `flushAnalytics()` manual) envía los eventos acumulados como un lote. El backend agrupa los lotes por sesión para que veas una única línea de tiempo por visita de usuario, no un registro por flush.
 
 :::note[React Native]
 En React Native la History API no está disponible. Usa [`setScreen(name)`](#react-native) para reportar la navegación manualmente. Los eventos de ciclo de vida usan `onForeground()` / `onBackground()` en lugar de `visibilitychange`.
+:::
+
+### Detección de idioma
+
+El idioma que se reporta en el contexto de analytics — enviado como `deepdots_language` en el metadata del Feedback — se resuelve **automáticamente**, en este orden:
+
+1. El `language` pasado a `init()` — una etiqueta [BCP-47](https://www.rfc-editor.org/info/bcp47) explícita como `'es-ES'`. Úsalo cuando tu app tiene su propio i18n y quieres forzar el idioma reportado.
+2. `navigator.language` — el idioma del navegador (web).
+3. El locale de `Intl` (`Intl.DateTimeFormat().resolvedOptions().locale`) — el fallback usado cuando `navigator.language` no está disponible. Es lo que hace que la detección funcione en **React Native con Hermes**, donde `navigator.language` no existe.
+4. Si nada de lo anterior resuelve, el campo se omite.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  analytics: { publicKey: 'YOUR_ANALYTICS_PUBLIC_KEY', integration: 'YOUR_INTEGRATION_ID' },
+  language: 'es-ES', // opcional — fuerza el idioma de analytics; se detecta automáticamente si se omite
+});
+```
+
+:::note
+Este es el idioma del metadata de la **integración de analytics**, no el metadata de identidad del survey. A diferencia de la navegación y el ciclo de vida, la detección de idioma no requiere ninguna integración en el host en React Native — el fallback de `Intl` se encarga. `country` / `city` se resuelven aparte por geo-IP.
 :::
 
 ---
