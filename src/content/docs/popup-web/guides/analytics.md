@@ -39,13 +39,34 @@ The following data is collected with **zero extra code** as long as the SDK is i
 | Persistent user identity (`user_id`) | Generated on first visit, stored in `localStorage` | Metadata |
 | Device type | Parsed from User-Agent (mobile / tablet / desktop) | Context |
 | User agent | `navigator.userAgent` | Context |
-| Browser language | `navigator.language` | Context |
+| Language (`deepdots_language`) | Auto-detected (see [Language detection](#language-detection)) | Context |
 | App version | `appVersion` passed to `init()` | Context |
 
 Each flush (tab hidden, page closed, or manual `flushAnalytics()`) sends the accumulated events as a batch. The backend groups batches by session so you see a single timeline per user visit, not one record per flush.
 
 :::note[React Native]
 In React Native, History API is not available. Use [`setScreen(name)`](#react-native) to report navigation manually. Lifecycle events use `onForeground()` / `onBackground()` instead of `visibilitychange`.
+:::
+
+### Language detection
+
+The language reported on the analytics context — sent as `deepdots_language` in the Feedback metadata — is resolved **automatically**, in this order:
+
+1. The `language` passed to `init()` — an explicit [BCP-47](https://www.rfc-editor.org/info/bcp47) tag such as `'es-ES'`. Set this when your app has its own i18n and you want to force the reported language.
+2. `navigator.language` — the browser language (web).
+3. The `Intl` locale (`Intl.DateTimeFormat().resolvedOptions().locale`) — the fallback used when `navigator.language` is unavailable. This is what makes detection work on **React Native with Hermes**, where `navigator.language` does not exist.
+4. If none of these resolve, the field is omitted.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  analytics: { publicKey: 'YOUR_ANALYTICS_PUBLIC_KEY', integration: 'YOUR_INTEGRATION_ID' },
+  language: 'es-ES', // optional — force the analytics language; auto-detected when omitted
+});
+```
+
+:::note
+This is the language of the **analytics integration** metadata, not the survey's identity metadata. Unlike navigation and lifecycle, language detection needs no host wiring in React Native — the `Intl` fallback handles it. `country` / `city` are resolved separately by geo-IP.
 :::
 
 ---

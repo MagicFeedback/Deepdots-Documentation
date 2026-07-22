@@ -20,6 +20,7 @@ popups.init({
 | -------- | ----------- | -------------------------------------------------------- |
 | `apiKey` | sí          | Tu API key pública de Deepdots.                          |
 | `userId` | no          | Identificador enviado con cada evento de popup.          |
+| `language` | no        | Etiqueta de idioma BCP-47 (p. ej. `es-ES`) para el contexto de analytics. Se detecta automáticamente desde el navegador (o `Intl` en React Native) si se omite. Ver [Analytics → Detección de idioma](/es/popup-web/guides/analytics/#detección-de-idioma). |
 | `contactAttributes` | no | Atributos internos del usuario a enviar al Contact (requiere `userId`). Ver [`setContactAttributes`](#setcontactattributesattributes). |
 
 ## `autoLaunch()`
