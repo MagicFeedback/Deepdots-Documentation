@@ -172,6 +172,45 @@ popups.init({
 
 ---
 
+## Métricas
+
+Llama a `setMetric(key, value)` para registrar un **valor medible** — una cantidad que quieres reportar junto al contexto de analytics del usuario, como el valor del carrito o el número de artículos en él.
+
+```ts
+popups.setMetric('cart_value', 49.99);
+popups.setMetric('items_in_cart', 3);
+```
+
+La firma es:
+
+```ts
+setMetric(key: string, value: string | number | boolean): void
+```
+
+Las métricas aterrizan en un **campo dedicado `metrics`** del payload de analytics (`POST /sdk/feedback`), separado de `metadata` y de los [atributos de usuario](#atributos-de-usuario).
+
+### Comportamiento
+
+- **Persistente** — una vez fijado, el valor se reenvía en cada flush hasta que cambie.
+- **Sobrescribe por key** — volver a llamar a `setMetric` con la misma key reemplaza el valor anterior.
+- **Se coerciona a string** — el valor se almacena como string en el envío (`49.99` → `"49.99"`).
+- **Las keys vacías se ignoran** — una llamada con `key` vacía es un no-op.
+- **Respeta el kill-switch** — es un no-op mientras el tracking está desactivado (ver [Privacidad y consentimiento](#privacidad-y-consentimiento)).
+
+### Métricas vs. atributos de usuario
+
+Ambos adjuntan contexto al usuario, pero responden a preguntas distintas:
+
+| | [`setUserAttributes`](#atributos-de-usuario) | `setMetric` |
+| --- | --- | --- |
+| Representa | Dimensiones para **desglosar** | **Valores** medibles a reportar |
+| Ejemplo | `plan: 'pro'`, `sector: 'retail'` | `cart_value: 49.99`, `items_in_cart: 3` |
+| Campo del payload | `metadata` | `metrics` |
+
+Usa los atributos para el *quién* — las categorías por las que filtras y agrupas — y las métricas para el *cuánto* — las cantidades que mides.
+
+---
+
 ## Messaging
 
 Rastrea el ciclo de vida de las notificaciones de tu app (push e in-app) para que Deepdots pueda medir entrega, click-through y conversión por mensaje. Usa un único método, `trackMessage(stage, options)`, en cada etapa del funnel del mensaje:
