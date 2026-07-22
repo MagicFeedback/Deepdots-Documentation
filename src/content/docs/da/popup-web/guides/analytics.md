@@ -172,6 +172,45 @@ popups.init({
 
 ---
 
+## Metrikker
+
+Kald `setMetric(key, value)` for at registrere en **målbar værdi** — en mængde, du vil rapportere sammen med brugerens analytics-kontekst, såsom kurvværdi eller antal varer i kurven.
+
+```ts
+popups.setMetric('cart_value', 49.99);
+popups.setMetric('items_in_cart', 3);
+```
+
+Signaturen er:
+
+```ts
+setMetric(key: string, value: string | number | boolean): void
+```
+
+Metrikker lander i et **dedikeret `metrics`-felt** i analytics-payloaden (`POST /sdk/feedback`), adskilt fra `metadata` og fra [brugerattributter](#brugerattributter).
+
+### Adfærd
+
+- **Vedvarende** — når den er sat, gensendes værdien ved hvert flush, indtil den ændres.
+- **Overskriver pr. key** — at kalde `setMetric` igen med samme key erstatter den tidligere værdi.
+- **Konverteres til string** — værdien gemmes som string på wiren (`49.99` → `"49.99"`).
+- **Tomme keys ignoreres** — et kald med tom `key` er en no-op.
+- **Respekterer kill-switchen** — det er en no-op, mens tracking er deaktiveret (se [Privatliv og samtykke](#privatliv-og-samtykke)).
+
+### Metrikker vs. brugerattributter
+
+Begge knytter kontekst til brugeren, men de besvarer forskellige spørgsmål:
+
+| | [`setUserAttributes`](#brugerattributter) | `setMetric` |
+| --- | --- | --- |
+| Repræsenterer | Dimensioner at **opdele** efter | Målbare **værdier** at rapportere |
+| Eksempel | `plan: 'pro'`, `sector: 'retail'` | `cart_value: 49.99`, `items_in_cart: 3` |
+| Payload-felt | `metadata` | `metrics` |
+
+Brug attributter til *hvem* — kategorierne du filtrerer og grupperer efter — og metrikker til *hvor meget* — mængderne du måler.
+
+---
+
 ## Messaging
 
 Spor livscyklussen for din apps notifikationer (push og in-app), så Deepdots kan måle levering, click-through og konvertering pr. besked. Brug en enkelt metode, `trackMessage(stage, options)`, ved hvert trin i besked-funnelen:
