@@ -20,8 +20,41 @@ popups.init({
 | -------- | -------- | -------------------------------------------------------- |
 | `apiKey` | yes      | Your Deepdots public API key.                            |
 | `userId` | no       | Identifier sent with every popup event.                  |
-| `language` | no     | BCP-47 language tag (e.g. `es-ES`) for the analytics context. Auto-detected from the browser (or `Intl` on React Native) when omitted. See [Analytics → Language detection](/popup-web/guides/analytics/#language-detection). |
+| `language` | no     | BCP-47 language tag (e.g. `es-ES`). Drives both the analytics context and popup [language targeting](/popup-web/reference/popup-definition/#fields-that-affect-behavior) (`segments.lang`). Auto-detected from the browser (or `Intl` on React Native) when omitted. See [Analytics → Language detection](/popup-web/guides/analytics/#language-detection). |
 | `contactAttributes` | no | Internal user attributes to send to the Contact (requires `userId`). See [`setContactAttributes`](#setcontactattributesattributes). |
+| `debug`  | no       | Enables the SDK's debug output. Off by default.           |
+| `logger` | no       | Custom destination for that debug output. See [Custom logger](#custom-logger). |
+
+### Custom logger
+
+By default the SDK writes its debug output to `console`. Pass a `logger` to route it somewhere else — a log file, a remote logging service, Firebase, your own buffer — which is useful on React Native, where the Metro console is not available in production builds.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  debug: true,
+  logger: {
+    log: (...args) => myLogger.info(...args),
+    warn: (...args) => myLogger.warn(...args),
+    error: (...args) => myLogger.error(...args),
+  },
+});
+```
+
+Only `log` is required — `warn`, `error`, and `info` fall back to `log` when omitted. `console` itself satisfies the shape, so `logger: console` is valid and is the default.
+
+```ts
+interface DeepdotsLogger {
+  log: (...args: unknown[]) => void;
+  warn?: (...args: unknown[]) => void;
+  error?: (...args: unknown[]) => void;
+  info?: (...args: unknown[]) => void;
+}
+```
+
+:::note
+`logger` only changes **where** the output goes, not how much of it there is: the SDK's debug messages still require `debug: true`. Errors the SDK reports regardless of `debug` (a throwing event listener, a renderer warning) also go through the logger once it is set.
+:::
 
 ## `autoLaunch()`
 

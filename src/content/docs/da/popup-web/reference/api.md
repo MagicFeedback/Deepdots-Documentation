@@ -20,8 +20,41 @@ popups.init({
 | -------- | -------- | ------------------------------------------------------------ |
 | `apiKey` | ja       | Din offentlige Deepdots-API-nøgle.                           |
 | `userId` | nej      | Identifikator sendt med hver popup-event.                    |
-| `language` | nej    | BCP-47-sprogtag (f.eks. `es-ES`) til analytics-konteksten. Registreres automatisk fra browseren (eller `Intl` på React Native), hvis den udelades. Se [Analytics → Sprogregistrering](/da/popup-web/guides/analytics/#sprogregistrering). |
+| `language` | nej    | BCP-47-sprogtag (f.eks. `es-ES`). Styrer både analytics-konteksten og popup-[sprogmålretningen](/da/popup-web/reference/popup-definition/#felter-der-påvirker-adfærd) (`segments.lang`). Registreres automatisk fra browseren (eller `Intl` på React Native), hvis den udelades. Se [Analytics → Sprogregistrering](/da/popup-web/guides/analytics/#sprogregistrering). |
 | `contactAttributes` | nej | Interne brugerattributter der skal sendes til Contact (kræver `userId`). Se [`setContactAttributes`](#setcontactattributesattributes). |
+| `debug`  | nej      | Slår SDK'ets debug-output til. Slået fra som standard.        |
+| `logger` | nej      | Tilpasset destination for dette debug-output. Se [Tilpasset logger](#tilpasset-logger). |
+
+### Tilpasset logger
+
+Som standard skriver SDK'et sit debug-output til `console`. Send en `logger` for at dirigere det et andet sted hen — en logfil, en fjern-logtjeneste, Firebase, din egen buffer — hvilket er nyttigt på React Native, hvor Metro-konsollen ikke er tilgængelig i produktionsbuilds.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  debug: true,
+  logger: {
+    log: (...args) => myLogger.info(...args),
+    warn: (...args) => myLogger.warn(...args),
+    error: (...args) => myLogger.error(...args),
+  },
+});
+```
+
+Kun `log` er påkrævet — `warn`, `error` og `info` falder tilbage til `log`, når de udelades. `console` opfylder selv formen, så `logger: console` er gyldig og er standardværdien.
+
+```ts
+interface DeepdotsLogger {
+  log: (...args: unknown[]) => void;
+  warn?: (...args: unknown[]) => void;
+  error?: (...args: unknown[]) => void;
+  info?: (...args: unknown[]) => void;
+}
+```
+
+:::note
+`logger` ændrer kun **hvor** outputtet havner, ikke hvor meget der er: SDK'ets debug-beskeder kræver stadig `debug: true`. Fejl, som SDK'et rapporterer uanset `debug` (en event-listener der kaster, en advarsel fra rendereren), går også gennem loggeren, når den først er sat.
+:::
 
 ## `autoLaunch()`
 

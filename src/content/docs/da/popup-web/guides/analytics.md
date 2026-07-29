@@ -69,6 +69,8 @@ popups.init({
 Dette er sproget for metadataen fra **analytics-integrationen**, ikke surveyets identitets-metadata. I modsætning til navigation og livscyklus kræver sprogregistrering ingen host-integration i React Native — `Intl`-fallbacken klarer det. `country` / `city` bestemmes separat via geo-IP.
 :::
 
+Det bestemte sprog er også det, popup-**sprogmålretning** (`segments.lang`) matches imod, så sætter du `language` eksplicit, fastlægger du begge ting på én gang. I React Native kræver dette **1.1.8 eller nyere** — se [React Native → Sprogsegmenter](/da/popup-web/reference/react-native/#sprogsegmenter).
+
 ---
 
 ## Brugerdefinerede events
@@ -325,7 +327,7 @@ AppState.addEventListener('change', (state) => {
 ```
 
 :::tip
-Hvis du bruger `setupReactNative()`, håndteres både `setScreen` (via React Navigation) og `AppState`-koblingen automatisk for dig. Se [React Native-referencen](/da/popup-web/reference/react-native/) for den komplette opsætning.
+`<DeepdotsProvider>` fra `@magicfeedback/popup-sdk/react-native` (og `setupReactNative()` under den) kobler `AppState`-livscyklussen for dig — men **ikke** `setScreen`: navigation skal altid rapporteres fra din navigator. Se [React Native-referencen](/da/popup-web/reference/react-native/) for den komplette opsætning.
 :::
 
 ---
@@ -343,4 +345,23 @@ For at fremtvinge et flush manuelt (nyttigt til test):
 
 ```ts
 popups.flushAnalytics();
+```
+
+## Leveringsgarantier
+
+Flush sker automatisk — hvert 30. sekund i forgrunden, når bufferen når 20 events, når fanen skjules, og når siden eller appen lukkes. Du har sjældent brug for selv at kalde `flushAnalytics()`. Fra **1.1.8** og frem er kanalen hærdet, så det sidste batch i et besøg — det, der bærer det afsluttende `deepdots_page_view` og `deepdots_user_engagement` — ikke går tabt:
+
+- **Overlever navigation og lukning** — forespørgslen bruger `keepalive`, og det afsluttende flush ved sidelukning skifter til `navigator.sendBeacon`. Browsere afbryder den ikke længere undervejs.
+- **Genforsøger forbigående fejl** — en netværksfejl eller en `5xx` / `408` / `429` lægger batchet tilbage forrest i bufferen i kronologisk orden, så det genforsøges ved næste flush. Op til 200 events holdes; derudover kasseres de ældste.
+- **Rapporterer permanente fejl** — en `4xx` (for eksempel en `406` for en ukendt Contact) logges med status og svarets indhold, og batchet kasseres i stedet for at fejle lydløst.
+- **Holder én post pr. besøg** — indtil backend har returneret et session-id, serialiseres batches i stedet for at sendes parallelt, så et besøg ikke deles over to poster.
+
+:::note
+Genforsøg gør leveringen **at-least-once**: mister man et svar, efter backend allerede har behandlet et batch, sendes de events igen. En event identificeres entydigt ved bruger + eventnavn + timestamp — så bygger du rapportering på integrationens rådata, skal du deduplikere på den kombination.
+:::
+
+`flushAnalytics()` tager et `final`-flag, som er det, SDK'et selv bruger ved sidelukning. Send det kun, hvis du implementerer din egen nedlukningssti — det foretrækker `sendBeacon` og venter ikke på svaret:
+
+```ts
+popups.flushAnalytics({ final: true });
 ```

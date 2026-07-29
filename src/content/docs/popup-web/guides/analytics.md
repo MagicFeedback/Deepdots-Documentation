@@ -69,6 +69,8 @@ popups.init({
 This is the language of the **analytics integration** metadata, not the survey's identity metadata. Unlike navigation and lifecycle, language detection needs no host wiring in React Native — the `Intl` fallback handles it. `country` / `city` are resolved separately by geo-IP.
 :::
 
+The resolved language is also what popup **language targeting** (`segments.lang`) is matched against, so setting `language` explicitly pins both at once. In React Native this requires **1.1.8 or newer** — see [React Native → Language segments](/popup-web/reference/react-native/#language-segments).
+
 ---
 
 ## Custom events
@@ -325,7 +327,7 @@ AppState.addEventListener('change', (state) => {
 ```
 
 :::tip
-If you use `setupReactNative()`, both `setScreen` (via React Navigation) and the `AppState` wiring are handled for you automatically. See the [React Native reference](/popup-web/reference/react-native/) for the complete setup.
+The `<DeepdotsProvider>` from `@magicfeedback/popup-sdk/react-native` (and `setupReactNative()` under it) wires the `AppState` lifecycle for you — but **not** `setScreen`: navigation always has to be reported from your navigator. See the [React Native reference](/popup-web/reference/react-native/) for the complete setup.
 :::
 
 ---
@@ -343,4 +345,23 @@ To force a flush manually (useful for testing):
 
 ```ts
 popups.flushAnalytics();
+```
+
+## Delivery guarantees
+
+Flushes happen automatically — every 30 s in the foreground, when the buffer reaches 20 events, when the tab is hidden, and when the page or app closes. You rarely need to call `flushAnalytics()` yourself. From **1.1.8** onwards the channel is hardened so that the last batch of a visit — the one carrying the closing `deepdots_page_view` and `deepdots_user_engagement` — is not lost:
+
+- **Survives navigation and close** — the request uses `keepalive`, and the final flush at page close switches to `navigator.sendBeacon`. Browsers no longer cancel it mid-flight.
+- **Retries transient failures** — a network error or a `5xx` / `408` / `429` puts the batch back at the front of the buffer, in chronological order, to be retried on the next flush. Up to 200 events are held; beyond that the oldest are dropped.
+- **Reports permanent failures** — a `4xx` (for example a `406` for an unknown Contact) is logged with its status and response body and the batch is discarded, instead of failing silently.
+- **Keeps one record per visit** — until the backend has returned a session id, batches are serialized rather than sent in parallel, so a visit doesn't get split across two records.
+
+:::note
+Retrying makes delivery **at-least-once**: if a response is lost after the backend already processed a batch, those events are sent again. An event is uniquely identified by user + event name + timestamp — so if you build reporting on the raw integration data, deduplicate on that triple.
+:::
+
+`flushAnalytics()` accepts a `final` flag, which is what the SDK uses internally at page close. Pass it only if you are implementing your own shutdown path — it prefers `sendBeacon` and does not wait for the response:
+
+```ts
+popups.flushAnalytics({ final: true });
 ```

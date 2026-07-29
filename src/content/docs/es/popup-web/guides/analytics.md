@@ -69,6 +69,8 @@ popups.init({
 Este es el idioma del metadata de la **integración de analytics**, no el metadata de identidad del survey. A diferencia de la navegación y el ciclo de vida, la detección de idioma no requiere ninguna integración en el host en React Native — el fallback de `Intl` se encarga. `country` / `city` se resuelven aparte por geo-IP.
 :::
 
+El idioma resuelto es también aquello contra lo que se compara la **segmentación por idioma** de los popups (`segments.lang`), así que fijar `language` explícitamente fija ambas cosas a la vez. En React Native esto requiere **1.1.8 o superior** — ver [React Native → Segmentación por idioma](/es/popup-web/reference/react-native/#segmentación-por-idioma).
+
 ---
 
 ## Eventos personalizados
@@ -325,7 +327,7 @@ AppState.addEventListener('change', (state) => {
 ```
 
 :::tip
-Si usas `setupReactNative()`, tanto `setScreen` (mediante React Navigation) como el cableado de `AppState` se gestionan automáticamente. Consulta la [referencia de React Native](/es/popup-web/reference/react-native/) para la configuración completa.
+El `<DeepdotsProvider>` de `@magicfeedback/popup-sdk/react-native` (y `setupReactNative()` por debajo) cablea por ti el ciclo de vida de `AppState` — pero **no** `setScreen`: la navegación siempre hay que reportarla desde tu navegador. Consulta la [referencia de React Native](/es/popup-web/reference/react-native/) para la configuración completa.
 :::
 
 ---
@@ -343,4 +345,23 @@ Para forzar un flush manualmente (útil para testing):
 
 ```ts
 popups.flushAnalytics();
+```
+
+## Garantías de entrega
+
+Los flushes ocurren automáticamente — cada 30 s en primer plano, cuando el buffer llega a 20 eventos, cuando se oculta la pestaña y cuando se cierra la página o la app. Rara vez necesitas llamar a `flushAnalytics()` tú. A partir de **1.1.8** el canal está endurecido para que no se pierda el último lote de una visita — el que lleva el `deepdots_page_view` y el `deepdots_user_engagement` de cierre:
+
+- **Sobrevive a la navegación y al cierre** — la petición usa `keepalive`, y el flush final al cerrar la página pasa a `navigator.sendBeacon`. Los navegadores ya no la cancelan a medias.
+- **Reintenta los fallos transitorios** — un error de red o un `5xx` / `408` / `429` devuelve el lote al principio del buffer, en orden cronológico, para reintentarlo en el flush siguiente. Se retienen hasta 200 eventos; por encima se descartan los más antiguos.
+- **Reporta los fallos permanentes** — un `4xx` (por ejemplo un `406` por un Contact desconocido) se loguea con su status y el cuerpo de la respuesta, y el lote se descarta, en lugar de fallar en silencio.
+- **Mantiene un registro por visita** — hasta que el backend devuelve un id de sesión, los lotes se serializan en vez de enviarse en paralelo, así una visita no se parte en dos registros.
+
+:::note
+Reintentar hace que la entrega sea **at-least-once**: si se pierde una respuesta después de que el backend ya procesara un lote, esos eventos se vuelven a enviar. Un evento se identifica de forma única por usuario + nombre de evento + timestamp — así que si montas reporting sobre los datos crudos de la integración, deduplica por esa terna.
+:::
+
+`flushAnalytics()` acepta un flag `final`, que es el que usa el SDK internamente al cerrar la página. Pásalo solo si estás implementando tu propio camino de cierre — prefiere `sendBeacon` y no espera la respuesta:
+
+```ts
+popups.flushAnalytics({ final: true });
 ```
