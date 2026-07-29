@@ -20,8 +20,41 @@ popups.init({
 | -------- | ----------- | -------------------------------------------------------- |
 | `apiKey` | sí          | Tu API key pública de Deepdots.                          |
 | `userId` | no          | Identificador enviado con cada evento de popup.          |
-| `language` | no        | Etiqueta de idioma BCP-47 (p. ej. `es-ES`) para el contexto de analytics. Se detecta automáticamente desde el navegador (o `Intl` en React Native) si se omite. Ver [Analytics → Detección de idioma](/es/popup-web/guides/analytics/#detección-de-idioma). |
+| `language` | no        | Etiqueta de idioma BCP-47 (p. ej. `es-ES`). Determina tanto el contexto de analytics como la [segmentación por idioma](/es/popup-web/reference/popup-definition/#campos-que-afectan-al-comportamiento) de los popups (`segments.lang`). Se detecta automáticamente desde el navegador (o `Intl` en React Native) si se omite. Ver [Analytics → Detección de idioma](/es/popup-web/guides/analytics/#detección-de-idioma). |
 | `contactAttributes` | no | Atributos internos del usuario a enviar al Contact (requiere `userId`). Ver [`setContactAttributes`](#setcontactattributesattributes). |
+| `debug`  | no          | Activa la salida de debug del SDK. Desactivada por defecto. |
+| `logger` | no          | Destino personalizado para esa salida de debug. Ver [Logger personalizado](#logger-personalizado). |
+
+### Logger personalizado
+
+Por defecto el SDK escribe su salida de debug en `console`. Pasa un `logger` para enrutarla a otro sitio — un archivo de log, un servicio de logging remoto, Firebase, tu propio buffer — lo que resulta útil en React Native, donde la consola de Metro no está disponible en builds de producción.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  debug: true,
+  logger: {
+    log: (...args) => myLogger.info(...args),
+    warn: (...args) => myLogger.warn(...args),
+    error: (...args) => myLogger.error(...args),
+  },
+});
+```
+
+Solo `log` es obligatorio — `warn`, `error` e `info` caen a `log` si se omiten. `console` cumple la forma, así que `logger: console` es válido y es el valor por defecto.
+
+```ts
+interface DeepdotsLogger {
+  log: (...args: unknown[]) => void;
+  warn?: (...args: unknown[]) => void;
+  error?: (...args: unknown[]) => void;
+  info?: (...args: unknown[]) => void;
+}
+```
+
+:::note
+`logger` solo cambia **dónde** va la salida, no cuánta hay: los mensajes de debug del SDK siguen requiriendo `debug: true`. Los errores que el SDK reporta independientemente de `debug` (un listener de evento que lanza, un aviso del renderer) también pasan por el logger una vez está fijado.
+:::
 
 ## `autoLaunch()`
 
