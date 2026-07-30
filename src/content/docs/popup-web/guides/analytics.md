@@ -73,6 +73,57 @@ The resolved language is also what popup **language targeting** (`segments.lang`
 
 ---
 
+## Sessions
+
+A session is one continuous visit. The backend owns the session id and stitches batches together by `user_id`, so a visit reads as a single timeline instead of one record per flush.
+
+Since **1.2.0** both ends of a session are signalled explicitly:
+
+- **`deepdots_session_start`** — on every session open. That means `init()`, returning to the foreground, granting consent with `setTrackingEnabled(true)`, and after a user change. If you init with `trackingEnabled: false`, the first session opens when consent is granted.
+- **`deepdots_session_end`** — on close, with a `reason`. The closing batch is sent with `completed: true`, which is what tells the backend the record is finished.
+
+The closing batch flushes everything still open, in order: the current screen's `deepdots_page_view`, any pending `deepdots_mini_service_exit`, the accumulated `deepdots_user_engagement`, and finally `deepdots_session_end`. Nothing is left behind for a flush that will never come.
+
+| `reason` | When |
+| --- | --- |
+| `page_hide` | The page closes (`pagehide`) — web |
+| `background` | The app goes to background (`onBackground()`) — React Native |
+| `user_change` | `setUserId()` switched the user |
+| `tracking_disabled` | `setTrackingEnabled(false)` |
+| `manual` | `endSession()` |
+
+### `endSession()`
+
+Closes the session explicitly. Use it at logout or at the end of a self-contained flow, when the visit is over but the page or app is not:
+
+```ts
+popups.endSession();
+```
+
+The next tracked event opens a new session.
+
+### `setUserId(userId?)`
+
+Reports a user change — login, logout, or account switch. It closes the previous user's session with `reason: 'user_change'`, swaps the identity, and opens a new session, so the two users never share a timeline:
+
+```ts
+// Login: attribute what follows to your own user id
+popups.setUserId('customer-123');
+
+// Logout: back to the SDK's anonymous id
+popups.setUserId();
+```
+
+:::caution
+User attributes and metrics set with [`setUserAttributes`](#user-attributes) and [`setMetric`](#metrics) are **discarded** on a user change — they belonged to the previous user. Set them again after switching.
+:::
+
+:::note
+`setUserId()` is for a change *during* the session. To identify the user you already know at startup, pass `userId` to `init()`.
+:::
+
+---
+
 ## Custom events
 
 Use `track(name, params?)` to record any business event. Event names are free-form strings — use lowercase snake_case to stay consistent with the automatic events.
@@ -281,7 +332,7 @@ For a reliable denominator, take `delivered` from your sending provider (FCM/APN
 
 ## Crash & error reporting
 
-The SDK captures application errors and surfaces them as `deepdots_app_crash` events, powering the Stability metrics (crash-free users, crashes by release and device). A `deepdots_session_start` event is emitted on every `init()` so the backend can compute crash-free rates.
+The SDK captures application errors and surfaces them as `deepdots_app_crash` events, powering the Stability metrics (crash-free users, crashes by release and device). A `deepdots_session_start` event is emitted on every [session open](#sessions) so the backend can compute crash-free rates.
 
 ### Automatic capture
 
@@ -329,7 +380,7 @@ popups.init({
 popups.setTrackingEnabled(true);
 ```
 
-`setTrackingEnabled(false)` suspends all outbound calls (analytics, contact). `setTrackingEnabled(true)` resumes them and assigns a persistent `user_id` if one was not already stored.
+`setTrackingEnabled(false)` closes the current [session](#sessions) with `reason: 'tracking_disabled'` and suspends all outbound calls (analytics, contact) — the data collected before the opt-out is still delivered, rather than dropped. `setTrackingEnabled(true)` resumes them, assigns a persistent `user_id` if one was not already stored, and opens a new session.
 
 ---
 
@@ -355,9 +406,13 @@ import { AppState } from 'react-native';
 
 AppState.addEventListener('change', (state) => {
   if (state === 'active') popups.onForeground();
-  else popups.onBackground(); // also flushes pending analytics
+  else popups.onBackground(); // ends the session and flushes
 });
 ```
+
+:::caution
+Since **1.2.0** `onBackground()` **ends the session** (`reason: 'background'`) and `onForeground()` opens a new one. Only call it for a real background transition — on iOS, do not wire it to `willResignActive`: the `inactive` state is transient (an incoming call, the app switcher) and would split one visit into two sessions.
+:::
 
 :::tip
 The `<DeepdotsProvider>` from `@magicfeedback/popup-sdk/react-native` (and `setupReactNative()` under it) wires the `AppState` lifecycle for you — but **not** `setScreen`: navigation always has to be reported from your navigator. See the [React Native reference](/popup-web/reference/react-native/) for the complete setup.

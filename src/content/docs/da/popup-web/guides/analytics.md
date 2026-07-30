@@ -73,6 +73,57 @@ Det bestemte sprog er også det, popup-**sprogmålretning** (`segments.lang`) ma
 
 ---
 
+## Sessioner
+
+En session er ét sammenhængende besøg. Backenden ejer session-id'et og syr batches sammen efter `user_id`, så et besøg læses som én tidslinje i stedet for én post pr. flush.
+
+Fra **1.2.0** signaleres begge ender af en session eksplicit:
+
+- **`deepdots_session_start`** — ved hver sessionsåbning. Det vil sige `init()`, tilbagevenden til forgrunden, samtykke givet med `setTrackingEnabled(true)` og efter et brugerskift. Hvis du initialiserer med `trackingEnabled: false`, åbnes den første session, når samtykket gives.
+- **`deepdots_session_end`** — ved lukning, med en `reason`. Afslutningsbatchen sendes med `completed: true`, hvilket er det, der fortæller backenden, at posten er færdig.
+
+Afslutningsbatchen flusher alt, der stadig var åbent, i denne rækkefølge: den aktuelle skærms `deepdots_page_view`, en eventuel ventende `deepdots_mini_service_exit`, den akkumulerede `deepdots_user_engagement` og til sidst `deepdots_session_end`. Intet efterlades til et flush, der aldrig kommer.
+
+| `reason` | Hvornår |
+| --- | --- |
+| `page_hide` | Siden lukkes (`pagehide`) — web |
+| `background` | Appen går i baggrunden (`onBackground()`) — React Native |
+| `user_change` | `setUserId()` skiftede bruger |
+| `tracking_disabled` | `setTrackingEnabled(false)` |
+| `manual` | `endSession()` |
+
+### `endSession()`
+
+Lukker sessionen eksplicit. Brug den ved logout eller ved afslutningen af et selvindeholdt flow, når besøget er slut, men siden eller appen ikke er:
+
+```ts
+popups.endSession();
+```
+
+Den næste sporede event åbner en ny session.
+
+### `setUserId(userId?)`
+
+Rapporterer et brugerskift — login, logout eller kontoskift. Den lukker den forrige brugers session med `reason: 'user_change'`, skifter identiteten og åbner en ny session, så de to brugere aldrig deler tidslinje:
+
+```ts
+// Login: tilskriv det følgende dit eget bruger-id
+popups.setUserId('customer-123');
+
+// Logout: tilbage til SDK'ets anonyme id
+popups.setUserId();
+```
+
+:::caution
+Brugerattributter og metrikker sat med [`setUserAttributes`](#brugerattributter) og [`setMetric`](#metrikker) **kasseres** ved et brugerskift — de tilhørte den forrige bruger. Sæt dem igen efter skiftet.
+:::
+
+:::note
+`setUserId()` er til et skift *under* sessionen. For at identificere den bruger, du allerede kender ved opstart, skal du sende `userId` til `init()`.
+:::
+
+---
+
 ## Brugerdefinerede events
 
 Brug `track(name, params?)` til at registrere enhver forretnings-event. Event-navne er frie strenge — brug snake_case med små bogstaver for at være konsistent med de automatiske events.
@@ -281,7 +332,7 @@ For at få en pålidelig nævner bør du tage `delivered` fra din afsender-udbyd
 
 ## Crash- og fejlrapportering
 
-SDK'et opfanger applikationsfejl og viser dem som `deepdots_app_crash`-events, hvilket driver Stability-metrikkerne (crash-frie brugere, crashes pr. release og enhed). En `deepdots_session_start`-event udsendes ved hvert `init()`, så backenden kan beregne crash-frie rater.
+SDK'et opfanger applikationsfejl og viser dem som `deepdots_app_crash`-events, hvilket driver Stability-metrikkerne (crash-frie brugere, crashes pr. release og enhed). En `deepdots_session_start`-event udsendes ved hver [sessionsåbning](#sessioner), så backenden kan beregne crash-frie rater.
 
 ### Automatisk opfangning
 
@@ -329,7 +380,7 @@ popups.init({
 popups.setTrackingEnabled(true);
 ```
 
-`setTrackingEnabled(false)` suspenderer alle udgående kald (analytics, kontakt). `setTrackingEnabled(true)` genoptager dem og tildeler et vedvarende `user_id`, hvis et ikke allerede var gemt.
+`setTrackingEnabled(false)` lukker den aktuelle [session](#sessioner) med `reason: 'tracking_disabled'` og suspenderer alle udgående kald (analytics, kontakt) — de data, der blev indsamlet før fravalget, leveres stadig i stedet for at blive smidt væk. `setTrackingEnabled(true)` genoptager dem, tildeler et vedvarende `user_id`, hvis et ikke allerede var gemt, og åbner en ny session.
 
 ---
 
@@ -355,9 +406,13 @@ import { AppState } from 'react-native';
 
 AppState.addEventListener('change', (state) => {
   if (state === 'active') popups.onForeground();
-  else popups.onBackground(); // flusher også ventende analytics
+  else popups.onBackground(); // lukker sessionen og flusher
 });
 ```
+
+:::caution
+Fra **1.2.0** **lukker** `onBackground()` sessionen (`reason: 'background'`), og `onForeground()` åbner en ny. Kald den kun ved en reel overgang til baggrunden — på iOS må du ikke koble den til `willResignActive`: `inactive`-tilstanden er forbigående (et indgående opkald, app-skifteren) og ville dele ét besøg op i to sessioner.
+:::
 
 :::tip
 `<DeepdotsProvider>` fra `@magicfeedback/popup-sdk/react-native` (og `setupReactNative()` under den) kobler `AppState`-livscyklussen for dig — men **ikke** `setScreen`: navigation skal altid rapporteres fra din navigator. Se [React Native-referencen](/da/popup-web/reference/react-native/) for den komplette opsætning.
