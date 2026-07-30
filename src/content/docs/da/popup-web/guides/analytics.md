@@ -241,7 +241,40 @@ popups.trackMessage('converted', { id: 'msg-42', title: 'Summer Sale', channel: 
 Hvert kald udsender én `deepdots_message`-event; backenden grupperer efter `title` (og opdeler efter registreringsstatus / kanal) for at beregne leveringsantal, CTR, unikke click-through-brugere, konverteringsrate og handlingsbrugere.
 
 :::note
-Messaging er host-instrumenteret — SDK'et kan ikke observere dit notifikationssystem automatisk, så du kalder `trackMessage` fra dine egne push/in-app-handlers. For **push** er det sande "delivered"-signal normalt mest pålideligt fra din push-udbyder/backend; appen ser pålideligt klikket/konverteringen.
+Messaging er host-instrumenteret — SDK'et kan ikke observere dit notifikationssystem automatisk, så du kalder `trackMessage` fra dine egne push/in-app-handlers.
+:::
+
+### Regler for et korrekt funnel
+
+CTR og konverteringsrate er forhold målt op imod `delivered`. Hvis stadierne ikke passer sammen, bliver de tal forkerte — og mangler `delivered`, bliver værdierne umulige, fordi nævneren er nul.
+
+1. **Send alle tre stadier.** `delivered` sendes, når beskeden når enheden, *før* brugeren åbner den — ved in-app-beskeder når den vises. Uden den findes der ingen nævner.
+2. **Brug det samme `id` i alle tre stadier.** Det er det, der korrelerer funnelet, og det skal være unikt pr. udsendelse, ikke pr. kampagne.
+3. **Ét `id`, én kanal.** Hvis en kampagne sendes både som push *og* som in-app-besked, brug to forskellige `id`-værdier med samme `campaign`.
+4. **Ét kald pr. stadie.** Hvis din klik-handler kan køre ad to veje — åbning af notifikationen plus et deep link — sørg for, at kun én af dem udsender `clicked`.
+
+### Validering
+
+Fra **1.2.0** kasserer SDK'et kald, der bryder disse regler, i stedet for at videresende dem, og advarer i konsollen (advarslens tekst leveres på spansk):
+
+```
+[DeepdotsPopups] trackMessage descartado (channel_conflict): message_id "msg-42" ya se reportó en channel "push"; se descarta "in_app"
+```
+
+| Regel | Hvad kasseres | `reason` |
+| --- | --- | --- |
+| `channel` skal være `push` eller `in_app` | Enhver anden værdi | `invalid_channel` |
+| Hvert par `(id, stage)` sendes én gang | Det 2. kald til samme stadie for samme besked | `duplicate_stage` |
+| Et `id` beholder sin kanal | Events på en anden kanal end den først sete | `channel_conflict` |
+
+Kontrollerne gælder for sessionen og er pr. enhed, og de overvåger op til 500 besked-id'er (de ældste fjernes først). Et afvist kald bruger ikke state: efter en `channel_conflict` på `in_app` bliver samme stadie på den korrekte kanal stadig sendt.
+
+Hvis du ser disse advarsler under integrationen, peger de på en reel dobbelttælling — ret kaldstedet i stedet for at ignorere dem.
+
+:::caution[`delivered` på push har en strukturel grænse]
+På enheden kan levering kun observeres, hvis din app-proces modtager notifikationen: et *data*-push på Android, en `UNNotificationServiceExtension` med `mutable-content` på iOS. Notifikationer, der ankommer, mens appen er lukket, eller med begrænsede tilladelser, udløser den aldrig — så et `delivered`-antal målt i appen ligger under det reelle, og CTR ser højt ud.
+
+For at få en pålidelig nævner bør du tage `delivered` fra din afsender-udbyder (FCM/APNs eller din kampagneplatform) og bruge SDK'ets `delivered` som sekundært signal og som kilde til sandhed for `in_app`.
 :::
 
 ---

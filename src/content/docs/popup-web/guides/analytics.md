@@ -241,7 +241,40 @@ popups.trackMessage('converted', { id: 'msg-42', title: 'Summer Sale', channel: 
 Each call emits one `deepdots_message` event; the backend groups by `title` (and breaks down by registration status / channel) to compute delivered counts, CTR, unique click-through users, conversion rate, and action users.
 
 :::note
-Messaging is host-instrumented — the SDK can't observe your notification system automatically, so you call `trackMessage` from your own push/in-app handlers. For **push**, the true "delivered" signal is usually most reliable from your push provider/backend; the app reliably sees the click/conversion.
+Messaging is host-instrumented — the SDK can't observe your notification system automatically, so you call `trackMessage` from your own push/in-app handlers.
+:::
+
+### Rules for a correct funnel
+
+CTR and conversion rate are ratios over `delivered`. If the stages don't line up, those metrics come out wrong — and a missing `delivered` produces impossible values, because the denominator is zero.
+
+1. **Send all three stages.** `delivered` goes out when the message reaches the device, *before* the user opens it — for in-app messages, when it is rendered. Without it there is no denominator.
+2. **Use the same `id` across the three stages.** It is what correlates the funnel, and it must be unique per send, not per campaign.
+3. **One `id`, one channel.** If a campaign goes out both as a push and as an in-app message, use two different `id` values sharing the same `campaign`.
+4. **One call per stage.** If your click handler can run through two paths — opening the notification plus a deep link — make sure only one of them emits `clicked`.
+
+### Validation
+
+Starting in **1.2.0** the SDK discards calls that break these rules instead of forwarding them, and warns on the console (the warning text ships in Spanish):
+
+```
+[DeepdotsPopups] trackMessage descartado (channel_conflict): message_id "msg-42" ya se reportó en channel "push"; se descarta "in_app"
+```
+
+| Rule | What is discarded | `reason` |
+| --- | --- | --- |
+| `channel` must be `push` or `in_app` | Any other value | `invalid_channel` |
+| Each `(id, stage)` pair is sent once | The 2nd call to the same stage of the same message | `duplicate_stage` |
+| An `id` keeps its channel | Events on a channel other than the first one seen | `channel_conflict` |
+
+The checks last for the session and are per device, and they track up to 500 message ids (oldest evicted first). A rejected call doesn't consume state: after a `channel_conflict` on `in_app`, the same stage on the correct channel is still sent.
+
+If these warnings show up while you integrate, they are pointing at a real double-count — fix the call site rather than ignoring them.
+
+:::caution[`delivered` on push has a structural limit]
+On the device, delivery is only observable if your app process receives the notification: a *data* push on Android, a `UNNotificationServiceExtension` with `mutable-content` on iOS. Notifications that arrive while the app is killed, or with restricted permissions, never fire it — so a `delivered` count measured in the app sits below the real one, and CTR reads high.
+
+For a reliable denominator, take `delivered` from your sending provider (FCM/APNs or your campaign platform), and treat the SDK's `delivered` as a secondary signal and as the source of truth for `in_app`.
 :::
 
 ---
