@@ -162,6 +162,21 @@ popups.trackFunnelStep('onboarding', 'profile_completed', 'task-42');
 popups.trackFunnelStep('onboarding', 'first_popup_seen', 'task-42');
 ```
 
+### Meaningful interactions
+
+Record a meaningful interaction — a moment that signals the user got real value out of your app. `interactionType` is the grouping dimension, so keep a small, stable set of names (`get_help`, `homepage`, `contact_support`):
+
+```ts
+popups.trackMeaningfulInteraction('get_help');
+popups.trackMeaningfulInteraction('homepage', { screen: '/home' });
+```
+
+Each call emits a `deepdots_meaningful_interaction` event that powers the **Effectiveness** dashboard.
+
+:::caution
+Use this helper rather than `track('meaningful_interaction')`. A custom event goes out namespaced as `deepdots_event_meaningful_interaction`, which the Effectiveness reports do not read — so the data would land in the integration but never show up on that page. A call with an empty `interactionType` is discarded with a console warning.
+:::
+
 ---
 
 ## Mini-service tracking
