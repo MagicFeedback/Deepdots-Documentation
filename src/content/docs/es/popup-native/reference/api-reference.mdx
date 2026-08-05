@@ -1,26 +1,78 @@
 ---
 title: API Reference
-description: Entrypoints publicos principales del SDK.
+description: Entry points públicos expuestos por el SDK compartido.
 ---
 
 # API Reference
 
-Clase principal:
+Esta página resume los entry points públicos visibles en el código Kotlin compartido.
 
-- `DeepdotsPopups`
+## Clase principal del SDK
 
-Metodos clave:
+### `DeepdotsPopups`
 
-- `init`
-- `initialize`
-- `autoLaunch`
-- `attachContext`
-- `setPath`
-- `onScroll`
-- `onExit`
-- `triggerEvent`
-- `triggerClick`
-- `show`
-- `showByPopupId`
-- `on`
-- `off`
+Responsabilidades principales:
+
+- inicializar el runtime del SDK
+- cargar las definiciones de popup
+- adjuntar un contexto de plataforma
+- evaluar triggers y encolar popups
+- renderizar las experiencias de popup y encuesta
+- emitir eventos de ciclo de vida del popup
+
+## Métodos clave
+
+### Inicialización
+
+- `init(options: InitOptions)`
+- `initialize(options: InitOptions)`
+- `autoLaunch()`
+- `attachContext(context: PlatformContext)`
+
+### Navegación y triggers
+
+- `setPath(path: String?)`
+- `onScroll(percentage: Int)`
+- `onExit()`
+- `triggerEvent(eventName: String)`
+- `triggerClick(targetId: String)`
+
+### Visualización
+
+- `show(options: ShowOptions, context: PlatformContext)`
+- `showByPopupId(popupId: String, context: PlatformContext)`
+- `triggerSurvey(surveyId: String, context: PlatformContext, popupId: String? = null)`
+
+### Eventos
+
+- `on(event: Event, listener: (EventData) -> Unit)`
+- `off(event: Event, listener: (EventData) -> Unit)`
+
+### Diagnóstico
+
+- `environment: Environment` — de solo lectura, refleja el backend al que apunta el
+  SDK tras `init()` (por defecto `Environment.Production`). Útil para afirmar en
+  tiempo de ejecución qué backend está usando un `publicKey` dado.
+
+## Helpers de conveniencia
+
+### `Deepdots`
+
+El objeto `Deepdots` ofrece helpers de utilidad:
+
+- `create()`
+- `createInitialized(options)`
+- `now()`
+- `parseHtml(html)`
+- `dismiss(context)`
+- `getSurveyHtml(surveyId, productId)`
+- `createInitializedSimple(...)`
+
+## Helpers específicos de plataforma
+
+El repositorio también ofrece helpers de scroll en Android:
+
+- `bindRecyclerView(recyclerView: RecyclerView)`
+- `bindScrollView(scrollView: ScrollView)`
+
+Ayudan a traducir el scroll del host en actualizaciones de `onScroll(...)` para la evaluación de triggers.
