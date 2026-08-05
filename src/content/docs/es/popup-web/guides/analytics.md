@@ -162,6 +162,21 @@ popups.trackFunnelStep('onboarding', 'perfil_completado', 'task-42');
 popups.trackFunnelStep('onboarding', 'primer_popup_visto', 'task-42');
 ```
 
+### Interacciones significativas
+
+Registra una interacción significativa: un momento que indica que el usuario obtuvo valor real de tu app. `interactionType` es la dimensión de agrupación, así que mantén un conjunto de nombres pequeño y estable (`get_help`, `homepage`, `contact_support`):
+
+```ts
+popups.trackMeaningfulInteraction('get_help');
+popups.trackMeaningfulInteraction('homepage', { screen: '/home' });
+```
+
+Cada llamada emite un evento `deepdots_meaningful_interaction` que alimenta el panel de **Effectiveness**.
+
+:::caution
+Usa este helper en lugar de `track('meaningful_interaction')`. Un evento custom sale con el namespace `deepdots_event_meaningful_interaction`, que los informes de Effectiveness no leen, así que el dato llegaría a la integración pero nunca aparecería en esa página. Una llamada con `interactionType` vacío se descarta con un warning en consola.
+:::
+
 ---
 
 ## Seguimiento de mini-servicios

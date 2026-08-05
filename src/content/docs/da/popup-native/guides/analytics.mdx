@@ -1,0 +1,379 @@
+---
+title: Analytics
+description: Automatisk adfærdsanalyse og brugerdefinerede events med Deepdots Popup Native SDK (Android + iOS).
+---
+
+Deepdots Popup Native SDK indeholder et indbygget analyselag, der indsamler adfærdsdata fra dine brugere og videresender dem til en dedikeret integration i dit Deepdots-workspace. Det deler eventmodellen og backend-kanalen med Web SDK'et, så dashboardene læses ens uanset platform.
+
+Helper-metoderne (`track`, `trackMessage`, `setMetric`, …) har de **samme navne** på Android og iOS. Eksemplerne er i Kotlin; kald den identiske metode fra Swift med Swift-syntaks. Hvor platformene adskiller sig — initialisering, livscyklus, navigation — vises begge.
+
+## Opsætning
+
+Send et `analytics`-objekt til `InitOptions` med `publicKey` og `integration`-id'et for den integration, der er oprettet i dit Deepdots-workspace. Uden det kører SDK'et i **dry-run-tilstand** — hver event-payload printes til konsollen (Logcat / Xcode), men intet sendes.
+
+### Android
+
+```kotlin
+val options = InitOptions(
+    popupOptions = PopupOptions(publicKey = "<your-public-key>"),
+    analytics = AnalyticsKeys(
+        publicKey = "<your-analytics-public-key>",
+        integration = "<your-integration-id>",
+    ),
+    provideLang = { "da" },
+    metadata = mapOf("userId" to "customer-123"), // valgfrit — identificér brugeren
+)
+val sdk = DeepdotsPopups().apply { initialize(options) }
+```
+
+### iOS
+
+```swift
+let options = InitOptions(
+    popupOptions: PopupOptions(id: nil, publicKey: "<your-public-key>", companyId: nil),
+    provideLang: { Locale.current.language.languageCode?.identifier ?? "da" },
+    analytics: AnalyticsKeys(
+        publicKey: "<your-analytics-public-key>",
+        integration: "<your-integration-id>"
+    ),
+    metadata: ["userId": "customer-123"]
+)
+let instance = DeepdotsSDK.DeepdotsPopups()
+instance.initialize(options: options)
+```
+
+:::tip
+Det er sikkert at udelade `analytics` under udvikling — dry-run-tilstand printer hver payload præcis som den ville blive sendt, så du kan verificere dataene, før du går live.
+:::
+
+---
+
+## Automatiske data
+
+Følgende data indsamles med **nul ekstra kode**, når SDK'et er initialiseret, tracking er slået til, og du har wiret [livscyklus- og navigations](#livscyklus-og-navigation)-hooks:
+
+| Data | Hvordan | Hvor det vises |
+| --- | --- | --- |
+| Skærmvisninger (`deepdots_page_view`) | [`setPath()`](#navigation) ved hver navigation | Events |
+| Aktiv engagement-tid (`deepdots_user_engagement`) | Foreground/background-livscyklus | Events |
+| Vedvarende brugeridentitet (`user_id`) | Genereres ved første start, gemmes i `SharedPreferences` (Android) / `NSUserDefaults` (iOS) | Metadata |
+| Enhedstype, OS-version, enhedsmodel, app-version | Hentes fra platformen | Context |
+| Sprog (`deepdots_language`) | `provideLang`-resolver, med fallback til platformens locale | Context |
+
+Hvert flush sender de akkumulerede events som et batch. Backenden grupperer batches efter session, så du ser én tidslinje pr. besøg, ikke én post pr. flush.
+
+:::note[Vedvarende identitet kræver vedvarende lager]
+Lad `InitOptions.storage` være `null`, så bruger SDK'et det vedvarende standardlager (`SharedPreferences` / `NSUserDefaults`), så `user_id` overlever mellem opstarter. Injicér kun dit eget `KeyValueStorage` for at styre, hvor det gemmes; et in-memory-lager ville få hver opstart til at ligne en ny bruger.
+:::
+
+---
+
+## Livscyklus og navigation
+
+Modsat browseren kan det native SDK ikke selv observere navigation eller foreground/background-overgange. To hooks skal wires af hosten — uden dem er der ingen `page_view`-events, ingen engagement-tid og ingen sessionsgrænser.
+
+### Navigation
+
+Kald `setPath(path)` ved hvert skærmskift. Det første kald starter navigations-tracking; hvert senere kald lukker den forrige skærms `deepdots_page_view` (med dens varighed) og åbner den næste:
+
+```kotlin
+sdk.setPath("/home")
+sdk.setPath("/products/42")   // lukker "/home" med dens varighed, åbner "/products/42"
+```
+
+Stien fodrer også popup-rute-triggers og rute-exit-popups, så hold den opdateret, selv hvis du kun bruger popups.
+
+### Sessioner og engagement
+
+Forbind SDK'et til app-livscyklussen, så en session åbnes i foreground og lukkes i background.
+
+#### Android
+
+```kotlin
+// I din Activity / livscyklus-observer:
+override fun onStart() { super.onStart(); sdk.onForeground() }
+override fun onStop()  { super.onStop();  sdk.onBackground() }
+```
+
+#### iOS
+
+```swift
+NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+    instance.onForeground()
+}
+NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+    instance.onBackground()
+}
+```
+
+:::caution[`onBackground()` afslutter sessionen]
+`onBackground()` lukker sessionen (`reason: background`) og `onForeground()` åbner en ny. Wire det kun til `onStop` / `didEnterBackground`. Kald det **ikke** fra `onPause` / `willResignActive`: på iOS er tilstanden `inactive` forbigående (et indgående opkald, app-switcheren) og ville dele ét besøg i to sessioner.
+:::
+
+---
+
+## Sessioner
+
+En session er ét sammenhængende besøg. Backenden ejer session-id'et og syr batches sammen efter `user_id`. Begge ender signaleres eksplicit:
+
+- **`deepdots_session_start`** — ved hver sessionsåbning: `initialize()`, retur til foreground, samtykke via `setTrackingEnabled(true)` og efter et brugerskift.
+- **`deepdots_session_end`** — ved lukning, med en `reason`. Det afsluttende batch sendes med `completed: true`, hvilket fortæller backenden, at posten er færdig.
+
+Det afsluttende batch flusher alt, der stadig er åbent, i rækkefølge: den aktuelle skærms `deepdots_page_view`, ethvert ventende `deepdots_mini_service_exit`, den akkumulerede `deepdots_user_engagement` og til sidst `deepdots_session_end`.
+
+| `reason` | Hvornår |
+| --- | --- |
+| `background` | Appen går i baggrunden (`onBackground()`) |
+| `user_change` | `setUserId()` skiftede bruger |
+| `tracking_disabled` | `setTrackingEnabled(false)` |
+| `manual` | `endSession()` |
+
+:::caution
+Sessionslukning er **opportunistisk**: et hårdt kill (swipe væk), et crash eller en strømafbrydelse giver intet callback på nogen platform, så den post modtager aldrig sit `session_end`. Backenden har stadig brug for et inaktivitetsvindue til at lukke dem.
+:::
+
+### `endSession()`
+
+Lukker sessionen eksplicit — ved logout eller i slutningen af et selvstændigt flow. Det næste sporede event åbner en ny.
+
+```kotlin
+sdk.endSession()
+```
+
+### `setUserId(userId?)`
+
+Rapporterer et brugerskift (login, logout eller kontoskift). Det lukker den forrige brugers session med `reason: user_change`, skifter identiteten og åbner en ny session, så de to brugere aldrig deler tidslinje:
+
+```kotlin
+sdk.setUserId("customer-123") // login
+sdk.setUserId()               // logout — tilbage til det anonyme id
+```
+
+:::caution
+Brugerattributter og metrics **kasseres** ved et brugerskift — de tilhørte den forrige bruger. Sæt dem igen efter skiftet.
+:::
+
+---
+
+## Brugerdefinerede events
+
+Brug `track(name, params?)` til at registrere ethvert forretningsevent. Brug snake_case med små bogstaver for at være konsistent med de automatiske events.
+
+```kotlin
+sdk.track("add_to_cart", mapOf("product_id" to "p-123", "value" to 49.9, "currency" to "EUR"))
+sdk.track("checkout_started")
+```
+
+### Søgning
+
+`trackSearch` registrerer en forespørgsel og dens antal resultater; SDK'et udleder `has_results` fra tallet.
+
+```kotlin
+sdk.trackSearch("running shoes", 0)   // ingen resultater — has_results: false
+sdk.trackSearch("t-shirt", 142)       // has_results: true
+```
+
+### Findbarhedsfriktion
+
+```kotlin
+sdk.trackFindabilityFriction("checkout_address")
+```
+
+### Funnel-trin
+
+Grupper relaterede trin under samme `funnel` og `taskId`, så backenden kan beregne konverteringsrater:
+
+```kotlin
+sdk.trackFunnelStep("onboarding", "account_created", "task-42")
+sdk.trackFunnelStep("onboarding", "profile_completed", "task-42")
+```
+
+### Meningsfulde interaktioner
+
+Registrer en meningsfuld interaktion — et øjeblik, der signalerer, at brugeren fik reel værdi ud af din app. `interactionType` er grupperingsdimensionen, så hold et lille, stabilt sæt af navne (`get_help`, `homepage`, `contact_support`):
+
+```kotlin
+sdk.trackMeaningfulInteraction("get_help")
+sdk.trackMeaningfulInteraction("homepage", mapOf("screen" to "/home"))
+```
+
+Hvert kald udsender et `deepdots_meaningful_interaction`-event, der driver **Effectiveness**-dashboardet.
+
+:::caution
+Brug denne helper i stedet for `track("meaningful_interaction")`. Et brugerdefineret event sendes med navnerummet `deepdots_event_meaningful_interaction`, som Effectiveness-rapporterne ikke læser — så dataene ville lande i integrationen, men aldrig dukke op på den side. Et kald med en tom `interactionType` kasseres med en advarsel i konsollen.
+:::
+
+---
+
+## Sporing af mini-services
+
+En mini-service er ethvert afgrænset flow i din app (checkout, onboarding-wizard, supportchat). Signalér grænserne, og SDK'et sporer indgang, udgang og varighed:
+
+```kotlin
+sdk.enterMiniService("checkout", "home_banner")
+// … brugeren fuldfører eller forlader …
+sdk.exitMiniService("checkout")   // udsender mini_service_exit med varigheden
+```
+
+Flere mini-services kan være aktive samtidig; luk altid hver enkelt ved **navn**. Enhver survey, der vises, mens en mini-service er aktiv, får et `mini_service`-metadata-tag, så du kan filtrere CSAT efter flow-kontekst.
+
+---
+
+## Brugerattributter
+
+`setUserAttributes` vedhæfter forretningsdimensioner til brugerens analytics-kontekst, inkluderet i hvert efterfølgende flush og kumulativt på tværs af kald:
+
+```kotlin
+sdk.setUserAttributes(mapOf(
+    "plan" to "pro",
+    "registration_status" to "registered",
+    "sector" to "retail",
+))
+```
+
+### Kontaktpost
+
+`setContactAttributes` sender attributterne til `POST /sdk/popups/contact` og opretter eller opdaterer brugerens kontaktpost. Det er en `suspend`-funktion og udløses kun, når et `userId` blev angivet, og tracking er slået til; den returnerer `true`, hvis der blev lavet et POST, `false`, hvis attributterne var uændrede (deduplikering).
+
+```kotlin
+val sent = sdk.setContactAttributes(mapOf("language" to "da", "age" to 34, "plan" to "premium"))
+```
+
+Du kan også sende `contactAttributes` i `InitOptions` for at udløse opdateringen ved opstart.
+
+---
+
+## Metrics
+
+`setMetric(key, value)` registrerer en **målbar værdi** — en mængde, der rapporteres sammen med brugerens kontekst, såsom kurvens værdi. Metrics lander i et dedikeret `metrics`-felt i payloaden, adskilt fra brugerattributter.
+
+```kotlin
+sdk.setMetric("cart_value", 49.99)
+sdk.setMetric("items_in_cart", 3)
+```
+
+- **Vedvarende** — gensendes ved hvert flush, indtil den ændres.
+- **Overskriver pr. nøgle** — samme nøgle erstatter den forrige værdi.
+- **Konverteres til string** på wiren.
+- **Respekterer kill-switchen** — en no-op, mens tracking er slået fra.
+
+Brug attributter til *hvem* (dimensioner du grupperer efter) og metrics til *hvor meget* (mængder du måler).
+
+---
+
+## Messaging
+
+Spor livscyklussen for din apps notifikationer (push og in-app), så Deepdots kan måle levering, click-through og konvertering. Kald `trackMessage` ved hvert trin i funnelen:
+
+```kotlin
+sdk.trackMessage("delivered", id = "msg-42", title = "Summer Sale", channel = "push", campaign = "summer_sale")
+sdk.trackMessage("clicked",   id = "msg-42", title = "Summer Sale", channel = "push")
+sdk.trackMessage("converted", id = "msg-42", title = "Summer Sale", channel = "push", value = 49.9, currency = "EUR")
+```
+
+| Argument | Type | Beskrivelse |
+| --- | --- | --- |
+| `stage` | `"delivered"` / `"clicked"` / `"converted"` | Trin i beskedens funnel |
+| `id` | String | Korrelerer trinene for samme besked |
+| `title` | String | Grupperingsdimension for Messaging-metrics |
+| `channel` | `"push"` / `"in_app"` | Leveringskanal |
+| `campaign` | String? | Kampagnenavn (valgfrit) |
+| `value` / `currency` | Double? / String? | Konverteringsværdi (typisk ved `converted`) |
+| `params` | Map? | Ekstra nøgle/værdi-par |
+
+Hvert kald udsender ét `deepdots_message`-event; backenden grupperer efter `title` for at beregne leveringsantal, CTR, unikke click-through-brugere, konverteringsrate og handlingsbrugere.
+
+### Regler for en korrekt funnel
+
+CTR og konverteringsrate er forhold over `delivered`, så trinene skal passe sammen:
+
+1. **Send alle tre trin.** `delivered` sendes, når beskeden når enheden, før brugeren åbner den. Uden det er der ingen nævner.
+2. **Brug samme `id` på tværs af de tre trin.** Unikt pr. afsendelse, ikke pr. kampagne.
+3. **Ét `id`, én kanal.** En kampagne sendt både som push og in-app skal bruge to forskellige `id`-værdier, der deler samme `campaign`.
+4. **Ét kald pr. trin.**
+
+### Validering
+
+SDK'et kasserer kald, der bryder disse regler, i stedet for at videresende dem, og advarer i konsollen:
+
+```
+[DeepdotsPopups] trackMessage discarded (channel_conflict): message_id "msg-42" was already reported on channel "push"; discarding "in_app"
+```
+
+| Regel | Hvad kasseres | `reason` |
+| --- | --- | --- |
+| `channel` skal være `push` eller `in_app` | Enhver anden værdi | `invalid_channel` |
+| Hvert `(id, stage)`-par sendes én gang | Det 2. kald til samme trin for samme besked | `duplicate_stage` |
+| Et `id` beholder sin kanal | Events på en anden kanal end den først sete | `channel_conflict` |
+
+Tjekkene varer sessionen og er pr. enhed, og de sporer op til 500 message-id'er (ældste smides ud først). Hvis disse advarsler dukker op, peger de på en reel dobbelttælling — ret kaldstedet.
+
+:::caution[`delivered` på push har en strukturel begrænsning]
+På enheden er levering kun observerbar, hvis din app-proces modtager notifikationen: et *data*-push på Android, en `UNNotificationServiceExtension` med `mutable-content` på iOS. Notifikationer, der ankommer, mens appen er lukket, udløser det aldrig — så et `delivered`-antal målt i appen ligger under det reelle, og CTR læses højt. For en pålidelig nævner skal du tage `delivered` fra din afsendelsesudbyder (FCM / APNs) og behandle SDK'ets som kilden til sandhed for `in_app`.
+:::
+
+---
+
+## Crash- og fejlrapportering
+
+Ufangede fejl på Kotlin-siden fanges automatisk, gemmes til lager og afspilles igen ved næste opstart — så det crash, der afsluttede en session, når stadig frem til Deepdots, selvom processen døde før næste flush. De vises som `deepdots_app_crash`-events og driver Stability-metrikkerne.
+
+Rapportér håndterede fejl manuelt:
+
+```kotlin
+try {
+    checkout()
+} catch (e: Throwable) {
+    sdk.reportError(e, severity = "error", context = mapOf("screen" to "Checkout", "order_id" to "o-42"))
+}
+```
+
+| Argument | Værdier | Standard |
+| --- | --- | --- |
+| `severity` | `"fatal"` / `"error"` / `"warning"` | `"error"` |
+| `handled` | Boolean | `true` |
+| `context` | frit map (præfikset `ctx_` i payloaden) | — |
+
+:::caution
+Dækningen gælder fejl på Kotlin/JVM-siden plus alt, du sender via `reportError`. Hvis du kører en platform-native crash-reporter (Crashlytics, Sentry) til crashes på lavere niveau, så videresend dens rapporter til `reportError`.
+:::
+
+Crash-rapportering respekterer den samme samtykke-kill-switch som resten af analytics.
+
+---
+
+## Privatliv og samtykke
+
+Sæt `trackingEnabled = false` i `InitOptions` for at starte med al analytics- og kontakt-tracking slået fra — nyttigt, når du har brug for eksplicit samtykke først.
+
+```kotlin
+val options = InitOptions(
+    popupOptions = PopupOptions(publicKey = "<your-public-key>"),
+    trackingEnabled = false,
+)
+// Senere, når brugeren giver samtykke:
+sdk.setTrackingEnabled(true)
+```
+
+`setTrackingEnabled(false)` lukker den aktuelle session med `reason: tracking_disabled` og suspenderer alle udgående kald — data indsamlet før fravalget leveres stadig, i stedet for at blive smidt væk. `setTrackingEnabled(true)` genoptager dem, tildeler et vedvarende `user_id`, hvis der ikke var gemt et, og åbner en ny session.
+
+---
+
+## Forhåndsvisning og levering
+
+Inspicér det aktuelle buffer uden at flushe, eller fremtving et flush (nyttigt i udvikling):
+
+```kotlin
+val preview = sdk.previewAnalytics()   // det AnalyticsEnvelope, der ville blive sendt
+sdk.flushAnalytics()                   // send nu
+```
+
+Flushes sker også automatisk (periodisk i foreground, ved buffer-størrelse og ved `onBackground()`). Kanalen er hærdet, så det afsluttende batch ikke går tabt:
+
+- **Genforsøger forbigående fejl** — en netværksfejl eller et `5xx` / `408` / `429` lægger batchet forrest i bufferen igen, i kronologisk rækkefølge, til genforsøg ved næste flush.
+- **Rapporterer permanente fejl** — et `4xx` (fx et `406` for en ukendt Contact) logges med sin status og body, og batchet kasseres i stedet for at fejle i stilhed.
+- **Beholder én post pr. besøg** — indtil backenden returnerer et session-id, serialiseres batches i stedet for at blive sendt parallelt.
+
+:::note
+Genforsøg gør leveringen **at-least-once**. Et event identificeres unikt ved bruger + eventnavn + timestamp — dedupliker på den triplet, hvis du bygger rapportering på de rå integrationsdata.
+:::

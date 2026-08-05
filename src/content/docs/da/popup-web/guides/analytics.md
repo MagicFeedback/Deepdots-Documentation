@@ -162,6 +162,21 @@ popups.trackFunnelStep('onboarding', 'profile_completed', 'task-42');
 popups.trackFunnelStep('onboarding', 'first_popup_seen', 'task-42');
 ```
 
+### Meningsfulde interaktioner
+
+Registrer en meningsfuld interaktion — et øjeblik, der signalerer, at brugeren fik reel værdi ud af din app. `interactionType` er grupperingsdimensionen, så hold et lille, stabilt sæt af navne (`get_help`, `homepage`, `contact_support`):
+
+```ts
+popups.trackMeaningfulInteraction('get_help');
+popups.trackMeaningfulInteraction('homepage', { screen: '/home' });
+```
+
+Hvert kald udsender et `deepdots_meaningful_interaction`-event, der driver **Effectiveness**-dashboardet.
+
+:::caution
+Brug denne helper i stedet for `track('meaningful_interaction')`. Et brugerdefineret event sendes med navnerummet `deepdots_event_meaningful_interaction`, som Effectiveness-rapporterne ikke læser — så dataene ville lande i integrationen, men aldrig dukke op på den side. Et kald med en tom `interactionType` kasseres med en advarsel i konsollen.
+:::
+
 ---
 
 ## Sporing af mini-services
