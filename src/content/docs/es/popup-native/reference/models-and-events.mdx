@@ -1,21 +1,101 @@
 ---
 title: Models and Events
-description: Tipos de opciones, triggers y eventos del SDK.
+description: Tipos de opciones principales, formas de trigger y eventos de ciclo de vida definidos en el SDK compartido.
 ---
 
 # Models and Events
 
-Modelos clave:
+## Modelos de inicialización
 
-- `InitOptions`
-- `PopupOptions`
-- `PopupDefinition`
-- `ShowOptions`
-- `Style`
-- `Segments`
+### `InitOptions`
 
-Eventos:
+- `debug`
+- `popupOptions`
+- `provideLang`
+- `autoLaunch`
+- `renderChrome`
+- `metadata`
+
+`renderChrome` (por defecto `true`, desde **0.4.0**) controla si el SDK pinta el "modal" del popup — el scrim oscurecido y la tarjeta redondeada con elevación que dibuja `PopupView`. Ponlo en `false` para renderizar el popup transparente y a pantalla completa, de modo que se integre en tu propia pantalla; la encuesta sigue funcional (botón de cerrar en el header, footer con back/start/complete/send). Refleja el flag `renderChrome` de web/RN. Ten en cuenta la divergencia nativa: el chrome es Compose nativo (no HTML) y el SDK sigue auto-montando un overlay a pantalla completa, así que el flag quita el scrim y la tarjeta pero no cede a tu app el montaje del contenedor.
+
+### `PopupOptions`
+
+- `id`
+- `publicKey`
+- `companyId`
+
+### `ShowOptions`
+
+- `surveyId`
+- `productId`
+- `data`
+
+## Modelo de definición de popup
+
+### `PopupDefinition`
+
+- `id`
+- `title`
+- `message`
+- `trigger`
+- `triggers`
+- `conditions`
+- `cooldown`
+- `legacyConditions`
+- `actions`
+- `surveyId`
+- `productId`
+- `style`
+- `segments`
+
+## Modelos de trigger
+
+Tipos de trigger soportados en el código:
+
+- `Trigger.TimeOnPage(seconds: Double)`
+- `Trigger.Scroll(percentage: Int)`
+- `Trigger.Exit(delaySeconds: Double = 0.0)`
+- `Trigger.Event(name: String)`
+- `Trigger.Click(targetId: String)`
+
+## Modelos de estilo y segmentación
+
+### `Style`
+
+- `theme`
+- `position`
+- `imageUrl`
+- `imageSize`
+- `imageAlignment`
+
+### `Segments`
+
+- `lang`
+- `path`
+
+## Modelo de eventos
+
+### `Event`
 
 - `PopupShown`
 - `PopupClicked`
 - `SurveyCompleted`
+
+El helper compartido `Event.code()` los mapea a:
+
+- `popup_shown`
+- `popup_clicked`
+- `survey_completed`
+
+### `EventData`
+
+- `popupId`
+- `surveyId`
+- `productId`
+- `extra`
+- `timestamp`
+
+## Notas para equipos de integración
+
+- `metadata` es donde los ejemplos pasan el `userId`
+- `LegacyCondition` sigue soportado por compatibilidad hacia atrás

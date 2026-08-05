@@ -1,8 +1,68 @@
 ---
 title: Examples
-description: Oversigt over demoapps i repositoriet.
+description: Hvad de medfølgende demoapps viser, og hvordan du bruger dem til intern validering.
 ---
 
 # Examples
 
-Repoet indeholder native demoapps for Android og iOS. Der findes ingen offentlig webdemo i repoet, saa sitet publicerer ikke `/demo/` lige nu.
+Dette repository indeholder native demoapplikationer. Der er ingen indtjekket offentlig webdemo i repositoriet, så dette site publicerer ikke en `/demo/`-oplevelse i dag.
+
+## Android-eksempelapp
+
+Sti:
+
+```text
+example-android/
+```
+
+Hvad den demonstrerer:
+
+- forbrug af den publicerede Android-pakke `com.deepdots.sdk:shared-android:0.3.0`
+- initialisering med en `publicKey`
+- bruger-metadata via `metadata = mapOf("userId" to userId)`
+- path-opdateringer for `/login`, `/home` og detalje-ruter
+- event-listenere for popup-lifecycle-events
+- manuel triggering af en popup
+- event-drevne og scroll-drevne flows i demo-UI'et
+
+## Lokal Android-eksempelapp
+
+Sti:
+
+```text
+example-android-local/
+```
+
+Hvad den demonstrerer:
+
+- forbrug af det lokale `:shared`-modul direkte under repository-udvikling
+- validering af SDK-adfærd uden at afhænge af den publicerede Android-artefakt
+
+## iOS-eksempelapp
+
+Sti:
+
+```text
+iosApp/
+```
+
+Hvad den demonstrerer:
+
+- initialisering fra Swift
+- tilføjelse af `PlatformContext` fra en root view controller
+- navigationsdrevne path-opdateringer
+- rapportering af scroll-procent via `onScroll`
+- triggering af custom events
+- forbrug af den binære Swift Package via `DeepdotsSDK`
+
+## Anbefalet valideringsflow for stakeholders
+
+1. Brug Android- eller iOS-demoappen til at validere timing, UX-placering og event-adfærd.
+2. Bekræft path-naming med de skærme, der bruges i produktions-værtsappen.
+3. Verificér popup-lifecycle-events mod analytics-forventningerne.
+4. Bekræft, at de popups, der er konfigureret i Deepdots, indlæses og opfører sig som forventet i appen.
+
+## Status for offentlig demo
+
+- Offentlig webdemo aktuelt tilgængelig i dette repository: **ingen**
+- Native eksempelapps tilgængelige til intern validering: **ja**

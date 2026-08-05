@@ -1,14 +1,68 @@
 ---
 title: Examples
-description: Resumen de las demos incluidas en el repositorio.
+description: Qué muestran las apps demo incluidas y cómo usarlas para validación interna.
 ---
 
 # Examples
 
-El repo incluye:
+Este repositorio incluye aplicaciones demo nativas. No hay una demo web pública incluida en el repositorio, así que este sitio no publica hoy una experiencia `/demo/`.
 
-- `example-android/`
-- `example-android-local/`
-- `iosApp/`
+## App de ejemplo Android
 
-No incluye una demo web publica lista para publicar en `/demo/`, por lo que este site no expone una demo web actualmente.
+Ruta:
+
+```text
+example-android/
+```
+
+Qué demuestra:
+
+- consumir el paquete Android publicado `com.deepdots.sdk:shared-android:0.3.0`
+- inicialización con un `publicKey`
+- metadata de usuario mediante `metadata = mapOf("userId" to userId)`
+- actualizaciones de path para `/login`, `/home` y rutas de detalle
+- listeners de eventos del ciclo de vida del popup
+- disparo manual de un popup
+- flujos por evento y por scroll en la UI de la demo
+
+## App de ejemplo Android local
+
+Ruta:
+
+```text
+example-android-local/
+```
+
+Qué demuestra:
+
+- consumir directamente el módulo local `:shared` durante el desarrollo del repositorio
+- validar el comportamiento del SDK sin depender del artefacto Android publicado
+
+## App de ejemplo iOS
+
+Ruta:
+
+```text
+iosApp/
+```
+
+Qué demuestra:
+
+- inicialización desde Swift
+- adjuntar `PlatformContext` desde un root view controller
+- actualizaciones de path por navegación
+- reporte del porcentaje de scroll vía `onScroll`
+- disparo de eventos personalizados
+- consumo del Swift Package binario a través de `DeepdotsSDK`
+
+## Flujo de validación recomendado para stakeholders
+
+1. Usa la app demo de Android o iOS para validar timing, colocación de UX y comportamiento de eventos.
+2. Confirma el naming de los paths con las pantallas usadas en la app host de producción.
+3. Verifica los eventos de ciclo de vida del popup frente a las expectativas de analítica.
+4. Confirma que los popups configurados en Deepdots cargan y se comportan como se espera en la app.
+
+## Estado de la demo pública
+
+- Demo web pública disponible actualmente en este repositorio: **ninguna**
+- Apps de ejemplo nativas disponibles para validación interna: **sí**

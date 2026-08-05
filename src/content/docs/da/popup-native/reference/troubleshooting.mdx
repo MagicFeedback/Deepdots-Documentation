@@ -1,10 +1,58 @@
 ---
 title: Troubleshooting
-description: Typiske integrationsproblemer baseret paa den nuvaerende kodebase.
+description: Almindelige årsager til opsætnings- eller runtime-problemer baseret på den nuværende kodebase og eksempelapps.
 ---
 
 # Troubleshooting
 
-- Kontroller `publicKey`, `attachContext`, `setPath` og `autoLaunch`, hvis popups ikke vises.
-- Kontroller at host-appen sender scroll og custom events videre til SDK'et.
-- Kontroller bundling af `magicfeedback-sdk.browser.js`, hvis survey-rendering fejler.
+## Popups vises aldrig
+
+Tjek:
+
+- at `initialize(...)` eller `init(...)` kun blev kaldt én gang på en frisk instans
+- at der er en gyldig `publicKey`
+- at `attachContext(...)` blev kaldt med en gyldig platformskontekst
+- at `setPath(...)` matcher de paths, popup-segmenteringen forventer
+- at `autoLaunch` er slået til, eller at `autoLaunch()` kaldes efter initialisering
+
+## Popups indlæses ikke
+
+Tjek:
+
+- at runtime-miljøet peger på den forventede backend-base-URL
+- at backend har popup-definitioner for den givne `publicKey`
+- at appen leverer de forventede sprog- og path-værdier
+
+## Scroll- eller event-triggers udløses ikke
+
+Tjek:
+
+- at værtsappen faktisk videresender scroll-procent via `onScroll(...)`
+- at custom events sendes med `triggerEvent(...)`
+- at click-baserede flows bruger `triggerClick(...)`
+
+## Problemer med survey-rendering
+
+Repositoriet bruger MagicFeedback-survey-HTML renderet inde i native web views.
+
+Tjek:
+
+- Android-asset-pakning for `magicfeedback-sdk.browser.js`
+- iOS-ressource-bundling for det samme asset
+- web view-bridge-wiring til event-propagering
+
+## Validerings- eller submit-fejl i survey-flows
+
+Koden håndterer både validerings- og submit-fejl og viser dem i UI'et. Hvis surveyen sætter sig fast:
+
+- inspicér Android WebView-logs
+- inspicér iOS-konsoloutput og bridge-beskeder
+- bekræft, at survey-payloaden indeholder de forventede progress- og total-værdier
+
+## Problemer med build eller resolution af den binære iOS-pakke
+
+Tjek:
+
+- at den lokale eller hostede XCFramework findes
+- at `spm/Package.swift` peger på den korrekte release-ZIP og checksum
+- at iOS-demoen har resolvet pakkeafhængighederne efter regenerering af den lokale binær, hvis nødvendigt

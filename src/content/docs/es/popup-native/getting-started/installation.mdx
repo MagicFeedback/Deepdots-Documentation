@@ -1,16 +1,25 @@
 ---
 title: Installation
-description: Instalacion del SDK Deepdots Popup para Android e iOS.
+description: Instala el SDK de popups de Deepdots en Android e iOS con las coordenadas de paquete usadas en este repositorio.
 ---
 
 # Installation
 
-La integracion publica visible en este repositorio sigue dos caminos:
+Este repositorio expone dos caminos de consumo principales:
 
-- Android con `com.deepdots.sdk:shared-android`
-- iOS con Swift Package Manager usando `DeepdotsSDK` y el producto `DeepdotsSDK`
+- Android vía Maven Central con `com.deepdots.sdk:shared-android`
+- iOS vía Swift Package Manager con el manifiesto de paquete binario `DeepdotsSDK`
+
+## Requisitos
+
+- Las apps Android compilan contra Java 17 en este repositorio
+- Las apps de ejemplo Android usan `minSdk = 24`
+- La distribución iOS apunta a **iOS 13+**
+- El namespace del módulo del SDK compartido es `com.deepdots.sdk`
 
 ## Android
+
+Añade la dependencia publicada:
 
 ```kotlin
 dependencies {
@@ -18,7 +27,9 @@ dependencies {
 }
 ```
 
-Comandos de ejemplo:
+La app de ejemplo de Android de este repositorio usa exactamente esa coordenada.
+
+### Comandos de ejemplo en Android
 
 ```bash
 ./gradlew :example-android:assembleDebug
@@ -27,12 +38,42 @@ Comandos de ejemplo:
 
 ## iOS
 
-- Nombre del package SPM: `DeepdotsSDK`
-- Producto consumido desde Swift: `DeepdotsSDK`
-- Target minimo visible en el repo: `iOS 13+`
+El manifiesto SPM incluido es binario y actualmente se llama `DeepdotsSDK`. Expone el producto de librería `DeepdotsSDK`.
 
-Si falta el binario local del ejemplo iOS:
+```swift
+// swift-tools-version: 5.7
+import PackageDescription
+
+let package = Package(
+    name: "DeepdotsSDK",
+    platforms: [
+        .iOS(.v13)
+    ],
+    products: [
+        .library(name: "DeepdotsSDK", targets: ["DeepdotsSDK"])
+    ]
+)
+```
+
+### Flujo del ejemplo iOS en este repositorio
+
+El proyecto demo de iOS resuelve un paquete local desde `spm-local/`. Si falta el XCFramework local, regenéralo primero:
 
 ```bash
 ./run_ios_example.sh
 ```
+
+Para resolver y compilar desde las herramientas de Xcode:
+
+```bash
+cd iosApp
+xcodebuild -resolvePackageDependencies -project iosApp.xcodeproj -scheme iosApp -destination 'generic/platform=iOS Simulator'
+xcodebuild -scheme iosApp -project iosApp.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 16e' build
+```
+
+## Detalles de empaquetado públicos frente a internos
+
+- Detalle público de consumo: la coordenada de dependencia de Android y los nombres del paquete/producto SPM de iOS
+- Detalle de mantenimiento: los scripts de release en `scripts/prepare_sdk_release.sh`, `scripts/prepare_spm_release.sh` y `scripts/prepare_maven_upload_zip.sh`
+
+Esos scripts de mantenimiento forman parte del repositorio, pero están orientados al tooling de release, no a los pasos de integración del usuario final.
