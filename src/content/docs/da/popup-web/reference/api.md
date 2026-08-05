@@ -24,6 +24,7 @@ popups.init({
 | `contactAttributes` | nej | Interne brugerattributter der skal sendes til Contact (kræver `userId`). Se [`setContactAttributes`](#setcontactattributesattributes). |
 | `debug`  | nej      | Slår SDK'ets debug-output til. Slået fra som standard.        |
 | `logger` | nej      | Tilpasset destination for dette debug-output. Se [Tilpasset logger](#tilpasset-logger). |
+| `renderChrome` | nej | **Kun React Native** (fra 1.4.0). Standard `true`. Sæt `false`, når du monterer din egen dekorerede container, så survey-WebView'en renderes uden SDK'ets eget kort og backdrop. Se [React Native → renderChrome](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome). |
 
 ### Tilpasset logger
 

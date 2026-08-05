@@ -227,9 +227,10 @@ export function DeepdotsHost({ children }: { children: React.ReactNode }) {
         <Modal visible transparent animationType="slide">
           <View style={{ flex: 1 }}>
             <WebView
+              style={{ flex: 1 }}
               originWhitelist={['*']}
               javaScriptEnabled
-              source={{ html: survey.html }}
+              source={{ html: survey.html, baseUrl: 'https://sdk.deepdots.com/' }}
               onMessage={(e) => rendererRef.current?.handleMessage(e.nativeEvent.data)}
             />
           </View>
@@ -241,6 +242,26 @@ export function DeepdotsHost({ children }: { children: React.ReactNode }) {
 ```
 
 El renderer es un **puente**, no un stub: `onShow` te entrega `{ surveyId, productId, html }` listo para `<WebView source={{ html }}>`, y `handleMessage` traduce los mensajes del WebView a eventos del SDK — primera interacción → `popup_clicked` (`PARTIAL`), completado → `survey_completed` (`COMPLETED`) y cierra el popup.
+
+:::caution[Fija `baseUrl` en el WebView]
+Pasa siempre `source={{ html, baseUrl: 'https://sdk.deepdots.com/' }}`. Sin `baseUrl` el WebView corre en un origen opaco y el fetch interno del survey para cargar `@magicfeedback/native` queda bloqueado en WKWebView (iOS) — el survey nunca aparece. Da también un tamaño real al `WebView` (`style={{ flex: 1 }}`); según tu layout puede colapsar a altura cero.
+:::
+
+### Renderizar el survey sin la tarjeta del SDK (`renderChrome`)
+
+Desde **1.4.0**, cuando montas tu propio contenedor decorado (un `Modal`, un bottom sheet o una pantalla con su propia tarjeta, fondo, bordes redondeados o backdrop), pasa `renderChrome: false` en la config:
+
+```tsx
+setupReactNative(
+  sdk,
+  { apiKey: 'YOUR_PUBLIC_API_KEY', renderChrome: false },
+  { /* deps */ },
+);
+```
+
+Desde **1.3.0** el HTML del survey pinta su propia tarjeta y backdrop (header con botón de cerrar, footer con los botones de navegación, tarjeta redondeada, fondo oscurecido). Si tu contenedor también está decorado, los dos se apilan en un **"doble modal"** — una tarjeta dentro de otra. `renderChrome: false` deja el HTML del WebView transparente y a pantalla completa para que llene tu contenedor, manteniendo el survey totalmente funcional (puente de mensajes, formulario, botones back/start/complete/send y el botón de cerrar). Tú controlas el marco exterior; el SDK controla el survey.
+
+El flag solo afecta a React Native (el HTML del survey en el WebView). No afecta al popup DOM web, y el `<DeepdotsProvider>` por defecto lo ignora, porque su `Modal` ya es transparente y a pantalla completa (así que el camino integrado muestra una sola tarjeta). Úsalo en el camino manual de arriba.
 
 ### `setupReactNative(sdk, config, deps)`
 

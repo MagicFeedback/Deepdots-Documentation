@@ -24,6 +24,7 @@ popups.init({
 | `contactAttributes` | no | Internal user attributes to send to the Contact (requires `userId`). See [`setContactAttributes`](#setcontactattributesattributes). |
 | `debug`  | no       | Enables the SDK's debug output. Off by default.           |
 | `logger` | no       | Custom destination for that debug output. See [Custom logger](#custom-logger). |
+| `renderChrome` | no | **React Native only** (from 1.4.0). Default `true`. Set `false` when you mount your own decorated container so the survey WebView renders without the SDK's own card and backdrop. See [React Native → renderChrome](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome). |
 
 ### Custom logger
 
