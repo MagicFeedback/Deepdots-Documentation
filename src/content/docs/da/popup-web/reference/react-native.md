@@ -227,9 +227,10 @@ export function DeepdotsHost({ children }: { children: React.ReactNode }) {
         <Modal visible transparent animationType="slide">
           <View style={{ flex: 1 }}>
             <WebView
+              style={{ flex: 1 }}
               originWhitelist={['*']}
               javaScriptEnabled
-              source={{ html: survey.html }}
+              source={{ html: survey.html, baseUrl: 'https://sdk.deepdots.com/' }}
               onMessage={(e) => rendererRef.current?.handleMessage(e.nativeEvent.data)}
             />
           </View>
@@ -241,6 +242,26 @@ export function DeepdotsHost({ children }: { children: React.ReactNode }) {
 ```
 
 Rendereren er en **bro**, ikke en stub: `onShow` giver dig `{ surveyId, productId, html }` klar til `<WebView source={{ html }}>`, og `handleMessage` oversætter WebView-beskeder til SDK-events — første interaktion → `popup_clicked` (`PARTIAL`), fuldførelse → `survey_completed` (`COMPLETED`) og lukker popuppen.
+
+:::caution[Sæt `baseUrl` på WebView'en]
+Send altid `source={{ html, baseUrl: 'https://sdk.deepdots.com/' }}`. Uden en `baseUrl` kører WebView'en på et uigennemsigtigt origin, og surveyens interne fetch til at indlæse `@magicfeedback/native` blokeres i WKWebView (iOS) — surveyen vises aldrig. Giv også `WebView`'en en reel størrelse (`style={{ flex: 1 }}`); afhængigt af dit layout kan den ellers kollapse til nul højde.
+:::
+
+### Render surveyen uden SDK'ets kort (`renderChrome`)
+
+Fra **1.4.0**: når du monterer din egen dekorerede container (en `Modal`, en bottom sheet eller en skærm med sit eget kort, baggrund, afrundede hjørner eller backdrop), send `renderChrome: false` i konfigurationen:
+
+```tsx
+setupReactNative(
+  sdk,
+  { apiKey: 'YOUR_PUBLIC_API_KEY', renderChrome: false },
+  { /* deps */ },
+);
+```
+
+Fra **1.3.0** tegner survey-HTML'en sit eget kort og backdrop (header med en lukkeknap, footer med navigationsknapperne, afrundet kort, nedtonet baggrund). Hvis din egen container også er dekoreret, stables de to til et **"dobbelt modal"** — et kort inde i et kort. `renderChrome: false` gør WebView-HTML'en gennemsigtig og kant-til-kant, så den fylder din container, mens surveyen forbliver fuldt funktionel (beskedbro, formular, back/start/complete/send-knapper og lukkeknappen). Du ejer den ydre ramme; SDK'et ejer surveyen.
+
+Flaget påvirker kun React Native (survey-WebView-HTML'en). Det har ingen effekt på web-DOM-popuppen, og standard-`<DeepdotsProvider>` ignorerer det, fordi dens `Modal` allerede er gennemsigtig og fuldskærm (så den indbyggede sti viser ét enkelt kort). Brug det på den manuelle sti ovenfor.
 
 ### `setupReactNative(sdk, config, deps)`
 

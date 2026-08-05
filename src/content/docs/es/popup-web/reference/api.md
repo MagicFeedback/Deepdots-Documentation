@@ -24,6 +24,7 @@ popups.init({
 | `contactAttributes` | no | Atributos internos del usuario a enviar al Contact (requiere `userId`). Ver [`setContactAttributes`](#setcontactattributesattributes). |
 | `debug`  | no          | Activa la salida de debug del SDK. Desactivada por defecto. |
 | `logger` | no          | Destino personalizado para esa salida de debug. Ver [Logger personalizado](#logger-personalizado). |
+| `renderChrome` | no | **Solo React Native** (desde 1.4.0). Por defecto `true`. Ponlo en `false` cuando montas tu propio contenedor decorado, para que el WebView del survey se renderice sin la tarjeta ni el backdrop propios del SDK. Ver [React Native → renderChrome](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome). |
 
 ### Logger personalizado
 
