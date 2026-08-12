@@ -25,6 +25,79 @@ popups.init({
 | `debug`  | no          | Activa la salida de debug del SDK. Desactivada por defecto. |
 | `logger` | no          | Destino personalizado para esa salida de debug. Ver [Logger personalizado](#logger-personalizado). |
 | `renderChrome` | no | **Solo React Native** (desde 1.4.0). Por defecto `true`. Ponlo en `false` cuando montas tu propio contenedor decorado, para que el WebView del survey se renderice sin la tarjeta ni el backdrop propios del SDK. Ver [React Native → renderChrome](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome). |
+| `showProgressBar` | no | Desde 1.5.0. Muestra una etiqueta `Question X of Y` y una barra de progreso en la cabecera del popup. Omítelo para respetar lo que la plataforma haya configurado para el survey. Ver [Barra de progreso](#barra-de-progreso). |
+| `surveyCss` | no | Desde 1.5.0. Tu propio CSS, inyectado como última hoja de estilos para que gane en cascada. Es la vía para reestilar el área de preguntas por integración. Ver [CSS personalizado](#css-personalizado). |
+
+### Barra de progreso
+
+La cabecera del popup puede indicar por dónde va el survey: una etiqueta `Question 2 of 3` — el número en negrita y el resto atenuado — sobre una barra de progreso fina.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  showProgressBar: true,
+});
+```
+
+El flag tiene tres estados:
+
+| Valor | Comportamiento |
+| --- | --- |
+| `true` | Se muestra siempre. |
+| `false` | No se muestra nunca. |
+| omitido | Sigue el ajuste `showProgressBar` configurado para el survey en la plataforma. |
+
+La barra solo aparece cuando hay más de una página, una vez pasada la pantalla de inicio y antes de la pantalla final. También respeta el `progressUnit` del propio survey (`fraction` → `Question 2 of 3`, `percentage` → `66%`), `showProgressUnit` y `loadingBarColor`.
+
+:::note
+Las preguntas de seguimiento dinámicas no forman parte del grafo de páginas: avanzan la barra medio paso pero no cambian el total. La etiqueta redondea hacia abajo, así que un seguimiento de la pregunta 2 sigue leyéndose `Question 2` mientras la barra avanza.
+:::
+
+El texto de la etiqueta está de momento solo en inglés. Si lo necesitas localizado, desactiva la unidad con `showProgressUnit` en la plataforma y pinta tu propia cabecera.
+
+### CSS personalizado
+
+El área de preguntas — enunciados, opciones, escalas de valoración — la renderiza el SDK de Surveys con una hoja de estilos compartida por todos los clientes de Deepdots. `surveyCss` te permite reestilarla solo para tu integración: la cadena se inyecta como **última** hoja de estilos del popup, así que gana en cascada sin que nadie tenga que cambiar los valores por defecto compartidos.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  surveyCss: `
+    .magicfeedback-label { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .magicfeedback-sublabel { font-size: 13px; color: #6b7280; }
+  `,
+});
+```
+
+Se aplica tanto al popup DOM de web como al WebView del survey en React Native.
+
+Los nombres de clase vienen de `@magicfeedback/native` y no siempre son los evidentes. Los que más te van a interesar:
+
+| Elemento | Selector |
+| --- | --- |
+| Enunciado de la pregunta | `label.magicfeedback-label` |
+| Línea secundaria bajo la pregunta | `label.magicfeedback-sublabel` |
+| Fila de opción radio / checkbox | `.magicfeedback-radio-container`, `.magicfeedback-checkbox-container` |
+| Escala numérica de valoración | `.magicfeedback-rating-number-container`, `.magicfeedback-rating-number-option` |
+| Campo de texto libre | `.magicfeedback-input` |
+
+:::caution
+El recuadro de una fila de opción es un `box-shadow`, no un `border`. Quitar solo el borde deja la tarjeta visible: hay que resetear `box-shadow`, `background` y `border-radius` a la vez.
+
+```css
+.magicfeedback-radio-container {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+```
+:::
+
+:::note
+Inspecciona el DOM en vivo antes de escribir reglas: abre el popup en un navegador (o el inspector de WebView en React Native) y lee los nombres de clase reales. Adivinarlos es el motivo más común de que una regla parezca no hacer nada.
+:::
+
+Para cambiar el marco del propio popup — su tarjeta, cabecera y footer — usa el estilo del popup desde la plataforma (`theme`, `position`, `font`) o, en React Native, [`renderChrome: false`](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome).
 
 ### Logger personalizado
 

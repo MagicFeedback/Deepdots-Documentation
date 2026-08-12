@@ -25,6 +25,79 @@ popups.init({
 | `debug`  | no       | Enables the SDK's debug output. Off by default.           |
 | `logger` | no       | Custom destination for that debug output. See [Custom logger](#custom-logger). |
 | `renderChrome` | no | **React Native only** (from 1.4.0). Default `true`. Set `false` when you mount your own decorated container so the survey WebView renders without the SDK's own card and backdrop. See [React Native → renderChrome](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome). |
+| `showProgressBar` | no | From 1.5.0. Shows a `Question X of Y` label and a progress bar in the popup header. Omit it to respect whatever the platform configured for the survey. See [Progress bar](#progress-bar). |
+| `surveyCss` | no | From 1.5.0. Your own CSS, injected as the last stylesheet so it wins the cascade. The way to restyle the question area per integration. See [Custom CSS](#custom-css). |
+
+### Progress bar
+
+The popup header can show how far along the survey is: a `Question 2 of 3` label — the number in bold, the rest muted — above a thin progress bar.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  showProgressBar: true,
+});
+```
+
+The flag has three states:
+
+| Value | Behavior |
+| --- | --- |
+| `true` | Always shown. |
+| `false` | Never shown. |
+| omitted | Follows the `showProgressBar` setting configured for the survey in the platform. |
+
+The bar only appears when there is more than one page, once past the start screen, and before the completion screen. It also honors the survey's own `progressUnit` (`fraction` → `Question 2 of 3`, `percentage` → `66%`), `showProgressUnit`, and `loadingBarColor`.
+
+:::note
+Dynamic follow-up questions are not part of the page graph: they advance the bar by half a step but do not change the total. The label rounds down, so a follow-up under question 2 still reads `Question 2` while the bar moves forward.
+:::
+
+The label text is currently English only. If you need it localized, turn the unit off with `showProgressUnit` in the platform and render your own header.
+
+### Custom CSS
+
+The question area — wording, options, rating scales — is rendered by the Surveys SDK with a stylesheet shared by every Deepdots customer. `surveyCss` lets you restyle it for your integration alone: the string is injected as the **last** stylesheet in the popup, so it wins the cascade without anyone having to change the shared defaults.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  surveyCss: `
+    .magicfeedback-label { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .magicfeedback-sublabel { font-size: 13px; color: #6b7280; }
+  `,
+});
+```
+
+It applies to both the web DOM popup and the React Native survey WebView.
+
+The class names come from `@magicfeedback/native`, and they are not always the obvious ones. The ones you are most likely to want:
+
+| Element | Selector |
+| --- | --- |
+| Question wording | `label.magicfeedback-label` |
+| Secondary line under the question | `label.magicfeedback-sublabel` |
+| Radio / checkbox option row | `.magicfeedback-radio-container`, `.magicfeedback-checkbox-container` |
+| Numeric rating scale | `.magicfeedback-rating-number-container`, `.magicfeedback-rating-number-option` |
+| Free-text input | `.magicfeedback-input` |
+
+:::caution
+The box around an option row is a `box-shadow`, not a `border`. Removing only the border leaves the card visible — reset `box-shadow`, `background`, and `border-radius` together.
+
+```css
+.magicfeedback-radio-container {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+```
+:::
+
+:::note
+Inspect the live DOM before writing rules: open the popup in a browser (or the WebView inspector on React Native) and read the actual class names. Guessing them is the most common reason a rule appears to do nothing.
+:::
+
+To change the popup's own frame instead — its card, header, and footer — use the popup style from the platform (`theme`, `position`, `font`) or, on React Native, [`renderChrome: false`](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome).
 
 ### Custom logger
 

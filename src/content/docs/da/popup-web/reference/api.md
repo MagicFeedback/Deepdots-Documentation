@@ -25,6 +25,79 @@ popups.init({
 | `debug`  | nej      | Slår SDK'ets debug-output til. Slået fra som standard.        |
 | `logger` | nej      | Tilpasset destination for dette debug-output. Se [Tilpasset logger](#tilpasset-logger). |
 | `renderChrome` | nej | **Kun React Native** (fra 1.4.0). Standard `true`. Sæt `false`, når du monterer din egen dekorerede container, så survey-WebView'en renderes uden SDK'ets eget kort og backdrop. Se [React Native → renderChrome](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome). |
+| `showProgressBar` | nej | Fra 1.5.0. Viser en `Question X of Y`-etiket og en fremdriftslinje i popup-headeren. Udelad den for at følge det, platformen har konfigureret for surveyen. Se [Fremdriftslinje](#fremdriftslinje). |
+| `surveyCss` | nej | Fra 1.5.0. Din egen CSS, indsat som det sidste stylesheet, så den vinder i kaskaden. Måden at omstyle spørgsmålsområdet på pr. integration. Se [Tilpasset CSS](#tilpasset-css). |
+
+### Fremdriftslinje
+
+Popup-headeren kan vise, hvor langt surveyen er nået: en `Question 2 of 3`-etiket — tallet i fed, resten dæmpet — over en tynd fremdriftslinje.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  showProgressBar: true,
+});
+```
+
+Flaget har tre tilstande:
+
+| Værdi | Adfærd |
+| --- | --- |
+| `true` | Vises altid. |
+| `false` | Vises aldrig. |
+| udeladt | Følger den `showProgressBar`-indstilling, der er konfigureret for surveyen i platformen. |
+
+Linjen vises kun, når der er mere end én side, efter startskærmen og før afslutningsskærmen. Den respekterer også surveyens egen `progressUnit` (`fraction` → `Question 2 of 3`, `percentage` → `66%`), `showProgressUnit` og `loadingBarColor`.
+
+:::note
+Dynamiske opfølgende spørgsmål er ikke en del af sidegrafen: de rykker linjen et halvt trin frem, men ændrer ikke totalen. Etiketten runder ned, så en opfølgning under spørgsmål 2 står stadig som `Question 2`, mens linjen rykker frem.
+:::
+
+Etikettens tekst findes indtil videre kun på engelsk. Hvis du har brug for den lokaliseret, slå enheden fra med `showProgressUnit` i platformen og render din egen header.
+
+### Tilpasset CSS
+
+Spørgsmålsområdet — formuleringer, svarmuligheder, vurderingsskalaer — renderes af Surveys-SDK'et med et stylesheet, som alle Deepdots-kunder deler. `surveyCss` lader dig omstyle det for din integration alene: strengen indsættes som det **sidste** stylesheet i popuppen, så den vinder i kaskaden, uden at nogen skal ændre de fælles standardværdier.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  surveyCss: `
+    .magicfeedback-label { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .magicfeedback-sublabel { font-size: 13px; color: #6b7280; }
+  `,
+});
+```
+
+Den gælder både web-DOM-popuppen og survey-WebView'en i React Native.
+
+Klassenavnene kommer fra `@magicfeedback/native`, og de er ikke altid de oplagte. Dem du oftest får brug for:
+
+| Element | Selektor |
+| --- | --- |
+| Spørgsmålets formulering | `label.magicfeedback-label` |
+| Sekundær linje under spørgsmålet | `label.magicfeedback-sublabel` |
+| Radio-/checkbox-række | `.magicfeedback-radio-container`, `.magicfeedback-checkbox-container` |
+| Numerisk vurderingsskala | `.magicfeedback-rating-number-container`, `.magicfeedback-rating-number-option` |
+| Fritekstfelt | `.magicfeedback-input` |
+
+:::caution
+Rammen om en svarmulighed er en `box-shadow`, ikke en `border`. Fjerner du kun kanten, bliver kortet stående — nulstil `box-shadow`, `background` og `border-radius` samlet.
+
+```css
+.magicfeedback-radio-container {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+```
+:::
+
+:::note
+Inspicér den levende DOM, før du skriver regler: åbn popuppen i en browser (eller WebView-inspektøren på React Native) og læs de faktiske klassenavne. At gætte dem er den hyppigste årsag til, at en regel tilsyneladende ikke gør noget.
+:::
+
+Vil du i stedet ændre popuppens egen ramme — kort, header og footer — så brug popup-stilen fra platformen (`theme`, `position`, `font`) eller, på React Native, [`renderChrome: false`](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome).
 
 ### Tilpasset logger
 
