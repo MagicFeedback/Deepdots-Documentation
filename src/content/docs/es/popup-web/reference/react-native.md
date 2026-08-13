@@ -269,6 +269,12 @@ Desde **1.3.0** el HTML del survey pinta su propia tarjeta y backdrop (header co
 
 El flag solo afecta a React Native (el HTML del survey en el WebView). No afecta al popup DOM web, y el `<DeepdotsProvider>` por defecto lo ignora, porque su `Modal` ya es transparente y a pantalla completa (así que el camino integrado muestra una sola tarjeta). Úsalo en el camino manual de arriba.
 
+### Reestilar el propio survey
+
+`renderChrome` decide quién pinta el marco. Para reestilar lo que va **dentro** — enunciados, opciones, escalas de valoración, y la cabecera, la barra de progreso y el footer del propio SDK — pasa tu hoja de estilos en [`surveyCss`](/es/popup-web/reference/api/#css-personalizado). Se inyecta como última hoja del WebView, así que gana en cascada sin tocar los valores por defecto que comparten todos los clientes de Deepdots.
+
+Esa página también lista los nombres de clase a los que apuntar, incluidos los que difieren entre el popup web y el WebView de React Native.
+
 ### `setupReactNative(sdk, config, deps)`
 
 | Dep | Tipo | Valor por defecto si se omite |

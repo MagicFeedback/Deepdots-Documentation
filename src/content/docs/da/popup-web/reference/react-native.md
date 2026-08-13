@@ -269,6 +269,12 @@ Fra **1.3.0** tegner survey-HTML'en sit eget kort og backdrop (header med en luk
 
 Flaget påvirker kun React Native (survey-WebView-HTML'en). Det har ingen effekt på web-DOM-popuppen, og standard-`<DeepdotsProvider>` ignorerer det, fordi dens `Modal` allerede er gennemsigtig og fuldskærm (så den indbyggede sti viser ét enkelt kort). Brug det på den manuelle sti ovenfor.
 
+### Omstyling af selve surveyen
+
+`renderChrome` afgør, hvem der tegner rammen. Vil du omstyle det, der er **indeni** — formuleringer, svarmuligheder, vurderingsskalaer samt SDK'ets egen header, fremdriftslinje og footer — så send dit eget stylesheet i [`surveyCss`](/da/popup-web/reference/api/#tilpasset-css). Det indsættes som det sidste stylesheet i WebView'en, så det vinder i kaskaden uden at røre de standardværdier, alle Deepdots-kunder deler.
+
+Den side viser også de klassenavne, du kan målrette, herunder hvilke der er forskellige mellem web-popuppen og React Native-WebView'en.
+
 ### `setupReactNative(sdk, config, deps)`
 
 | Dep | Type | Standard når den udelades |

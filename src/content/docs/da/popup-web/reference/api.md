@@ -63,13 +63,31 @@ Spørgsmålsområdet — formuleringer, svarmuligheder, vurderingsskalaer — re
 popups.init({
   apiKey: 'YOUR_PUBLIC_API_KEY',
   surveyCss: `
-    .magicfeedback-label { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-    .magicfeedback-sublabel { font-size: 13px; color: #6b7280; }
+    /* Spørgsmålets formulering: mindre og strammere end standarden */
+    .magicfeedback-label {
+      font-size: 15px; font-weight: 600; color: #1a1a1a;
+      display: block; margin-bottom: 12px; line-height: 1.4;
+    }
+    .magicfeedback-sublabel {
+      font-size: 13px; font-weight: 400; color: #6b7280;
+      display: block; margin-bottom: 12px;
+    }
+    /* Svarmuligheder som flade rækker i stedet for kort */
+    .magicfeedback-radio-container {
+      box-shadow: none !important; border: none !important;
+      background: transparent !important; border-radius: 0 !important;
+      padding: 6px 0 !important; margin: 0 !important;
+    }
+    .magicfeedback-radio-container label { font-size: 14px; font-weight: 400; color: #1a1a1a; }
   `,
 });
 ```
 
 Den gælder både web-DOM-popuppen og survey-WebView'en i React Native.
+
+:::note
+Strengen indsættes ordret, uden sanering — det er din egen kode, som ethvert andet stylesheet du udgiver. Byg den ikke ud fra brugerinput eller tredjepartsdata.
+:::
 
 Klassenavnene kommer fra `@magicfeedback/native`, og de er ikke altid de oplagte. Dem du oftest får brug for:
 
@@ -97,7 +115,25 @@ Rammen om en svarmulighed er en `box-shadow`, ikke en `border`. Fjerner du kun k
 Inspicér den levende DOM, før du skriver regler: åbn popuppen i en browser (eller WebView-inspektøren på React Native) og læs de faktiske klassenavne. At gætte dem er den hyppigste årsag til, at en regel tilsyneladende ikke gør noget.
 :::
 
-Vil du i stedet ændre popuppens egen ramme — kort, header og footer — så brug popup-stilen fra platformen (`theme`, `position`, `font`) eller, på React Native, [`renderChrome: false`](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome).
+#### Sådan når du popuppens ramme
+
+`surveyCss` indsættes sidst, så den når også SDK'ets eget chrome: header, fremdriftslinje, footer og afslutningsskærm. Nogle kroge er forskellige mellem web-popuppen (rigtig DOM) og React Native-surveyen (WebView), så tjek kolonnen, før du skriver en regel.
+
+| Del | Selektor | Begge platforme |
+| --- | --- | --- |
+| Popup-container | `.deepdots-popup` | ja |
+| Header-række | `.deepdots-popup-header` | ja |
+| Header-titel | `.deepdots-popup-title` (web) · `#dd-title` (RN) | nej |
+| Fremdriftsblok | `.deepdots-progress` | ja |
+| Fremdriftsetiket / -linje | `#dd-progress-label` · `#dd-progress-bar` | kun React Native |
+| Spørgsmålsområde med scroll | `.deepdots-popup-main` | ja |
+| Footer | `.deepdots-popup-footer` | ja |
+| Footer-knapper | `.deepdots-popup-footer button` | ja |
+| Enkelte knapper | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` | kun React Native |
+| Afslutningsskærm | `.deepdots-success` | ja |
+| Valideringsbanner | `.deepdots-error-hint` | ja |
+
+Til farver er platformens indstillinger et bedre valg end CSS: popuppens `theme`, `position` og `font` samt surveyens egen `buttonPrimaryColor`, `buttonSecondaryColor` og `loadingBarColor`. De gælder på begge platforme og kan ændres uden en app-udgivelse. På React Native kan du også overlade hele rammen til din app med [`renderChrome: false`](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome).
 
 ### Tilpasset logger
 

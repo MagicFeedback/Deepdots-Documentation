@@ -63,13 +63,31 @@ El área de preguntas — enunciados, opciones, escalas de valoración — la re
 popups.init({
   apiKey: 'YOUR_PUBLIC_API_KEY',
   surveyCss: `
-    .magicfeedback-label { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-    .magicfeedback-sublabel { font-size: 13px; color: #6b7280; }
+    /* Enunciado: más pequeño y compacto que el valor por defecto */
+    .magicfeedback-label {
+      font-size: 15px; font-weight: 600; color: #1a1a1a;
+      display: block; margin-bottom: 12px; line-height: 1.4;
+    }
+    .magicfeedback-sublabel {
+      font-size: 13px; font-weight: 400; color: #6b7280;
+      display: block; margin-bottom: 12px;
+    }
+    /* Opciones como filas planas en lugar de tarjetas */
+    .magicfeedback-radio-container {
+      box-shadow: none !important; border: none !important;
+      background: transparent !important; border-radius: 0 !important;
+      padding: 6px 0 !important; margin: 0 !important;
+    }
+    .magicfeedback-radio-container label { font-size: 14px; font-weight: 400; color: #1a1a1a; }
   `,
 });
 ```
 
 Se aplica tanto al popup DOM de web como al WebView del survey en React Native.
+
+:::note
+La cadena se inyecta tal cual, sin sanear: es código tuyo, como cualquier hoja de estilos que publiques. No la construyas a partir de datos de usuario ni de terceros.
+:::
 
 Los nombres de clase vienen de `@magicfeedback/native` y no siempre son los evidentes. Los que más te van a interesar:
 
@@ -97,7 +115,25 @@ El recuadro de una fila de opción es un `box-shadow`, no un `border`. Quitar so
 Inspecciona el DOM en vivo antes de escribir reglas: abre el popup en un navegador (o el inspector de WebView en React Native) y lee los nombres de clase reales. Adivinarlos es el motivo más común de que una regla parezca no hacer nada.
 :::
 
-Para cambiar el marco del propio popup — su tarjeta, cabecera y footer — usa el estilo del popup desde la plataforma (`theme`, `position`, `font`) o, en React Native, [`renderChrome: false`](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome).
+#### Llegar al marco del popup
+
+`surveyCss` se inyecta el último, así que también alcanza el chrome del propio SDK: cabecera, barra de progreso, footer y pantalla final. Algunos puntos de enganche difieren entre el popup web (DOM real) y el survey de React Native (WebView), así que mira la columna antes de escribir una regla.
+
+| Parte | Selector | Ambas plataformas |
+| --- | --- | --- |
+| Contenedor del popup | `.deepdots-popup` | sí |
+| Fila de cabecera | `.deepdots-popup-header` | sí |
+| Título de la cabecera | `.deepdots-popup-title` (web) · `#dd-title` (RN) | no |
+| Bloque de progreso | `.deepdots-progress` | sí |
+| Etiqueta / barra de progreso | `#dd-progress-label` · `#dd-progress-bar` | solo React Native |
+| Área de preguntas con scroll | `.deepdots-popup-main` | sí |
+| Footer | `.deepdots-popup-footer` | sí |
+| Botones del footer | `.deepdots-popup-footer button` | sí |
+| Botones individuales | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` | solo React Native |
+| Pantalla final | `.deepdots-success` | sí |
+| Aviso de validación | `.deepdots-error-hint` | sí |
+
+Para los colores, mejor los ajustes de la plataforma que el CSS: el `theme`, la `position` y la `font` del popup, y el `buttonPrimaryColor`, `buttonSecondaryColor` y `loadingBarColor` del propio survey. Esos aplican en ambas plataformas y cambian sin publicar la app. En React Native también puedes ceder el marco entero a tu app con [`renderChrome: false`](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome).
 
 ### Logger personalizado
 

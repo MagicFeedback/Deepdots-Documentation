@@ -63,13 +63,31 @@ The question area — wording, options, rating scales — is rendered by the Sur
 popups.init({
   apiKey: 'YOUR_PUBLIC_API_KEY',
   surveyCss: `
-    .magicfeedback-label { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-    .magicfeedback-sublabel { font-size: 13px; color: #6b7280; }
+    /* Question wording: smaller and tighter than the default */
+    .magicfeedback-label {
+      font-size: 15px; font-weight: 600; color: #1a1a1a;
+      display: block; margin-bottom: 12px; line-height: 1.4;
+    }
+    .magicfeedback-sublabel {
+      font-size: 13px; font-weight: 400; color: #6b7280;
+      display: block; margin-bottom: 12px;
+    }
+    /* Options as plain rows instead of cards */
+    .magicfeedback-radio-container {
+      box-shadow: none !important; border: none !important;
+      background: transparent !important; border-radius: 0 !important;
+      padding: 6px 0 !important; margin: 0 !important;
+    }
+    .magicfeedback-radio-container label { font-size: 14px; font-weight: 400; color: #1a1a1a; }
   `,
 });
 ```
 
 It applies to both the web DOM popup and the React Native survey WebView.
+
+:::note
+The string is injected verbatim, with no sanitizing — it is your own code, like any stylesheet you ship. Do not build it from user input or third-party data.
+:::
 
 The class names come from `@magicfeedback/native`, and they are not always the obvious ones. The ones you are most likely to want:
 
@@ -97,7 +115,25 @@ The box around an option row is a `box-shadow`, not a `border`. Removing only th
 Inspect the live DOM before writing rules: open the popup in a browser (or the WebView inspector on React Native) and read the actual class names. Guessing them is the most common reason a rule appears to do nothing.
 :::
 
-To change the popup's own frame instead — its card, header, and footer — use the popup style from the platform (`theme`, `position`, `font`) or, on React Native, [`renderChrome: false`](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome).
+#### Reaching the popup frame
+
+`surveyCss` is injected last, so it also reaches the SDK's own chrome: header, progress bar, footer, completion screen. Some hooks differ between the web popup (a real DOM) and the React Native survey (a WebView), so check the column before writing a rule.
+
+| Part | Selector | Both platforms |
+| --- | --- | --- |
+| Popup container | `.deepdots-popup` | yes |
+| Header row | `.deepdots-popup-header` | yes |
+| Header title | `.deepdots-popup-title` (web) · `#dd-title` (RN) | no |
+| Progress block | `.deepdots-progress` | yes |
+| Progress label / bar | `#dd-progress-label` · `#dd-progress-bar` | React Native only |
+| Scrollable question area | `.deepdots-popup-main` | yes |
+| Footer | `.deepdots-popup-footer` | yes |
+| Footer buttons | `.deepdots-popup-footer button` | yes |
+| Individual buttons | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` | React Native only |
+| Completion screen | `.deepdots-success` | yes |
+| Validation banner | `.deepdots-error-hint` | yes |
+
+For colors, prefer the platform settings over CSS: the popup's `theme`, `position` and `font`, and the survey's own `buttonPrimaryColor`, `buttonSecondaryColor` and `loadingBarColor`. Those apply on both platforms and change without an app release. On React Native you can also hand the whole frame to your app with [`renderChrome: false`](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome).
 
 ### Custom logger
 
