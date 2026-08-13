@@ -241,7 +241,13 @@ export function DeepdotsHost({ children }: { children: React.ReactNode }) {
 }
 ```
 
-Rendereren er en **bro**, ikke en stub: `onShow` giver dig `{ surveyId, productId, html }` klar til `<WebView source={{ html }}>`, og `handleMessage` oversætter WebView-beskeder til SDK-events — første interaktion → `popup_clicked` (`PARTIAL`), fuldførelse → `survey_completed` (`COMPLETED`) og lukker popuppen.
+Rendereren er en **bro**, ikke en stub: `onShow` giver dig `{ surveyId, productId, html }` klar til `<WebView source={{ html }}>`, og `handleMessage` oversætter WebView-beskeder til SDK-events — første interaktion → `popup_clicked` (`PARTIAL`), fuldførelse → `survey_completed` (`COMPLETED`).
+
+:::caution[`survey_completed` lukker ikke længere popuppen (1.5.0)]
+Til og med 1.4.0 afmonterede rendereren WebView'en, så snart surveyen blev fuldført. Det skjulte surveyens egen tak-skærm, som netop var blevet renderet. Fra 1.5.0 rapporterer `survey_completed` kun statussen `COMPLETED`; `onHide` udløses senere, når brugeren trykker på fuldfør-knappen, og WebView'en sender `popup_close`.
+
+Hvis din app antog, at `survey_completed` var slutningen af flowet, så flyt den logik til `onHide`. `survey_completed` udløses stadig præcis én gang pr. fuldført survey, så det er fortsat det rigtige sted at rapportere fuldførelsen — blot ikke at nedrive UI'en.
+:::
 
 :::caution[Sæt `baseUrl` på WebView'en]
 Send altid `source={{ html, baseUrl: 'https://sdk.deepdots.com/' }}`. Uden en `baseUrl` kører WebView'en på et uigennemsigtigt origin, og surveyens interne fetch til at indlæse `@magicfeedback/native` blokeres i WKWebView (iOS) — surveyen vises aldrig. Giv også `WebView`'en en reel størrelse (`style={{ flex: 1 }}`); afhængigt af dit layout kan den ellers kollapse til nul højde.

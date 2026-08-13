@@ -241,7 +241,13 @@ export function DeepdotsHost({ children }: { children: React.ReactNode }) {
 }
 ```
 
-The renderer is a **bridge**, not a stub: `onShow` hands you `{ surveyId, productId, html }` ready for `<WebView source={{ html }}>`, and `handleMessage` translates the WebView messages into SDK events — first interaction → `popup_clicked` (`PARTIAL`), completion → `survey_completed` (`COMPLETED`) and closes the popup.
+The renderer is a **bridge**, not a stub: `onShow` hands you `{ surveyId, productId, html }` ready for `<WebView source={{ html }}>`, and `handleMessage` translates the WebView messages into SDK events — first interaction → `popup_clicked` (`PARTIAL`), completion → `survey_completed` (`COMPLETED`).
+
+:::caution[`survey_completed` no longer closes the popup (1.5.0)]
+Up to 1.4.0 the renderer unmounted the WebView as soon as the survey was completed. That hid the survey's own thank-you screen, which had just been rendered. From 1.5.0 `survey_completed` only reports the `COMPLETED` status; `onHide` fires later, when the user taps the completion button and the WebView sends `popup_close`.
+
+If your app assumed that `survey_completed` was the end of the flow, move that logic to `onHide`. `survey_completed` still fires exactly once per completed survey, so it remains the right place to report the completion — just not to tear down the UI.
+:::
 
 :::caution[Set `baseUrl` on the WebView]
 Always pass `source={{ html, baseUrl: 'https://sdk.deepdots.com/' }}`. Without a `baseUrl` the WebView runs on an opaque origin, and the survey's internal fetch to load `@magicfeedback/native` is blocked in WKWebView (iOS) — the survey never appears. Also give the `WebView` a real size (`style={{ flex: 1 }}`); depending on your layout it can otherwise collapse to zero height.

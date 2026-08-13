@@ -48,6 +48,7 @@ interface PopupDefinition {
 
 ## Fields that affect behavior
 
+- **`title`** — from 1.5.0, rendered in the popup header, to the left of the close button. It belongs to the popup, so two popups on the same survey can carry different titles, and an empty string is a valid choice: the header then shows only the close button. The SDK never falls back to the survey's own title.
 - **`triggers`** — when the popup is shown. See [Triggers](/popup-web/guides/triggers/) for value semantics per trigger type.
 - **`cooldown`** — how long to wait before showing again, depending on the user's progress (`SHOWED`, `PARTIAL`, `COMPLETED`).
 - **`segments.path`** — list of routes where the popup is allowed to appear.

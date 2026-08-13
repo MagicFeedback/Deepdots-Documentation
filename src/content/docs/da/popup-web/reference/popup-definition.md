@@ -48,6 +48,7 @@ interface PopupDefinition {
 
 ## Felter der påvirker adfærd
 
+- **`title`** — fra 1.5.0 vises den i popup-headeren, til venstre for luk-knappen. Den hører til popup'en, så to popups på samme survey kan have forskellige titler, og en tom streng er et gyldigt valg: så viser headeren kun luk-knappen. SDK'et falder aldrig tilbage til surveyens egen titel.
 - **`triggers`** — hvornår popup'en vises. Se [Triggers](/da/popup-web/guides/triggers/) for `value`-semantik pr. trigger-type.
 - **`cooldown`** — hvor længe der skal ventes, før popup'en vises igen, afhængigt af brugerens fremskridt (`SHOWED`, `PARTIAL`, `COMPLETED`).
 - **`segments.path`** — liste over ruter, hvor popup'en må vises.

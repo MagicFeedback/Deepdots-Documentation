@@ -48,6 +48,7 @@ interface PopupDefinition {
 
 ## Campos que afectan al comportamiento
 
+- **`title`** — desde 1.5.0, se pinta en la cabecera del popup, a la izquierda del botón de cerrar. Pertenece al popup, así que dos popups sobre el mismo survey pueden llevar títulos distintos, y la cadena vacía es una opción válida: la cabecera se queda solo con el botón de cerrar. El SDK nunca cae al título del propio survey.
 - **`triggers`** — cuándo se muestra el popup. Consulta [Triggers](/es/popup-web/guides/triggers/) para la semántica de `value` por tipo.
 - **`cooldown`** — cuánto esperar antes de mostrarlo de nuevo, según el progreso del usuario (`SHOWED`, `PARTIAL`, `COMPLETED`).
 - **`segments.path`** — lista de rutas donde el popup puede aparecer.
