@@ -273,7 +273,7 @@ The flag only affects React Native (the survey WebView HTML). It has no effect o
 
 `renderChrome` decides who draws the frame. To restyle what is **inside** it — question wording, options, rating scales, and the SDK's own header, progress bar and footer — pass your own stylesheet in [`surveyCss`](/popup-web/reference/api/#custom-css). It is injected as the last stylesheet in the WebView, so it wins the cascade without touching the defaults shared by every Deepdots customer.
 
-That page also lists the class names to target, including which ones differ between the web popup and the React Native WebView.
+That page also lists the class names to target. From 1.5.0 the SDK exposes the same hooks in both the web popup and this WebView, so one stylesheet covers both platforms.
 
 ### `setupReactNative(sdk, config, deps)`
 

@@ -117,21 +117,33 @@ Inspecciona el DOM en vivo antes de escribir reglas: abre el popup en un navegad
 
 #### Llegar al marco del popup
 
-`surveyCss` se inyecta el último, así que también alcanza el chrome del propio SDK: cabecera, barra de progreso, footer y pantalla final. Algunos puntos de enganche difieren entre el popup web (DOM real) y el survey de React Native (WebView), así que mira la columna antes de escribir una regla.
+`surveyCss` se inyecta el último, así que también alcanza el chrome del propio SDK: cabecera, barra de progreso, footer y pantalla final. Desde la 1.5.0 todos los puntos de enganche de abajo existen en **ambos**, el popup web y el survey de React Native, así que una sola hoja de estilos cubre los dos.
 
-| Parte | Selector | Ambas plataformas |
-| --- | --- | --- |
-| Contenedor del popup | `.deepdots-popup` | sí |
-| Fila de cabecera | `.deepdots-popup-header` | sí |
-| Título de la cabecera | `.deepdots-popup-title` (web) · `#dd-title` (RN) | no |
-| Bloque de progreso | `.deepdots-progress` | sí |
-| Etiqueta / barra de progreso | `#dd-progress-label` · `#dd-progress-bar` | solo React Native |
-| Área de preguntas con scroll | `.deepdots-popup-main` | sí |
-| Footer | `.deepdots-popup-footer` | sí |
-| Botones del footer | `.deepdots-popup-footer button` | sí |
-| Botones individuales | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` | solo React Native |
-| Pantalla final | `.deepdots-success` | sí |
-| Aviso de validación | `.deepdots-error-hint` | sí |
+| Parte | Selector |
+| --- | --- |
+| Contenedor del popup | `#dd-popup` · `.deepdots-popup` |
+| Fila de cabecera | `.deepdots-popup-header` |
+| Título de la cabecera | `#dd-title` · `.deepdots-popup-title` |
+| Icono de cerrar | `#dd-close` |
+| Bloque de progreso | `#dd-progress` · `.deepdots-progress` |
+| Etiqueta de progreso | `#dd-progress-label` (`#dd-progress-current`, `#dd-progress-total`) |
+| Barra de progreso | `.deepdots-progress-track` · `#dd-progress-bar` |
+| Área de preguntas con scroll | `#dd-main` · `.deepdots-popup-main` |
+| Footer | `#dd-footer` · `.deepdots-popup-footer` |
+| Todos los botones de navegación | `.dd-nav-btn` |
+| Botones individuales | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` |
+| Pantalla final | `.deepdots-success` |
+| Aviso de validación | `#dd-error` · `.deepdots-error-hint` |
+
+:::caution[Los valores que el SDK aplica inline necesitan `!important`]
+Los colores que vienen del estilo del survey — `buttonPrimaryColor`, `buttonSecondaryColor`, `loadingBarColor`, `boxBackgroundColor` — se fijan como estilos inline en cuanto el survey carga, y un estilo inline gana a un selector de id. Para sobreescribir uno de esos desde `surveyCss`, marca la declaración:
+
+```css
+#dd-progress-bar { background: #0b5cd5 !important; }
+```
+
+Todo lo que el SDK estila desde su propia hoja de estilos (tamaños, espaciados, radios, tipografía) no necesita `!important`.
+:::
 
 Para los colores, mejor los ajustes de la plataforma que el CSS: el `theme`, la `position` y la `font` del popup, y el `buttonPrimaryColor`, `buttonSecondaryColor` y `loadingBarColor` del propio survey. Esos aplican en ambas plataformas y cambian sin publicar la app. En React Native también puedes ceder el marco entero a tu app con [`renderChrome: false`](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome).
 

@@ -273,7 +273,7 @@ Flaget påvirker kun React Native (survey-WebView-HTML'en). Det har ingen effekt
 
 `renderChrome` afgør, hvem der tegner rammen. Vil du omstyle det, der er **indeni** — formuleringer, svarmuligheder, vurderingsskalaer samt SDK'ets egen header, fremdriftslinje og footer — så send dit eget stylesheet i [`surveyCss`](/da/popup-web/reference/api/#tilpasset-css). Det indsættes som det sidste stylesheet i WebView'en, så det vinder i kaskaden uden at røre de standardværdier, alle Deepdots-kunder deler.
 
-Den side viser også de klassenavne, du kan målrette, herunder hvilke der er forskellige mellem web-popuppen og React Native-WebView'en.
+Den side viser også de klassenavne, du kan målrette. Fra 1.5.0 eksponerer SDK'et de samme kroge i både web-popuppen og denne WebView, så ét stylesheet dækker begge platforme.
 
 ### `setupReactNative(sdk, config, deps)`
 

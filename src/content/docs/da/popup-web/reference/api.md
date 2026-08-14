@@ -117,21 +117,33 @@ Inspicér den levende DOM, før du skriver regler: åbn popuppen i en browser (e
 
 #### Sådan når du popuppens ramme
 
-`surveyCss` indsættes sidst, så den når også SDK'ets eget chrome: header, fremdriftslinje, footer og afslutningsskærm. Nogle kroge er forskellige mellem web-popuppen (rigtig DOM) og React Native-surveyen (WebView), så tjek kolonnen, før du skriver en regel.
+`surveyCss` indsættes sidst, så den når også SDK'ets eget chrome: header, fremdriftslinje, footer og afslutningsskærm. Fra 1.5.0 findes hver krog nedenfor i **både** web-popuppen og React Native-surveyen, så ét stylesheet dækker begge.
 
-| Del | Selektor | Begge platforme |
-| --- | --- | --- |
-| Popup-container | `.deepdots-popup` | ja |
-| Header-række | `.deepdots-popup-header` | ja |
-| Header-titel | `.deepdots-popup-title` (web) · `#dd-title` (RN) | nej |
-| Fremdriftsblok | `.deepdots-progress` | ja |
-| Fremdriftsetiket / -linje | `#dd-progress-label` · `#dd-progress-bar` | kun React Native |
-| Spørgsmålsområde med scroll | `.deepdots-popup-main` | ja |
-| Footer | `.deepdots-popup-footer` | ja |
-| Footer-knapper | `.deepdots-popup-footer button` | ja |
-| Enkelte knapper | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` | kun React Native |
-| Afslutningsskærm | `.deepdots-success` | ja |
-| Valideringsbanner | `.deepdots-error-hint` | ja |
+| Del | Selektor |
+| --- | --- |
+| Popup-container | `#dd-popup` · `.deepdots-popup` |
+| Header-række | `.deepdots-popup-header` |
+| Header-titel | `#dd-title` · `.deepdots-popup-title` |
+| Luk-ikon | `#dd-close` |
+| Fremdriftsblok | `#dd-progress` · `.deepdots-progress` |
+| Fremdriftsetiket | `#dd-progress-label` (`#dd-progress-current`, `#dd-progress-total`) |
+| Fremdriftslinje | `.deepdots-progress-track` · `#dd-progress-bar` |
+| Spørgsmålsområde med scroll | `#dd-main` · `.deepdots-popup-main` |
+| Footer | `#dd-footer` · `.deepdots-popup-footer` |
+| Alle navigationsknapper | `.dd-nav-btn` |
+| Enkelte knapper | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` |
+| Afslutningsskærm | `.deepdots-success` |
+| Valideringsbanner | `#dd-error` · `.deepdots-error-hint` |
+
+:::caution[Værdier SDK'et sætter inline kræver `!important`]
+Farverne, der kommer fra surveyens stil — `buttonPrimaryColor`, `buttonSecondaryColor`, `loadingBarColor`, `boxBackgroundColor` — sættes som inline styles, så snart surveyen indlæses, og en inline style slår en id-selektor. Vil du overskrive en af dem fra `surveyCss`, så markér deklarationen:
+
+```css
+#dd-progress-bar { background: #0b5cd5 !important; }
+```
+
+Alt, hvad SDK'et styler via sit eget stylesheet (størrelser, afstande, radier, typografi), kræver ikke `!important`.
+:::
 
 Til farver er platformens indstillinger et bedre valg end CSS: popuppens `theme`, `position` og `font` samt surveyens egen `buttonPrimaryColor`, `buttonSecondaryColor` og `loadingBarColor`. De gælder på begge platforme og kan ændres uden en app-udgivelse. På React Native kan du også overlade hele rammen til din app med [`renderChrome: false`](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome).
 

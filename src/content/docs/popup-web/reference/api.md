@@ -117,21 +117,33 @@ Inspect the live DOM before writing rules: open the popup in a browser (or the W
 
 #### Reaching the popup frame
 
-`surveyCss` is injected last, so it also reaches the SDK's own chrome: header, progress bar, footer, completion screen. Some hooks differ between the web popup (a real DOM) and the React Native survey (a WebView), so check the column before writing a rule.
+`surveyCss` is injected last, so it also reaches the SDK's own chrome: header, progress bar, footer, completion screen. From 1.5.0 every hook below exists in **both** the web popup and the React Native survey, so one stylesheet covers both.
 
-| Part | Selector | Both platforms |
-| --- | --- | --- |
-| Popup container | `.deepdots-popup` | yes |
-| Header row | `.deepdots-popup-header` | yes |
-| Header title | `.deepdots-popup-title` (web) · `#dd-title` (RN) | no |
-| Progress block | `.deepdots-progress` | yes |
-| Progress label / bar | `#dd-progress-label` · `#dd-progress-bar` | React Native only |
-| Scrollable question area | `.deepdots-popup-main` | yes |
-| Footer | `.deepdots-popup-footer` | yes |
-| Footer buttons | `.deepdots-popup-footer button` | yes |
-| Individual buttons | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` | React Native only |
-| Completion screen | `.deepdots-success` | yes |
-| Validation banner | `.deepdots-error-hint` | yes |
+| Part | Selector |
+| --- | --- |
+| Popup container | `#dd-popup` · `.deepdots-popup` |
+| Header row | `.deepdots-popup-header` |
+| Header title | `#dd-title` · `.deepdots-popup-title` |
+| Close icon | `#dd-close` |
+| Progress block | `#dd-progress` · `.deepdots-progress` |
+| Progress label | `#dd-progress-label` (`#dd-progress-current`, `#dd-progress-total`) |
+| Progress bar | `.deepdots-progress-track` · `#dd-progress-bar` |
+| Scrollable question area | `#dd-main` · `.deepdots-popup-main` |
+| Footer | `#dd-footer` · `.deepdots-popup-footer` |
+| All navigation buttons | `.dd-nav-btn` |
+| Individual buttons | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` |
+| Completion screen | `.deepdots-success` |
+| Validation banner | `#dd-error` · `.deepdots-error-hint` |
+
+:::caution[Values the SDK applies inline need `!important`]
+The colors that come from the survey's style — `buttonPrimaryColor`, `buttonSecondaryColor`, `loadingBarColor`, `boxBackgroundColor` — are set as inline styles once the survey loads, and an inline style beats an id selector. To override one of those from `surveyCss`, mark the declaration:
+
+```css
+#dd-progress-bar { background: #0b5cd5 !important; }
+```
+
+Everything the SDK styles through its own stylesheet (sizes, spacing, radii, typography) needs no `!important`.
+:::
 
 For colors, prefer the platform settings over CSS: the popup's `theme`, `position` and `font`, and the survey's own `buttonPrimaryColor`, `buttonSecondaryColor` and `loadingBarColor`. Those apply on both platforms and change without an app release. On React Native you can also hand the whole frame to your app with [`renderChrome: false`](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome).
 
