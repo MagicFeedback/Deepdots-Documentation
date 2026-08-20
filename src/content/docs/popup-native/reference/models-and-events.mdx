@@ -10,17 +10,18 @@ description: Core option types, trigger shapes, and lifecycle events defined in 
 ### `InitOptions`
 
 - `debug`
-- `mode`
 - `popupOptions`
 - `provideLang`
 - `autoLaunch`
+- `renderChrome`
 - `metadata`
+
+`renderChrome` (default `true`, from **0.4.0**) controls whether the SDK paints the popup "modal" — the dimmed scrim and the rounded card with elevation drawn by `PopupView`. Set it to `false` to render the popup transparent and full-bleed so it blends into your own screen; the survey stays functional (close button in the header, footer with back/start/complete/send). It mirrors the web/RN `renderChrome` flag. Note the native divergence: the chrome is native Compose (not HTML), and the SDK still auto-mounts a full-screen overlay, so the flag removes the scrim and card but does not hand the container mounting over to your app.
 
 ### `PopupOptions`
 
 - `id`
 - `publicKey`
-- `popups`
 - `companyId`
 
 ### `ShowOptions`

@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
 });
 
@@ -32,7 +31,6 @@ Pass a `userId` so popup events are linked to the user in your analytics and in 
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123',
 });
@@ -85,25 +83,14 @@ function onSearchAttempt(searchAttempts) {
 }
 ```
 
-## Show a popup manually
+## Trigger a popup from a button
 
-Bypass triggers entirely — useful for a permanent "Feedback" button.
+Configure the popup in Deepdots with an `event` trigger, then fire it from the click handler.
 
 ```ts
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.show({
-    surveyId: 'survey-feedback-001',
-    productId: 'product-main',
-  });
+  popups.triggerEvent('feedback_requested');
 });
-```
-
-## Show a popup by its Deepdots id
-
-When you know the popup's id from the Deepdots dashboard.
-
-```ts
-popups.showByPopupId('popup-footer-feedback');
 ```
 
 ## Full example: feedback button with analytics
@@ -116,7 +103,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: currentUser.id,
 });
@@ -132,13 +118,13 @@ popups.on('survey_completed', (event) => {
 popups.autoLaunch();
 
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.showByPopupId('popup-footer-feedback');
+  popups.triggerEvent('feedback_requested');
 });
 ```
 
 ## Live demo
 
-The public demo runs the SDK in server mode against a real Deepdots account.
+The public demo runs the SDK against a real Deepdots account.
 
 [Open the live demo](https://docs.deepdots.com/demo/).
 

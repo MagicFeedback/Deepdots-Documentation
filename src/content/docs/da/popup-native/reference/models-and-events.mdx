@@ -1,19 +1,101 @@
 ---
 title: Models and Events
-description: Centrale modeller, triggers og events i SDK'et.
+description: Centrale option-typer, trigger-former og lifecycle-events defineret i det delte SDK.
 ---
 
 # Models and Events
 
-Kerneobjekter:
+## Initialiseringsmodeller
 
-- `InitOptions`
-- `PopupOptions`
-- `PopupDefinition`
-- `ShowOptions`
+### `InitOptions`
 
-Events:
+- `debug`
+- `popupOptions`
+- `provideLang`
+- `autoLaunch`
+- `renderChrome`
+- `metadata`
+
+`renderChrome` (standard `true`, fra **0.4.0**) styrer, om SDK'et tegner popup-"modalen" — det nedtonede scrim og det afrundede kort med elevation, som `PopupView` tegner. Sæt den til `false` for at rendere popuppen gennemsigtig og fuld-bredde, så den falder ind i din egen skærm; surveyen forbliver funktionel (lukkeknap i headeren, footer med back/start/complete/send). Den spejler web/RN-flaget `renderChrome`. Bemærk den native divergens: chromet er native Compose (ikke HTML), og SDK'et auto-monterer stadig et fuldskærms-overlay, så flaget fjerner scrim og kort, men overlader ikke container-monteringen til din app.
+
+### `PopupOptions`
+
+- `id`
+- `publicKey`
+- `companyId`
+
+### `ShowOptions`
+
+- `surveyId`
+- `productId`
+- `data`
+
+## Popup-definitionsmodel
+
+### `PopupDefinition`
+
+- `id`
+- `title`
+- `message`
+- `trigger`
+- `triggers`
+- `conditions`
+- `cooldown`
+- `legacyConditions`
+- `actions`
+- `surveyId`
+- `productId`
+- `style`
+- `segments`
+
+## Trigger-modeller
+
+Understøttede trigger-typer i koden:
+
+- `Trigger.TimeOnPage(seconds: Double)`
+- `Trigger.Scroll(percentage: Int)`
+- `Trigger.Exit(delaySeconds: Double = 0.0)`
+- `Trigger.Event(name: String)`
+- `Trigger.Click(targetId: String)`
+
+## Stil- og segmenteringsmodeller
+
+### `Style`
+
+- `theme`
+- `position`
+- `imageUrl`
+- `imageSize`
+- `imageAlignment`
+
+### `Segments`
+
+- `lang`
+- `path`
+
+## Event-model
+
+### `Event`
 
 - `PopupShown`
 - `PopupClicked`
 - `SurveyCompleted`
+
+Den delte helper `Event.code()` mapper dem til:
+
+- `popup_shown`
+- `popup_clicked`
+- `survey_completed`
+
+### `EventData`
+
+- `popupId`
+- `surveyId`
+- `productId`
+- `extra`
+- `timestamp`
+
+## Noter til integrationsteams
+
+- `metadata` er der, hvor eksemplerne sender `userId`
+- `LegacyCondition` er fortsat understøttet af hensyn til bagudkompatibilitet

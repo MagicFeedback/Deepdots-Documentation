@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
 });
 
@@ -32,7 +31,6 @@ Pasa un `userId` para que los eventos de popup queden vinculados al usuario en t
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123',
 });
@@ -85,25 +83,14 @@ function onSearchAttempt(searchAttempts) {
 }
 ```
 
-## Mostrar un popup manualmente
+## Disparar un popup desde un botón
 
-Sáltate los triggers — útil para un botón permanente de "Feedback".
+Configura el popup en Deepdots con un trigger de tipo `event` y dispáralo desde el handler del click.
 
 ```ts
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.show({
-    surveyId: 'survey-feedback-001',
-    productId: 'product-main',
-  });
+  popups.triggerEvent('feedback_requested');
 });
-```
-
-## Mostrar un popup por su id de Deepdots
-
-Cuando conoces el id del popup desde el panel de Deepdots.
-
-```ts
-popups.showByPopupId('popup-footer-feedback');
 ```
 
 ## Ejemplo completo: botón de feedback con analítica
@@ -116,7 +103,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: currentUser.id,
 });
@@ -132,13 +118,13 @@ popups.on('survey_completed', (event) => {
 popups.autoLaunch();
 
 document.getElementById('feedback-btn')?.addEventListener('click', () => {
-  popups.showByPopupId('popup-footer-feedback');
+  popups.triggerEvent('feedback_requested');
 });
 ```
 
 ## Demo en vivo
 
-La demo pública ejecuta el SDK en modo server contra una cuenta real de Deepdots.
+La demo pública ejecuta el SDK contra una cuenta real de Deepdots.
 
 [Abrir la demo en vivo](https://docs.deepdots.com/demo/).
 

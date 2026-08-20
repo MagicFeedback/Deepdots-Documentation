@@ -11,7 +11,6 @@ Initialiserer SDK'et og henter popup-definitionerne fra Deepdots.
 
 ```ts
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123', // valgfrit
 });
@@ -19,9 +18,165 @@ popups.init({
 
 | Felt     | Påkrævet | Beskrivelse                                                  |
 | -------- | -------- | ------------------------------------------------------------ |
-| `mode`   | ja       | Altid `'server'` for kundeintegrationer.                     |
 | `apiKey` | ja       | Din offentlige Deepdots-API-nøgle.                           |
 | `userId` | nej      | Identifikator sendt med hver popup-event.                    |
+| `language` | nej    | BCP-47-sprogtag (f.eks. `es-ES`). Styrer både analytics-konteksten og popup-[sprogmålretningen](/da/popup-web/reference/popup-definition/#felter-der-påvirker-adfærd) (`segments.lang`). Registreres automatisk fra browseren (eller `Intl` på React Native), hvis den udelades. Se [Analytics → Sprogregistrering](/da/popup-web/guides/analytics/#sprogregistrering). |
+| `contactAttributes` | nej | Interne brugerattributter der skal sendes til Contact (kræver `userId`). Se [`setContactAttributes`](#setcontactattributesattributes). |
+| `debug`  | nej      | Slår SDK'ets debug-output til. Slået fra som standard.        |
+| `logger` | nej      | Tilpasset destination for dette debug-output. Se [Tilpasset logger](#tilpasset-logger). |
+| `renderChrome` | nej | **Kun React Native** (fra 1.4.0). Standard `true`. Sæt `false`, når du monterer din egen dekorerede container, så survey-WebView'en renderes uden SDK'ets eget kort og backdrop. Se [React Native → renderChrome](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome). |
+| `showProgressBar` | nej | Fra 1.5.0. Viser en `Question X of Y`-etiket og en fremdriftslinje i popup-headeren. Udelad den for at følge det, platformen har konfigureret for surveyen. Se [Fremdriftslinje](#fremdriftslinje). |
+| `surveyCss` | nej | Fra 1.5.0. Din egen CSS, indsat som det sidste stylesheet, så den vinder i kaskaden. Måden at omstyle spørgsmålsområdet på pr. integration. Se [Tilpasset CSS](#tilpasset-css). |
+
+### Fremdriftslinje
+
+Popup-headeren kan vise, hvor langt surveyen er nået: en `Question 2 of 3`-etiket — tallet i fed, resten dæmpet — over en tynd fremdriftslinje.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  showProgressBar: true,
+});
+```
+
+Flaget har tre tilstande:
+
+| Værdi | Adfærd |
+| --- | --- |
+| `true` | Vises altid. |
+| `false` | Vises aldrig. |
+| udeladt | Følger den `showProgressBar`-indstilling, der er konfigureret for surveyen i platformen. |
+
+Linjen vises kun, når der er mere end én side, efter startskærmen og før afslutningsskærmen. Den respekterer også surveyens egen `progressUnit` (`fraction` → `Question 2 of 3`, `percentage` → `66%`), `showProgressUnit` og `loadingBarColor`.
+
+:::note
+Dynamiske opfølgende spørgsmål er ikke en del af sidegrafen: de rykker linjen et halvt trin frem, men ændrer ikke totalen. Etiketten runder ned, så en opfølgning under spørgsmål 2 står stadig som `Question 2`, mens linjen rykker frem.
+:::
+
+Etikettens tekst findes indtil videre kun på engelsk. Hvis du har brug for den lokaliseret, slå enheden fra med `showProgressUnit` i platformen og render din egen header.
+
+### Tilpasset CSS
+
+Spørgsmålsområdet — formuleringer, svarmuligheder, vurderingsskalaer — renderes af Surveys-SDK'et med et stylesheet, som alle Deepdots-kunder deler. `surveyCss` lader dig omstyle det for din integration alene: strengen indsættes som det **sidste** stylesheet i popuppen, så den vinder i kaskaden, uden at nogen skal ændre de fælles standardværdier.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  surveyCss: `
+    /* Spørgsmålets formulering: mindre og strammere end standarden */
+    .magicfeedback-label {
+      font-size: 15px; font-weight: 600; color: #1a1a1a;
+      display: block; margin-bottom: 12px; line-height: 1.4;
+    }
+    .magicfeedback-sublabel {
+      font-size: 13px; font-weight: 400; color: #6b7280;
+      display: block; margin-bottom: 12px;
+    }
+    /* Svarmuligheder som flade rækker i stedet for kort */
+    .magicfeedback-radio-container {
+      box-shadow: none !important; border: none !important;
+      background: transparent !important; border-radius: 0 !important;
+      padding: 6px 0 !important; margin: 0 !important;
+    }
+    .magicfeedback-radio-container label { font-size: 14px; font-weight: 400; color: #1a1a1a; }
+  `,
+});
+```
+
+Den gælder både web-DOM-popuppen og survey-WebView'en i React Native.
+
+:::note
+Strengen indsættes ordret, uden sanering — det er din egen kode, som ethvert andet stylesheet du udgiver. Byg den ikke ud fra brugerinput eller tredjepartsdata.
+:::
+
+Klassenavnene kommer fra `@magicfeedback/native`, og de er ikke altid de oplagte. Dem du oftest får brug for:
+
+| Element | Selektor |
+| --- | --- |
+| Spørgsmålets formulering | `label.magicfeedback-label` |
+| Sekundær linje under spørgsmålet | `label.magicfeedback-sublabel` |
+| Radio-/checkbox-række | `.magicfeedback-radio-container`, `.magicfeedback-checkbox-container` |
+| Numerisk vurderingsskala | `.magicfeedback-rating-number-container`, `.magicfeedback-rating-number-option` |
+| Fritekstfelt | `.magicfeedback-input` |
+
+:::caution
+Rammen om en svarmulighed er en `box-shadow`, ikke en `border`. Fjerner du kun kanten, bliver kortet stående — nulstil `box-shadow`, `background` og `border-radius` samlet.
+
+```css
+.magicfeedback-radio-container {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+```
+:::
+
+:::note
+Inspicér den levende DOM, før du skriver regler: åbn popuppen i en browser (eller WebView-inspektøren på React Native) og læs de faktiske klassenavne. At gætte dem er den hyppigste årsag til, at en regel tilsyneladende ikke gør noget.
+:::
+
+#### Sådan når du popuppens ramme
+
+`surveyCss` indsættes sidst, så den når også SDK'ets eget chrome: header, fremdriftslinje, footer og afslutningsskærm. Fra 1.5.0 findes hver krog nedenfor i **både** web-popuppen og React Native-surveyen, så ét stylesheet dækker begge.
+
+| Del | Selektor |
+| --- | --- |
+| Popup-container | `#dd-popup` · `.deepdots-popup` |
+| Header-række | `.deepdots-popup-header` |
+| Header-titel | `#dd-title` · `.deepdots-popup-title` |
+| Luk-ikon | `#dd-close` |
+| Fremdriftsblok | `#dd-progress` · `.deepdots-progress` |
+| Fremdriftsetiket | `#dd-progress-label` (`#dd-progress-current`, `#dd-progress-total`) |
+| Fremdriftslinje | `.deepdots-progress-track` · `#dd-progress-bar` |
+| Spørgsmålsområde med scroll | `#dd-main` · `.deepdots-popup-main` |
+| Footer | `#dd-footer` · `.deepdots-popup-footer` |
+| Alle navigationsknapper | `.dd-nav-btn` |
+| Enkelte knapper | `#dd-submit` · `#dd-back` · `#dd-start` · `#dd-complete` |
+| Afslutningsskærm | `.deepdots-success` |
+| Valideringsbanner | `#dd-error` · `.deepdots-error-hint` |
+
+:::caution[Værdier SDK'et sætter inline kræver `!important`]
+Farverne, der kommer fra surveyens stil — `buttonPrimaryColor`, `buttonSecondaryColor`, `loadingBarColor`, `boxBackgroundColor` — sættes som inline styles, så snart surveyen indlæses, og en inline style slår en id-selektor. Vil du overskrive en af dem fra `surveyCss`, så markér deklarationen:
+
+```css
+#dd-progress-bar { background: #0b5cd5 !important; }
+```
+
+Alt, hvad SDK'et styler via sit eget stylesheet (størrelser, afstande, radier, typografi), kræver ikke `!important`.
+:::
+
+Til farver er platformens indstillinger et bedre valg end CSS: popuppens `theme`, `position` og `font` samt surveyens egen `buttonPrimaryColor`, `buttonSecondaryColor` og `loadingBarColor`. De gælder på begge platforme og kan ændres uden en app-udgivelse. På React Native kan du også overlade hele rammen til din app med [`renderChrome: false`](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome).
+
+### Tilpasset logger
+
+Som standard skriver SDK'et sit debug-output til `console`. Send en `logger` for at dirigere det et andet sted hen — en logfil, en fjern-logtjeneste, Firebase, din egen buffer — hvilket er nyttigt på React Native, hvor Metro-konsollen ikke er tilgængelig i produktionsbuilds.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  debug: true,
+  logger: {
+    log: (...args) => myLogger.info(...args),
+    warn: (...args) => myLogger.warn(...args),
+    error: (...args) => myLogger.error(...args),
+  },
+});
+```
+
+Kun `log` er påkrævet — `warn`, `error` og `info` falder tilbage til `log`, når de udelades. `console` opfylder selv formen, så `logger: console` er gyldig og er standardværdien.
+
+```ts
+interface DeepdotsLogger {
+  log: (...args: unknown[]) => void;
+  warn?: (...args: unknown[]) => void;
+  error?: (...args: unknown[]) => void;
+  info?: (...args: unknown[]) => void;
+}
+```
+
+:::note
+`logger` ændrer kun **hvor** outputtet havner, ikke hvor meget der er: SDK'ets debug-beskeder kræver stadig `debug: true`. Fejl, som SDK'et rapporterer uanset `debug` (en event-listener der kaster, en advarsel fra rendereren), går også gennem loggeren, når den først er sat.
+:::
 
 ## `autoLaunch()`
 
@@ -41,25 +196,6 @@ popups.triggerEvent('checkout_completed');
 
 Se [Triggers → event](/da/popup-web/guides/triggers/#event) for detaljer.
 
-## `show({ surveyId, productId })`
-
-Viser en popup direkte og omgår triggers. Cooldowns og rute-targeting respekteres stadig.
-
-```ts
-popups.show({
-  surveyId: 'survey-home-001',
-  productId: 'product-main',
-});
-```
-
-## `showByPopupId(popupId)`
-
-Samme som `show()`, men du adresserer popup'en med dens Deepdots-`id` i stedet for survey/product-parret.
-
-```ts
-popups.showByPopupId('popup-home-5s');
-```
-
 ## `on(event, listener)` / `off(event, listener)`
 
 Abonnér på SDK-events: `popup_shown`, `popup_clicked`, `survey_completed`.
@@ -72,3 +208,34 @@ popups.off('popup_shown', onShown);
 ```
 
 Se [Events](/da/popup-web/guides/events/) for den fulde payload-form.
+
+## `setContactAttributes(attributes)`
+
+Sender interne brugerattributter, som kun din applikation kender — sprog, alder, plan, segment osv. — til brugerens **Contact** i Deepdots, så de kan bruges til targeting og segmentering af popups.
+
+Kræver et `userId` i `init()`: attributterne knyttes til den identitet (det samme id fra dit eget system). Attributværdier skal være `string`, `number` eller `boolean`.
+
+```ts
+const sent = await popups.setContactAttributes({
+  language: 'es',
+  age: 34,
+  plan: 'premium',
+});
+```
+
+SDK'et sender kun, når attributterne er **ændret** siden sidste afsendelse — det gemmer en diff i vedvarende lagring — så du kan kalde dette ved hver brugeridentifikation uden at generere ekstra requests. Den returnerede promise resolver til:
+
+- `true` — attributterne blev sendt til backenden.
+- `false` — intet ændret siden sidste afsendelse (eller tracking er deaktiveret, eller der er intet `userId`).
+
+Under motorhjelmen udfører det `POST /sdk/popups/contact` med body'en `{ publicKey, userId, userAttributes }`. Contacten oprettes automatisk ved den første popup-hentning, så ingen rækkefølge er påkrævet.
+
+Du kan også angive de indledende attributter direkte i `init()` via `contactAttributes` (svarer til at kalde `setContactAttributes` lige efter init):
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  userId: 'customer-123',
+  contactAttributes: { language: 'es', plan: 'premium' },
+});
+```

@@ -3,7 +3,7 @@ title: Quickstart
 description: Get the SDK running in your product in three steps.
 ---
 
-The SDK runs in **server mode**: your popups, triggers, and targeting live in Deepdots and are fetched at runtime. You only need to mount the SDK, hand it your API key, and start it.
+Your popups, triggers, and targeting live in Deepdots and are fetched at runtime. You only need to mount the SDK, hand it your API key, and start it.
 
 ## 1. Install
 
@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123', // optional — your internal user identifier
 });

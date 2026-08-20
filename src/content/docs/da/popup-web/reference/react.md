@@ -32,7 +32,6 @@ export function useDeepdotsPopups(userId?: string) {
 
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
       userId,
     });
@@ -71,7 +70,6 @@ export function DeepdotsProvider({ userId }: { userId?: string }) {
   useEffect(() => {
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: process.env.NEXT_PUBLIC_DEEPDOTS_API_KEY!,
       userId,
     });
@@ -100,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Udløs en popup fra en React-komponent
 
-Du kan også gemme en reference til instansen og kalde `show()` eller `triggerEvent()` fra en event handler.
+Du kan også gemme en reference til instansen og kalde `triggerEvent()` fra en event handler.
 
 ```tsx
 'use client';
@@ -114,7 +112,6 @@ export function FeedbackButton() {
   useEffect(() => {
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
     });
     popups.autoLaunch();
@@ -122,14 +119,7 @@ export function FeedbackButton() {
   }, []);
 
   return (
-    <button
-      onClick={() =>
-        popupsRef.current?.show({
-          surveyId: 'survey-home-001',
-          productId: 'product-main',
-        })
-      }
-    >
+    <button onClick={() => popupsRef.current?.triggerEvent('feedback_requested')}>
       Giv feedback
     </button>
   );
@@ -143,7 +133,7 @@ Abonnér inde i `useEffect`, og afmeld i cleanup for at undgå lækager mellem r
 ```tsx
 useEffect(() => {
   const popups = new DeepdotsPopups();
-  popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+  popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 
   const onShown = (event: unknown) => console.log('shown', event);
   const onCompleted = (event: unknown) => console.log('completed', event);

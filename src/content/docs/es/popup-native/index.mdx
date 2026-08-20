@@ -1,28 +1,37 @@
 ---
 title: Deepdots Popup SDK
-description: Resumen para negocio y producto del SDK multiplataforma de Deepdots.
+description: Visión general orientada a negocio del SDK de popups de Deepdots para equipos de producto, growth, ventas e implementación.
 ---
 
 # Deepdots Popup SDK
 
-Deepdots Popup SDK permite mostrar popups y lanzar encuestas dentro de apps Android e iOS desde una base compartida de Kotlin Multiplatform. El repositorio incluye demos nativas, distribución para Android e iOS y soporte para segmentación, triggers y eventos de ciclo de vida.
+Deepdots Popup SDK es un SDK de Kotlin Multiplatform que permite a los equipos mostrar popups in-app y lanzar encuestas en Android e iOS desde una única implementación compartida.
 
 ## Valor para negocio
 
-- Reduce el tiempo para activar campañas o recoger feedback in-app
-- Facilita validaciones internas con demos ya incluidas en el repo
-- Permite separar el control remoto de campañas con **Server Mode** del control embebido con **Client Mode**
+- Reduce el tiempo para activar flujos de feedback y engagement in-app
+- Valida experiencias móviles con las apps demo de Android e iOS incluidas
+- Gestiona las campañas de popups de forma centralizada en Deepdots, entregadas a la app en tiempo de ejecución
 
-## Qué encontrar aquí
+## Qué problema resuelve
 
-- [Installation](/es/popup-native/getting-started/installation/) para integrar Android e iOS
-- [Quickstart](/es/popup-native/getting-started/quickstart/) para la puesta en marcha mínima
-- [Server Mode](/es/popup-native/guides/server-mode/) y [Client Mode](/es/popup-native/guides/client-mode/) para entender el modelo operativo
-- [API Reference](/es/popup-native/reference/api-reference/) para developers
+- popups entregados desde Deepdots en tiempo de ejecución
+- lógica de visualización basada en triggers
+- segmentación por idioma y por path
+- render de encuestas embebido a través de MagicFeedback
+- eventos de ciclo de vida del popup para analítica y orquestación
 
 ## Naming correcto
 
-- Nombre visible: **Deepdots Popup SDK**
+- Nombre comercial: **Deepdots Popup SDK**
+- Nombre del repositorio: `deepdots-popup-mobile-native-sdk`
 - Package Android: `com.deepdots.sdk:shared-android`
-- Nombre del package SPM: `DeepdotsSDK`
-- Producto Swift importado: `DeepdotsSDK`
+- Manifiesto de Swift Package: `DeepdotsSDK`
+- Nombre del producto Swift: `DeepdotsSDK`
+
+## Empieza aquí
+
+- [Installation](/es/popup-native/getting-started/installation/)
+- [Quickstart](/es/popup-native/getting-started/quickstart/)
+- [Cómo se cargan los popups](/es/popup-native/guides/modes/)
+- [Examples](/es/popup-native/guides/examples/)

@@ -1,10 +1,58 @@
 ---
 title: Troubleshooting
-description: Problemas comunes visibles en la integracion actual.
+description: Causas comunes de problemas de configuración o de runtime según la base de código actual y las apps de ejemplo.
 ---
 
 # Troubleshooting
 
-- Si no aparece ningun popup, revisa `publicKey`, `attachContext`, `setPath` y `autoLaunch`.
-- Si fallan triggers de scroll o eventos, confirma que la app host llama a `onScroll(...)` o `triggerEvent(...)`.
-- Si falla el render de encuesta, revisa el bundling del asset `magicfeedback-sdk.browser.js`.
+## Los popups no aparecen nunca
+
+Comprueba:
+
+- que `initialize(...)` o `init(...)` se llamó una sola vez sobre una instancia nueva
+- que hay un `publicKey` válido
+- que se llamó a `attachContext(...)` con un contexto de plataforma válido
+- que `setPath(...)` coincide con los paths que espera la segmentación del popup
+- que `autoLaunch` está activado, o que se llama a `autoLaunch()` tras la inicialización
+
+## Los popups no cargan
+
+Comprueba:
+
+- que el entorno de runtime apunta a la URL base del backend esperada
+- que el backend tiene definiciones de popup para el `publicKey` dado
+- que la app provee los valores de idioma y path esperados
+
+## Los triggers de scroll o de evento no se disparan
+
+Comprueba:
+
+- que la app host realmente reenvía el porcentaje de scroll a través de `onScroll(...)`
+- que los eventos personalizados se envían con `triggerEvent(...)`
+- que los flujos basados en click usan `triggerClick(...)`
+
+## Problemas al renderizar la encuesta
+
+El repositorio usa el HTML de encuesta de MagicFeedback renderizado dentro de web views nativas.
+
+Comprueba:
+
+- el empaquetado de assets en Android para `magicfeedback-sdk.browser.js`
+- el bundling del recurso en iOS para el mismo asset
+- el cableado del puente de la web view para la propagación de eventos
+
+## Errores de validación o de envío en los flujos de encuesta
+
+El código maneja tanto errores de validación como de envío y los muestra en la UI. Si la encuesta se queda bloqueada:
+
+- inspecciona los logs del WebView de Android
+- inspecciona la salida de consola de iOS y los mensajes del puente
+- confirma que el payload de la encuesta contiene los valores de progreso y total esperados
+
+## Problemas de compilación o resolución del paquete binario en iOS
+
+Comprueba:
+
+- que el XCFramework local o alojado existe
+- que `spm/Package.swift` apunta al ZIP de release y al checksum correctos
+- que la demo de iOS ha resuelto las dependencias del paquete tras regenerar el binario local si hacía falta

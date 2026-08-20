@@ -29,7 +29,7 @@ Udløses efter at brugeren har brugt et antal sekunder på siden.
 import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 
 const popups = new DeepdotsPopups();
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 // Tids-triggers konfigureret i Deepdots udløses af sig selv.
 ```
@@ -47,7 +47,7 @@ Udløses, når brugeren har scrollet forbi en given procentdel af sidens højde.
 **Host-side-kode:** ingen. SDK'et tilkobler sin egen scroll-listener og fjerner den, når tærsklen er nået.
 
 ```ts
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 // En scroll-trigger konfigureret til 70% i Deepdots udløses
 // automatisk, når brugeren når 70% af siden.
@@ -94,7 +94,7 @@ Stiller en popup i kø til at vises på den **næste** rute, efter brugeren forl
 **Host-side-kode:** ingen for standard SPA-navigation. SDK'et patcher `history.pushState` / `history.replaceState` og lytter til `popstate`, `hashchange` og klik på links med samme origin. Ethvert normalt klientsidigt rute-skift detekteres.
 
 ```ts
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 // Når brugeren navigerer væk fra en targetet rute,
 // stilles popup'en i kø og vises på den næste rute efter den konfigurerede forsinkelse.
@@ -123,7 +123,7 @@ Udløses, når din applikation udsender en brugerdefineret forretnings-event ved
 import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 
 const popups = new DeepdotsPopups();
-popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 popups.autoLaunch();
 
 // Senere, når noget interessant sker i din app:
@@ -184,18 +184,12 @@ Du behøver ikke gøre noget særligt i kode — sørg bare for, at din applikat
 
 ---
 
-## Vis en popup manuelt uden trigger
+## Udløs en popup fra kode
 
-Hvis du har brug for at omgå triggers helt — for eksempel en "Feedback"-knap altid tilgængelig i footeren — kald `show()` eller `showByPopupId()` direkte:
+Hvis du har brug for at udløse en popup fra kode — for eksempel en "Feedback"-knap altid tilgængelig i footeren — konfigurér popup'en i Deepdots med en `event`-trigger og kald `triggerEvent()`:
 
 ```ts
-popups.show({
-  surveyId: 'survey-feedback-001',
-  productId: 'product-main',
-});
-
-// Eller, hvis du kender popup-id'et fra Deepdots:
-popups.showByPopupId('popup-footer-feedback');
+popups.triggerEvent('feedback_requested');
 ```
 
 Cooldowns og rute-targeting respekteres stadig.

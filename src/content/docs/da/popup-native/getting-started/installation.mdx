@@ -1,16 +1,25 @@
 ---
 title: Installation
-description: Installation af Deepdots Popup SDK for Android og iOS.
+description: Installér Deepdots Popup SDK på Android og iOS med de pakkekoordinater, der bruges i dette repository.
 ---
 
 # Installation
 
-Offentlige integrationsspor i repoet:
+Dette repository eksponerer to primære forbrugsspor:
 
-- Android: `com.deepdots.sdk:shared-android`
-- iOS: `DeepdotsSDK` med Swift-produktet `DeepdotsSDK`
+- Android via Maven Central med `com.deepdots.sdk:shared-android`
+- iOS via Swift Package Manager med det binære pakkemanifest `DeepdotsSDK`
+
+## Krav
+
+- Android-apps kompilerer mod Java 17 i dette repository
+- Android-eksempelapps bruger `minSdk = 24`
+- iOS-distribution målretter **iOS 13+**
+- Namespacet for det delte SDK-modul er `com.deepdots.sdk`
 
 ## Android
+
+Tilføj den publicerede afhængighed:
 
 ```kotlin
 dependencies {
@@ -18,8 +27,53 @@ dependencies {
 }
 ```
 
+Android-eksempelappen i dette repository bruger præcis den koordinat.
+
+### Android-eksempelkommandoer
+
+```bash
+./gradlew :example-android:assembleDebug
+./gradlew :example-android:installDebug
+```
+
 ## iOS
 
-- SPM package-navn: `DeepdotsSDK`
-- Swift-produkt: `DeepdotsSDK`
-- Minimum iOS i repoet: `13`
+Det medfølgende SPM-manifest er binær-baseret og hedder aktuelt `DeepdotsSDK`. Det eksponerer biblioteksproduktet `DeepdotsSDK`.
+
+```swift
+// swift-tools-version: 5.7
+import PackageDescription
+
+let package = Package(
+    name: "DeepdotsSDK",
+    platforms: [
+        .iOS(.v13)
+    ],
+    products: [
+        .library(name: "DeepdotsSDK", targets: ["DeepdotsSDK"])
+    ]
+)
+```
+
+### iOS-eksempelflow i dette repository
+
+iOS-demoprojektet resolver en lokal pakke fra `spm-local/`. Hvis den lokale XCFramework mangler, så regenerér den først:
+
+```bash
+./run_ios_example.sh
+```
+
+For at resolve og bygge fra Xcode-værktøjer:
+
+```bash
+cd iosApp
+xcodebuild -resolvePackageDependencies -project iosApp.xcodeproj -scheme iosApp -destination 'generic/platform=iOS Simulator'
+xcodebuild -scheme iosApp -project iosApp.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 16e' build
+```
+
+## Offentlige kontra interne pakkedetaljer
+
+- Offentlig forbrugsdetalje: Android-afhængighedskoordinaten og iOS SPM-pakke-/produktnavnene
+- Vedligeholderdetalje: release-scripts i `scripts/prepare_sdk_release.sh`, `scripts/prepare_spm_release.sh` og `scripts/prepare_maven_upload_zip.sh`
+
+Disse vedligeholder-scripts er en del af repositoriet, men de er release-værktøjsorienterede snarere end integrationstrin for slutbrugeren.

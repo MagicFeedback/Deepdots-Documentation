@@ -1,32 +1,119 @@
 ---
 title: Quickstart
-description: Hurtig opstart baseret paa de demoer der allerede findes i repoet.
+description: Initialisér SDK'et, sæt en path, og lad Deepdots begynde at evaluere popup-triggers.
 ---
 
 # Quickstart
 
-Demoapps bruger **Server Mode**.
+Popup-definitioner kommer altid fra backend, så den hurtigste måde at validere SDK'et på er at initialisere det med en gyldig `publicKey` og lade det hente dine popups i runtime. Demoapps bruger allerede det flow.
 
-## Grundtrin
+## 1. Initialisér SDK'et
 
-1. Initialiser `DeepdotsPopups`
-2. Angiv `publicKey`
-3. Sæt `provideLang`
-4. Aktiver `autoLaunch`
-5. Kald `setPath(...)`
-6. Tilfoej platformskontekst via `attachContext(...)`
+### Android
 
-## Backend-miljø
+```kotlin
+val options = InitOptions(
+    debug = true,                              // kun SDK-logs — ændrer IKKE backend
+    environment = Environment.Development,     // udelad (eller brug Environment.Production) for prod
+    popupOptions = PopupOptions(
+        publicKey = "<your-public-key>"
+    ),
+    autoLaunch = true,
+    provideLang = { "en" },
+    metadata = mapOf("userId" to "demo-user")
+)
 
-`environment` styrer hvilken backend SDK'et taler med (`Environment.Production`
-eller `Environment.Development`). Standard er `Production`. Efter initialisering
-kan værtsappen læse den read-only `environment`-property på `DeepdotsPopups` for
-at logge eller tjekke det aktive miljø.
+val sdk = DeepdotsPopups().apply {
+    initialize(options)
+    setPath("/home")
+}
+```
 
-## Lokaliserede knapper
+`environment` styrer backendens base-URL (`Environment.Production` → `https://api.deepdots.com`,
+`Environment.Development` → `https://api-dev.deepdots.com`). Standard er `Production`, når den
+udelades. `debug` styrer kun SDK'ets log-output og er uafhængig af miljøet.
 
-`provideLang` bruges også til at lokalisere SDK'ets standard-knaptekster
-(Send / Cancel / Start survey / Complete survey / Back). Understøttede sprog:
-**en, es, da, no, sv, fi, zh-CN**. Regionsvarianter (`da-DK`, `nb-NO`, `zh-Hans`)
-accepteres. Ukendte sprog falder tilbage til engelsk. Etiketter sat på
-`PopupDefinition.actions` (server eller klient) har altid forrang.
+Efter initialisering eksponerer SDK'et en read-only `environment`-property på `DeepdotsPopups`,
+så værtsapps kan fastslå, hvilken backend de peger på, og vise det i deres egne diagnostikker
+eller logs.
+
+### Lokaliserede knaptekster
+
+`provideLang` bruges også til at lokalisere SDK'ets indbyggede standard-knaptekster
+(Send / Cancel / Start survey / Complete survey / Back). Understøttede sprog ud af boksen:
+**en, es, da, no, sv, fi, zh-CN**. Regionstags som `es-ES`, `nb-NO`, `zh-Hans` eller
+underscore-varianter som `es_419` accepteres. Ikke-understøttede sprog falder tilbage til
+engelsk. Etiketter leveret af server eller vært i `PopupDefinition.actions` har altid forrang
+over standardværdierne.
+
+### iOS
+
+```swift
+let options = InitOptions(
+    debug: true,                               // kun SDK-logs — ændrer IKKE backend
+    environment: Environment.development,      // udelad (eller brug .production) for prod
+    popupOptions: PopupOptions(
+        id: nil,
+        publicKey: "<your-public-key>",
+        companyId: nil
+    ),
+    provideLang: { Locale.current.language.languageCode?.identifier ?? "en" },
+    autoLaunch: true,
+    metadata: ["userId": "demo-user"]
+)
+
+let instance = DeepdotsSDK.DeepdotsPopups()
+instance.initialize(options: options)
+instance.setPath(path: "/home")
+```
+
+## 2. Tilføj en platformskontekst
+
+SDK'et har brug for en platformsspecifik kontekst for at rendere popup-UI'et.
+
+- Android-eksempel: `sdk.attachContext(PlatformContext(this))`
+- iOS-eksempel: `instance.attachContext(context: PlatformContext(viewController: root))`
+
+## 3. Hold den aktuelle path opdateret
+
+Eksemplerne ændrer den aktuelle path, efterhånden som brugeren navigerer:
+
+- `/login`
+- `/home`
+- `/detail/1`
+- `/detail/2`
+- `/detail/3`
+- `/detail/4`
+
+Path-opdateringer betyder noget, fordi path-segmentering og nogle trigger-flows afhænger af dem.
+
+## 4. Lyt efter lifecycle-events
+
+SDK'et udsender:
+
+- `popup_shown`
+- `popup_clicked`
+- `survey_completed`
+
+De eksponeres gennem `Event`-enum'et og `Events`-helperen.
+
+## 5. Trigger eller vis popups manuelt, hvis nødvendigt
+
+SDK'et kan også vise eller trigge popups fra værtskode:
+
+```kotlin
+sdk.show(
+    ShowOptions(
+        surveyId = "a9c8c170-bb1c-11f0-9d29-d5fe3dd521d0",
+        productId = "02b809f20e024bce47c57f123cff8735"
+    ),
+    PlatformContext(activity)
+)
+```
+
+## Hvad du bør validere først
+
+- At `publicKey` er gyldig
+- At værtsappen opdaterer `setPath(...)`, når skærme ændres
+- At værtsappen kalder `onScroll`, `triggerEvent` eller andre trigger-helpers, når det er relevant
+- At event-listenere er tilsluttet, så teamet kan bekræfte popup-lifecycle-adfærden

@@ -1,63 +1,119 @@
 ---
 title: Quickstart
-description: Puesta en marcha rapida del SDK con el flujo real usado por las demos.
+description: Inicializa el SDK, fija un path y deja que Deepdots empiece a evaluar los triggers de popup.
 ---
 
 # Quickstart
 
-Las demos del repositorio arrancan en **Server Mode**.
+Las definiciones de popup siempre vienen del backend, así que la forma más rápida de validar el SDK es inicializarlo con un `publicKey` válido y dejar que cargue tus popups en tiempo de ejecución. Las apps demo ya usan ese flujo.
 
-## Pasos base
+## 1. Inicializa el SDK
 
-1. Inicializa `DeepdotsPopups` con `Mode.Server`
-2. Pasa `popupOptions.publicKey`
-3. Define `provideLang`
-4. Activa `autoLaunch`
-5. Llama a `setPath(...)`
-6. Adjunta el contexto de plataforma con `attachContext(...)`
-
-## Android
+### Android
 
 ```kotlin
 val options = InitOptions(
     debug = true,                              // solo logs del SDK — NO cambia el backend
     environment = Environment.Development,     // omite (o usa Environment.Production) para apuntar a prod
-    mode = Mode.Server,
-    popupOptions = PopupOptions(publicKey = "<your-public-key>"),
+    popupOptions = PopupOptions(
+        publicKey = "<your-public-key>"
+    ),
     autoLaunch = true,
     provideLang = { "en" },
     metadata = mapOf("userId" to "demo-user")
 )
+
+val sdk = DeepdotsPopups().apply {
+    initialize(options)
+    setPath("/home")
+}
 ```
 
-`environment` controla la URL base del backend (`Environment.Production` →
-`https://api.deepdots.com`, `Environment.Development` → `https://api-dev.deepdots.com`).
-Por defecto es `Production`. `debug` controla solo los logs del SDK y es independiente
-del entorno: puedes tener logs activados en producción.
+`environment` controla la URL base del backend (`Environment.Production` → `https://api.deepdots.com`,
+`Environment.Development` → `https://api-dev.deepdots.com`). Por defecto es `Production` cuando se
+omite. `debug` controla solo los logs del SDK y es independiente del entorno.
 
-Tras inicializar, `DeepdotsPopups` expone una propiedad de solo lectura `environment`
-con el entorno activo, útil para que la app host la incluya en sus propios logs o
-checks de diagnóstico.
+Tras inicializar, el SDK expone una propiedad de solo lectura `environment` en `DeepdotsPopups`,
+para que las apps host puedan afirmar contra qué backend apuntan y mostrarlo en sus propios
+diagnósticos o logs.
 
 ### Etiquetas de botones localizadas
 
-`provideLang` también se usa para localizar las etiquetas por defecto de los botones
-internos del SDK (Send / Cancel / Start survey / Complete survey / Back). Idiomas
-soportados de fábrica: **en, es, da, no, sv, fi, zh-CN**. Se aceptan variantes con
-región (`es-ES`, `nb-NO`, `zh-Hans`) o con guion bajo (`es_419`). Los idiomas no
-soportados caen a inglés. Las etiquetas definidas en `PopupDefinition.actions`
-(server o cliente) siempre tienen prioridad sobre los valores por defecto.
+`provideLang` también se usa para localizar las etiquetas por defecto de los botones internos del
+SDK (Send / Cancel / Start survey / Complete survey / Back). Idiomas soportados de fábrica:
+**en, es, da, no, sv, fi, zh-CN**. Se aceptan etiquetas con región como `es-ES`, `nb-NO`,
+`zh-Hans`, o variantes con guion bajo como `es_419`. Los idiomas no soportados caen a inglés. Las
+etiquetas provistas por el servidor o el host en `PopupDefinition.actions` siempre tienen prioridad
+sobre los valores por defecto.
 
-## iOS
+### iOS
 
 ```swift
 let options = InitOptions(
     debug: true,                               // solo logs del SDK — NO cambia el backend
     environment: Environment.development,      // omite (o usa .production) para apuntar a prod
-    mode: Mode.server,
-    popupOptions: PopupOptions(id: nil, publicKey: "<your-public-key>", popups: nil, companyId: nil),
+    popupOptions: PopupOptions(
+        id: nil,
+        publicKey: "<your-public-key>",
+        companyId: nil
+    ),
     provideLang: { Locale.current.language.languageCode?.identifier ?? "en" },
     autoLaunch: true,
     metadata: ["userId": "demo-user"]
 )
+
+let instance = DeepdotsSDK.DeepdotsPopups()
+instance.initialize(options: options)
+instance.setPath(path: "/home")
 ```
+
+## 2. Adjunta un contexto de plataforma
+
+El SDK necesita un contexto específico de plataforma para renderizar la UI del popup.
+
+- Ejemplo Android: `sdk.attachContext(PlatformContext(this))`
+- Ejemplo iOS: `instance.attachContext(context: PlatformContext(viewController: root))`
+
+## 3. Mantén actualizado el path actual
+
+Los ejemplos cambian el path actual a medida que el usuario navega:
+
+- `/login`
+- `/home`
+- `/detail/1`
+- `/detail/2`
+- `/detail/3`
+- `/detail/4`
+
+Las actualizaciones de path importan porque la segmentación por path y algunos flujos de trigger dependen de ellas.
+
+## 4. Escucha los eventos de ciclo de vida
+
+El SDK emite:
+
+- `popup_shown`
+- `popup_clicked`
+- `survey_completed`
+
+Se exponen a través del enum `Event` y del helper `Events`.
+
+## 5. Dispara o muestra popups manualmente si hace falta
+
+El SDK también puede mostrar o disparar popups desde el código host:
+
+```kotlin
+sdk.show(
+    ShowOptions(
+        surveyId = "a9c8c170-bb1c-11f0-9d29-d5fe3dd521d0",
+        productId = "02b809f20e024bce47c57f123cff8735"
+    ),
+    PlatformContext(activity)
+)
+```
+
+## Qué validar primero
+
+- Que el `publicKey` sea válido
+- Que la app host actualice `setPath(...)` al cambiar de pantalla
+- Que la app host llame a `onScroll`, `triggerEvent` u otros helpers de trigger cuando corresponda
+- Que los listeners de eventos estén cableados para que el equipo pueda confirmar el comportamiento del ciclo de vida del popup

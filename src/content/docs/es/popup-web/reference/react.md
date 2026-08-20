@@ -32,7 +32,6 @@ export function useDeepdotsPopups(userId?: string) {
 
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
       userId,
     });
@@ -71,7 +70,6 @@ export function DeepdotsProvider({ userId }: { userId?: string }) {
   useEffect(() => {
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: process.env.NEXT_PUBLIC_DEEPDOTS_API_KEY!,
       userId,
     });
@@ -100,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Disparar un popup desde un componente React
 
-También puedes guardar una referencia a la instancia y llamar a `show()` o `triggerEvent()` desde un handler.
+También puedes guardar una referencia a la instancia y llamar a `triggerEvent()` desde un handler.
 
 ```tsx
 'use client';
@@ -114,7 +112,6 @@ export function FeedbackButton() {
   useEffect(() => {
     const popups = new DeepdotsPopups();
     popups.init({
-      mode: 'server',
       apiKey: 'YOUR_PUBLIC_API_KEY',
     });
     popups.autoLaunch();
@@ -122,14 +119,7 @@ export function FeedbackButton() {
   }, []);
 
   return (
-    <button
-      onClick={() =>
-        popupsRef.current?.show({
-          surveyId: 'survey-home-001',
-          productId: 'product-main',
-        })
-      }
-    >
+    <button onClick={() => popupsRef.current?.triggerEvent('feedback_requested')}>
       Enviar feedback
     </button>
   );
@@ -143,7 +133,7 @@ Suscríbete dentro de `useEffect` y cancela la suscripción en el cleanup para e
 ```tsx
 useEffect(() => {
   const popups = new DeepdotsPopups();
-  popups.init({ mode: 'server', apiKey: 'YOUR_PUBLIC_API_KEY' });
+  popups.init({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 
   const onShown = (event: unknown) => console.log('shown', event);
   const onCompleted = (event: unknown) => console.log('completed', event);

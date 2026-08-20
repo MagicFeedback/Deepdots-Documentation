@@ -3,7 +3,7 @@ title: Quickstart
 description: Få SDK'et i gang i dit produkt i tre trin.
 ---
 
-SDK'et kører i **server mode**: dine popups, triggers og targeting lever i Deepdots og hentes i runtime. Du skal kun montere SDK'et, give det din API-nøgle og starte det.
+Dine popups, triggers og targeting lever i Deepdots og hentes i runtime. Du skal kun montere SDK'et, give det din API-nøgle og starte det.
 
 ## 1. Installation
 
@@ -19,7 +19,6 @@ import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
 const popups = new DeepdotsPopups();
 
 popups.init({
-  mode: 'server',
   apiKey: 'YOUR_PUBLIC_API_KEY',
   userId: 'customer-123', // valgfrit — din interne bruger-identifikator
 });

@@ -1,23 +1,78 @@
 ---
 title: API Reference
-description: Centrale offentlige entrypoints i SDK'et.
+description: Offentlige entry points, som det delte SDK eksponerer.
 ---
 
 # API Reference
 
-Vigtigste klasse:
+Denne side opsummerer de offentlige entry points, der er synlige i den delte Kotlin-kode.
 
-- `DeepdotsPopups`
+## Primær SDK-klasse
 
-Vigtige metoder:
+### `DeepdotsPopups`
 
-- `init`
-- `initialize`
-- `autoLaunch`
-- `attachContext`
-- `setPath`
-- `onScroll`
-- `triggerEvent`
-- `triggerClick`
-- `show`
-- `showByPopupId`
+Hovedansvar:
+
+- initialisere SDK-runtime
+- indlæse popup-definitioner
+- tilføje en platformskontekst
+- evaluere triggers og køsætte popups
+- rendere popup- og survey-oplevelser
+- udsende popup-lifecycle-events
+
+## Vigtige metoder
+
+### Initialisering
+
+- `init(options: InitOptions)`
+- `initialize(options: InitOptions)`
+- `autoLaunch()`
+- `attachContext(context: PlatformContext)`
+
+### Navigation og triggers
+
+- `setPath(path: String?)`
+- `onScroll(percentage: Int)`
+- `onExit()`
+- `triggerEvent(eventName: String)`
+- `triggerClick(targetId: String)`
+
+### Visning
+
+- `show(options: ShowOptions, context: PlatformContext)`
+- `showByPopupId(popupId: String, context: PlatformContext)`
+- `triggerSurvey(surveyId: String, context: PlatformContext, popupId: String? = null)`
+
+### Events
+
+- `on(event: Event, listener: (EventData) -> Unit)`
+- `off(event: Event, listener: (EventData) -> Unit)`
+
+### Diagnostik
+
+- `environment: Environment` — read-only, afspejler den backend, SDK'et peger på
+  efter `init()` (standard er `Environment.Production`). Nyttig til i runtime at
+  fastslå, hvilken backend en given `publicKey` rammer.
+
+## Bekvemmeligheds-helpers
+
+### `Deepdots`
+
+`Deepdots`-objektet tilbyder hjælpe-helpers:
+
+- `create()`
+- `createInitialized(options)`
+- `now()`
+- `parseHtml(html)`
+- `dismiss(context)`
+- `getSurveyHtml(surveyId, productId)`
+- `createInitializedSimple(...)`
+
+## Platformsspecifikke helpers
+
+Repositoriet tilbyder også scroll-binding-helpers på Android:
+
+- `bindRecyclerView(recyclerView: RecyclerView)`
+- `bindScrollView(scrollView: ScrollView)`
+
+De hjælper med at oversætte værtens scroll til `onScroll(...)`-opdateringer til trigger-evaluering.
