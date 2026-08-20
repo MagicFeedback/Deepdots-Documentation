@@ -1,6 +1,6 @@
 ---
 title: Campañas
-description: Crea campañas, adjunta contactos mediante sesiones y recupera el feedback de sesiones con el SDK Python de MagicFeedback.
+description: Crea campañas, adjunta contactos mediante sesiones y recupera el feedback de sesiones con el SDK Python de Deepdots.
 ---
 
 Las campañas te permiten agrupar esfuerzos de alcance y rastrear qué contactos participaron. Cada campaña contiene una o más sesiones; cada sesión enlaza con una lista de contactos.

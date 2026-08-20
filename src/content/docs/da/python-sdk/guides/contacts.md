@@ -1,6 +1,6 @@
 ---
 title: Administration af Kontakter
-description: Opret, list, opdater og slet CRM-kontakter med MagicFeedback Python SDK.
+description: Opret, list, opdater og slet CRM-kontakter med Deepdots Python SDK.
 ---
 
 Kontakter repræsenterer personerne i dit CRM — kunder, brugere eller enhver person du ønsker at associere med kampagner eller feedback.

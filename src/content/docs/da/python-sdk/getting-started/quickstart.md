@@ -6,17 +6,17 @@ description: Installer SDK'en, autentificer og foretag dit første API-kald på 
 ## 1. Installer
 
 ```bash
-pip install MagicFeedback
+pip install deepdots
 ```
 
 ## 2. Opret en klient
 
-Importer `MagicFeedback` og send dine kontooplysninger. Konstruktøren autentificerer med det samme og gemmer bearer-tokenet til alle efterfølgende requests.
+Importer `Deepdots` og send dine kontooplysninger. Konstruktøren autentificerer med det samme og gemmer bearer-tokenet til alle efterfølgende requests.
 
 ```python
-from magicfeedback_sdk import MagicFeedback
+from deepdots_sdk import Deepdots
 
-client = MagicFeedback(
+client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
 )
@@ -51,7 +51,7 @@ print(feedback["id"])
 ```
 
 :::tip
-`integrationId`, `companyId` og `productId` kommer fra dit MagicFeedback-dashboard. Brug `client.products.get()` til at hente dem programmatisk.
+`integrationId`, `companyId` og `productId` kommer fra dit Deepdots-dashboard. Brug `client.products.get()` til at hente dem programmatisk.
 :::
 
 ## Næste skridt

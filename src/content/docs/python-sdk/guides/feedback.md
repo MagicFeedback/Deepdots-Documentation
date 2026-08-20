@@ -1,9 +1,9 @@
 ---
 title: Managing Feedback
-description: Create, read, update, and delete feedback submissions with the MagicFeedback Python SDK.
+description: Create, read, update, and delete feedback submissions with the Deepdots Python SDK.
 ---
 
-Feedback submissions are the primary resource in MagicFeedback. Each submission records a set of answers for a specific integration and product.
+Feedback submissions are the primary resource in Deepdots. Each submission records a set of answers for a specific integration and product.
 
 ## Create a submission
 

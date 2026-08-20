@@ -1,9 +1,9 @@
 ---
 title: Administration af Feedback
-description: Opret, læs, opdater og slet feedback-submissions med MagicFeedback Python SDK.
+description: Opret, læs, opdater og slet feedback-submissions med Deepdots Python SDK.
 ---
 
-Feedback-submissions er den primære ressource i MagicFeedback. Hver submission registrerer et sæt svar for en specifik integration og et specifikt produkt.
+Feedback-submissions er den primære ressource i Deepdots. Hver submission registrerer et sæt svar for en specifik integration og et specifikt produkt.
 
 ## Opret en submission
 

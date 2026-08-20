@@ -1,16 +1,16 @@
 ---
 title: API Reference
-description: Complete reference for every public class and method in the MagicFeedback Python SDK.
+description: Complete reference for every public class and method in the Deepdots Python SDK.
 ---
 
-## MagicFeedback
+## Deepdots
 
 The main entry point. Import and instantiate once; reuse the client across your application.
 
 ```python
-from magicfeedback_sdk import MagicFeedback
+from deepdots_sdk import Deepdots
 
-client = MagicFeedback(
+client = Deepdots(
     user="you@example.com",
     password="your-password",
     base_url="https://api.magicfeedback.io",  # optional

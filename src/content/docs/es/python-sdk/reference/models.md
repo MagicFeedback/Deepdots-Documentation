@@ -1,6 +1,6 @@
 ---
 title: Modelos
-description: Shapes de datos retornados por la API de MagicFeedback — objetos de feedback, contacto, campaña, sesión, producto y pregunta.
+description: Shapes de datos retornados por la API de Deepdots — objetos de feedback, contacto, campaña, sesión, producto y pregunta.
 ---
 
 El SDK retorna dicts de Python planos. Los shapes a continuación describen las claves que puedes esperar en cada objeto.

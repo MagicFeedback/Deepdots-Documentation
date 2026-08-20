@@ -3,7 +3,7 @@ title: Querying
 description: Use LoopBack-style filter dicts to query, paginate, and shape results from any SDK list method.
 ---
 
-Every `.get()` method in the SDK accepts an optional `filter` dict. The filter follows the LoopBack query syntax used by the MagicFeedback API.
+Every `.get()` method in the SDK accepts an optional `filter` dict. The filter follows the LoopBack query syntax used by the Deepdots API.
 
 ## Basic structure
 

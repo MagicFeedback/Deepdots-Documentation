@@ -3,7 +3,7 @@ title: Forespørgsler
 description: Brug LoopBack-filter-dicts til at forespørge, paginere og forme resultater fra enhver liste-metode i SDK'en.
 ---
 
-Alle `.get()`-metoder i SDK'en accepterer en valgfri `filter`-dict. Filteret følger LoopBack-forespørgselssyntaksen brugt af MagicFeedback API.
+Alle `.get()`-metoder i SDK'en accepterer en valgfri `filter`-dict. Filteret følger LoopBack-forespørgselssyntaksen brugt af Deepdots API.
 
 ## Grundlæggende struktur
 
