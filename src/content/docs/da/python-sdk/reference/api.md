@@ -1,16 +1,16 @@
 ---
 title: API-reference
-description: Komplet reference for alle offentlige klasser og metoder i MagicFeedback Python SDK.
+description: Komplet reference for alle offentlige klasser og metoder i Deepdots Python SDK.
 ---
 
-## MagicFeedback
+## Deepdots
 
 Hoved-indgangspunktet. Importer og instantier én gang; genbrug klienten på tværs af din applikation.
 
 ```python
-from magicfeedback_sdk import MagicFeedback
+from deepdots_sdk import Deepdots
 
-client = MagicFeedback(
+client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
     base_url="https://api.magicfeedback.io",  # valgfri

@@ -1,6 +1,6 @@
 ---
 title: Instalación
-description: Requisitos e instrucciones de configuración para el SDK Python de MagicFeedback.
+description: Requisitos e instrucciones de configuración para el SDK Python de Deepdots.
 ---
 
 ## Requisitos
@@ -8,30 +8,51 @@ description: Requisitos e instrucciones de configuración para el SDK Python de 
 - Python 3.8 o superior
 - pip (incluido en todas las distribuciones estándar de Python)
 
-El SDK tiene una única dependencia en tiempo de ejecución — `requests` — que pip instala automáticamente.
+pip instala automáticamente las dependencias en tiempo de ejecución: `requests`, `google-cloud-pubsub` y `google-cloud-datastore`.
 
 ## Instalar
 
 ```bash
-pip install MagicFeedback
+pip install deepdots
 ```
 
-Para fijar una versión específica en tu proyecto:
+Esto instala siempre la última versión publicada.
+
+### Instalar una versión concreta
+
+Para fijar una versión exacta — sustituye `X.Y.Z` por la que quieras:
 
 ```bash
-pip install MagicFeedback==1.0.14
+pip install "deepdots==X.Y.Z"
 ```
 
-O agrégalo a tu `requirements.txt`:
+O define una versión mínima en tu `requirements.txt`:
 
 ```text
-MagicFeedback>=1.0.14
+deepdots>=X.Y.Z
 ```
+
+El [Changelog](/es/python-sdk/reference/changelog/) lista todas las versiones publicadas con su fecha.
+
+## ¿Vienes de `MagicFeedback`?
+
+El SDK se publicaba como `MagicFeedback` antes de que la empresa pasara a llamarse Deepdots. **El código existente sigue funcionando igual** — no hay nada que migrar.
+
+Ambas distribuciones están publicadas e instalan el mismo código:
+
+```bash
+pip install deepdots        # nombre actual
+pip install magicfeedback   # nombre original, sigue soportado
+```
+
+Con los nombres de importación pasa lo mismo. `deepdots_sdk` y `magicfeedback_sdk` exponen exactamente los mismos objetos, y la clase `Deepdots` *es* la clase `MagicFeedback` — el mismo objeto de Python bajo dos nombres, así que las comprobaciones con `isinstance()` se comportan igual.
+
+En código nuevo, usa los nombres de Deepdots.
 
 ## Verificar
 
 ```python
-from magicfeedback_sdk import MagicFeedback
+from deepdots_sdk import Deepdots
 print("SDK importado correctamente")
 ```
 
@@ -40,7 +61,7 @@ print("SDK importado correctamente")
 El SDK se conecta a `https://api.magicfeedback.io` por defecto. Puedes apuntarlo a otra URL base pasando el argumento `base_url` al constructor:
 
 ```python
-client = MagicFeedback(
+client = Deepdots(
     user="tu@ejemplo.com",
     password="tu-contraseña",
     base_url="https://api-dev.magicfeedback.io",

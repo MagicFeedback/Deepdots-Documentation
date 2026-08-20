@@ -1,6 +1,6 @@
 ---
 title: Kampagner
-description: Opret kampagner, tilknyt kontakter via sessioner og hent sessions-feedback med MagicFeedback Python SDK.
+description: Opret kampagner, tilknyt kontakter via sessioner og hent sessions-feedback med Deepdots Python SDK.
 ---
 
 Kampagner lader dig gruppere opsøgende indsatser og spore hvilke kontakter der deltog. Hver kampagne indeholder en eller flere sessioner; hver session linker til en liste af kontakter.

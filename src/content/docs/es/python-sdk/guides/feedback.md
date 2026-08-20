@@ -1,9 +1,9 @@
 ---
 title: Gestión de Feedback
-description: Crea, lee, actualiza y elimina submissions de feedback con el SDK Python de MagicFeedback.
+description: Crea, lee, actualiza y elimina submissions de feedback con el SDK Python de Deepdots.
 ---
 
-Las submissions de feedback son el recurso principal en MagicFeedback. Cada submission registra un conjunto de respuestas para una integración y producto específicos.
+Las submissions de feedback son el recurso principal en Deepdots. Cada submission registra un conjunto de respuestas para una integración y producto específicos.
 
 ## Crear una submission
 

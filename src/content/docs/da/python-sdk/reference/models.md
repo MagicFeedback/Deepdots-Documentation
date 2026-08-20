@@ -1,6 +1,6 @@
 ---
 title: Modeller
-description: Datashapes returneret af MagicFeedback API — feedback-, kontakt-, kampagne-, sessions-, produkt- og spørgsmålsobjekter.
+description: Datashapes returneret af Deepdots API — feedback-, kontakt-, kampagne-, sessions-, produkt- og spørgsmålsobjekter.
 ---
 
 SDK'en returnerer simple Python-dicts. Shapes nedenfor beskriver de nøgler du kan forvente på hvert objekt.

@@ -1,6 +1,6 @@
 ---
 title: Campaigns
-description: Create campaigns, attach contacts via sessions, and retrieve session feedback with the MagicFeedback Python SDK.
+description: Create campaigns, attach contacts via sessions, and retrieve session feedback with the Deepdots Python SDK.
 ---
 
 Campaigns let you group outreach efforts and track which contacts participated. Each campaign holds one or more sessions; each session links to a list of contacts.

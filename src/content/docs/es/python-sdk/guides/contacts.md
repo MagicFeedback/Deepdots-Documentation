@@ -1,6 +1,6 @@
 ---
 title: Gestión de Contactos
-description: Crea, lista, actualiza y elimina contactos CRM con el SDK Python de MagicFeedback.
+description: Crea, lista, actualiza y elimina contactos CRM con el SDK Python de Deepdots.
 ---
 
 Los contactos representan las personas en tu CRM — clientes, usuarios o cualquier individuo que quieras asociar con campañas o feedback.

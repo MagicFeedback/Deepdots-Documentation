@@ -1,6 +1,6 @@
 ---
 title: Models
-description: Data shapes returned by the MagicFeedback API — feedback, contact, campaign, session, product, and question objects.
+description: Data shapes returned by the Deepdots API — feedback, contact, campaign, session, product, and question objects.
 ---
 
 The SDK returns plain Python dicts. The shapes below describe the keys you can expect on each object.

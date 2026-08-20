@@ -1,16 +1,16 @@
 ---
 title: Referencia de la API
-description: Referencia completa de cada clase y método público del SDK Python de MagicFeedback.
+description: Referencia completa de cada clase y método público del SDK Python de Deepdots.
 ---
 
-## MagicFeedback
+## Deepdots
 
 El punto de entrada principal. Importa e instancia una vez; reutiliza el cliente en toda tu aplicación.
 
 ```python
-from magicfeedback_sdk import MagicFeedback
+from deepdots_sdk import Deepdots
 
-client = MagicFeedback(
+client = Deepdots(
     user="tu@ejemplo.com",
     password="tu-contraseña",
     base_url="https://api.magicfeedback.io",  # opcional

@@ -3,7 +3,7 @@ title: Consultas
 description: Usa dicts de filtro estilo LoopBack para consultar, paginar y dar forma a los resultados de cualquier método de lista del SDK.
 ---
 
-Cada método `.get()` del SDK acepta un dict `filter` opcional. El filtro sigue la sintaxis de consulta LoopBack utilizada por la API de MagicFeedback.
+Cada método `.get()` del SDK acepta un dict `filter` opcional. El filtro sigue la sintaxis de consulta LoopBack utilizada por la API de Deepdots.
 
 ## Estructura básica
 

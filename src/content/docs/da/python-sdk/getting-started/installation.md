@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Krav og opsætningsinstruktioner til MagicFeedback Python SDK.
+description: Krav og opsætningsinstruktioner til Deepdots Python SDK.
 ---
 
 ## Krav
@@ -8,30 +8,51 @@ description: Krav og opsætningsinstruktioner til MagicFeedback Python SDK.
 - Python 3.8 eller nyere
 - pip (inkluderet i alle standard Python-distributioner)
 
-SDK'en har én runtime-afhængighed — `requests` — som pip installerer automatisk.
+pip installerer automatisk runtime-afhængighederne: `requests`, `google-cloud-pubsub` og `google-cloud-datastore`.
 
 ## Installer
 
 ```bash
-pip install MagicFeedback
+pip install deepdots
 ```
 
-For at fastlåse en specifik version i dit projekt:
+Dette installerer altid den nyeste udgivelse.
+
+### Installation af en bestemt version
+
+Sådan fastlåser du en præcis version — erstat `X.Y.Z` med den ønskede:
 
 ```bash
-pip install MagicFeedback==1.0.14
+pip install "deepdots==X.Y.Z"
 ```
 
-Eller tilføj den til din `requirements.txt`:
+Eller angiv en minimumsversion i din `requirements.txt`:
 
 ```text
-MagicFeedback>=1.0.14
+deepdots>=X.Y.Z
 ```
+
+[Changelog](/da/python-sdk/reference/changelog/) viser alle udgivne versioner med dato.
+
+## Kommer du fra `MagicFeedback`?
+
+SDK'en blev tidligere udgivet som `MagicFeedback`, før virksomheden skiftede navn til Deepdots. **Eksisterende kode virker uændret** — der er ikke noget, der skal migreres.
+
+Begge distributioner er udgivet, og begge installerer den samme kode:
+
+```bash
+pip install deepdots        # nuværende navn
+pip install magicfeedback   # oprindeligt navn, stadig understøttet
+```
+
+Det samme gælder importnavnene. `deepdots_sdk` og `magicfeedback_sdk` eksponerer præcis de samme objekter, og klassen `Deepdots` *er* klassen `MagicFeedback` — det samme Python-objekt under to navne, så `isinstance()`-tjek opfører sig ens.
+
+Brug Deepdots-navnene i ny kode.
 
 ## Verificer
 
 ```python
-from magicfeedback_sdk import MagicFeedback
+from deepdots_sdk import Deepdots
 print("SDK importeret korrekt")
 ```
 
@@ -40,7 +61,7 @@ print("SDK importeret korrekt")
 SDK'en forbinder til `https://api.magicfeedback.io` som standard. Du kan pege den mod en anden basis-URL ved at sende `base_url`-argumentet til konstruktøren:
 
 ```python
-client = MagicFeedback(
+client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
     base_url="https://api-dev.magicfeedback.io",

@@ -1,11 +1,11 @@
 ---
 title: Python SDK
-description: Server-side Python-klient til MagicFeedback API — indsend feedback, administrer kontakter og kør kampagner fra ethvert Python-backend.
+description: Server-side Python-klient til Deepdots API — indsend feedback, administrer kontakter og kør kampagner fra ethvert Python-backend.
 ---
 
 # Python SDK
 
-MagicFeedback Python SDK er en synkron HTTP-klient til MagicFeedback REST API. Brug den fra ethvert Python-backend, script eller datapipeline til at indsende feedback, administrere kontakter, køre kampagner og hente rapporter — uden behov for frontend.
+Deepdots Python SDK er en synkron HTTP-klient til Deepdots REST API. Brug den fra ethvert Python-backend, script eller datapipeline til at indsende feedback, administrere kontakter, køre kampagner og hente rapporter — uden behov for frontend.
 
 ## Hvad det gør
 
@@ -20,9 +20,10 @@ SDK'en håndterer autentificering (email + adgangskode → bearer token via Goog
 
 ## Pakkedetaljer
 
-- **PyPI-navn:** `MagicFeedback`
+- **PyPI-navn:** `deepdots` (det oprindelige `magicfeedback` er stadig udgivet og virker stadig)
+- **Importnavn:** `deepdots_sdk` (eller `magicfeedback_sdk` — de samme objekter)
 - **Python:** ≥ 3.8
-- **Afhængigheder:** `requests` ≥ 2.0.0 (installeres automatisk)
+- **Afhængigheder:** `requests`, `google-cloud-pubsub`, `google-cloud-datastore` (installeres automatisk)
 - **API-basis-URL:** `https://api.magicfeedback.io`
 
 ## Start her
