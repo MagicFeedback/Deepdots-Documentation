@@ -234,7 +234,26 @@ Other behavior worth knowing:
 - **Cleared on a user change**: `setUserId()` discards them along with the metrics, because they belonged to the previous user.
 - **Respects the kill-switch**: it is a no-op while tracking is disabled.
 
-For measurable values (cart total, item count) use `setMetric` instead, which fills the dedicated `metrics` field. See [Analytics → User attributes](/popup-web/guides/analytics/#user-attributes).
+For measurable values (cart total, item count) use [`setMetric`](#setmetrickey-value) instead, which fills the dedicated `metrics` field. See [Analytics → User attributes](/popup-web/guides/analytics/#user-attributes).
+
+## `setMetric(key, value)`
+
+Records a **measurable value** to report alongside the user's analytics context: cart total, number of items, a score. Metrics fill a dedicated `metrics` field of the analytics payload, kept apart from the `metadata` where events and [user attributes](#setuserattributesattributes) travel.
+
+```ts
+popups.setMetric('cart_value', 49.99);
+popups.setMetric('items_in_cart', 3);
+```
+
+Signature: `setMetric(key: string, value: string | number | boolean): void`.
+
+- **Re-sent on every flush**: once set, the value rides along in every batch until it changes.
+- **Overwrites by key**: calling it again with the same key replaces the previous value.
+- **Coerced to string**: `49.99` is sent as `"49.99"`, and empty keys are ignored.
+- **In memory only**: like user attributes, a page reload clears them, and `setUserId()` discards them along with the previous user's data.
+- **Respects the kill-switch**: it is a no-op while tracking is disabled.
+
+Use [`setUserAttributes`](#setuserattributesattributes) for the dimensions you group by and `setMetric` for the quantities you measure. See [Analytics → Metrics](/popup-web/guides/analytics/#metrics).
 
 ## `setContactAttributes(attributes)`
 

@@ -234,7 +234,26 @@ Otros comportamientos a tener en cuenta:
 - **Se descartan al cambiar de usuario**: `setUserId()` los borra junto con las métricas, porque pertenecían al usuario anterior.
 - **Respetan el kill-switch**: no hacen nada mientras el tracking está desactivado.
 
-Para valores medibles (total del carrito, número de artículos) usa `setMetric`, que rellena el campo dedicado `metrics`. Ver [Analytics → Atributos de usuario](/es/popup-web/guides/analytics/#atributos-de-usuario).
+Para valores medibles (total del carrito, número de artículos) usa [`setMetric`](#setmetrickey-value), que rellena el campo dedicado `metrics`. Ver [Analytics → Atributos de usuario](/es/popup-web/guides/analytics/#atributos-de-usuario).
+
+## `setMetric(key, value)`
+
+Registra un **valor medible** para reportarlo junto al contexto de analytics del usuario: total del carrito, número de artículos, una puntuación. Las métricas rellenan un campo dedicado `metrics` del payload de analytics, aparte del `metadata` por donde viajan los eventos y los [atributos de usuario](#setuserattributesattributes).
+
+```ts
+popups.setMetric('cart_value', 49.99);
+popups.setMetric('items_in_cart', 3);
+```
+
+Firma: `setMetric(key: string, value: string | number | boolean): void`.
+
+- **Se reenvía en cada flush**: una vez fijado, el valor viaja en todos los lotes hasta que cambie.
+- **Sobrescribe por clave**: volver a llamarlo con la misma clave reemplaza el valor anterior.
+- **Se convierte a texto**: `49.99` viaja como `"49.99"`, y las claves vacías se ignoran.
+- **Solo en memoria**: igual que los atributos de usuario, una recarga de página los borra y `setUserId()` los descarta junto con los datos del usuario anterior.
+- **Respeta el kill-switch**: no hace nada mientras el tracking está desactivado.
+
+Usa [`setUserAttributes`](#setuserattributesattributes) para las dimensiones por las que agrupas y `setMetric` para las cantidades que mides. Ver [Analytics → Métricas](/es/popup-web/guides/analytics/#métricas).
 
 ## `setContactAttributes(attributes)`
 

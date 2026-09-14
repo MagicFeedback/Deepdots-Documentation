@@ -234,7 +234,26 @@ Anden adfærd, der er værd at kende:
 - **Ryddes ved brugerskift**: `setUserId()` kasserer dem sammen med metrikkerne, fordi de tilhørte den forrige bruger.
 - **Respekterer kill-switch**: kaldet er en no-op, mens tracking er deaktiveret.
 
-Til målbare værdier (kurvens total, antal varer) skal du bruge `setMetric`, som udfylder det dedikerede `metrics`-felt. Se [Analytics → Brugerattributter](/da/popup-web/guides/analytics/#brugerattributter).
+Til målbare værdier (kurvens total, antal varer) skal du bruge [`setMetric`](#setmetrickey-value), som udfylder det dedikerede `metrics`-felt. Se [Analytics → Brugerattributter](/da/popup-web/guides/analytics/#brugerattributter).
+
+## `setMetric(key, value)`
+
+Registrerer en **målbar værdi**, der skal rapporteres sammen med brugerens analytics-kontekst: kurvens total, antal varer, en score. Metrikker udfylder et dedikeret `metrics`-felt i analytics-payloaden, adskilt fra den `metadata`, hvor events og [brugerattributter](#setuserattributesattributes) sendes.
+
+```ts
+popups.setMetric('cart_value', 49.99);
+popups.setMetric('items_in_cart', 3);
+```
+
+Signatur: `setMetric(key: string, value: string | number | boolean): void`.
+
+- **Sendes igen ved hvert flush**: når værdien først er sat, følger den med i hvert batch, indtil den ændres.
+- **Overskriver pr. nøgle**: et nyt kald med samme nøgle erstatter den tidligere værdi.
+- **Konverteres til tekst**: `49.99` sendes som `"49.99"`, og tomme nøgler ignoreres.
+- **Kun i hukommelsen**: ligesom brugerattributter rydder en genindlæsning af siden dem, og `setUserId()` kasserer dem sammen med den forrige brugers data.
+- **Respekterer kill-switch**: kaldet er en no-op, mens tracking er deaktiveret.
+
+Brug [`setUserAttributes`](#setuserattributesattributes) til de dimensioner, du grupperer efter, og `setMetric` til de mængder, du måler. Se [Analytics → Metrikker](/da/popup-web/guides/analytics/#metrikker).
 
 ## `setContactAttributes(attributes)`
 
