@@ -262,8 +262,8 @@ sdk.setMetric("items_in_cart", 3)
 - **Overskriver pr. nøgle** — samme nøgle erstatter den forrige værdi.
 - **Konverteres til string** på wiren.
 - **Respekterer kill-switchen** — en no-op, mens tracking er slået fra.
-- **Tomme nøgler og `null`-værdier ignoreres**: kaldet gør ingenting.
-- **Kun i hukommelsen**: "vedvarende" betyder gensendt i hvert batch, så længe instansen lever, ikke gemt. En genstart af appen rydder metrikkerne, og `setUserId()` kasserer dem sammen med den forrige brugers data.
+- **Tomme nøgler og `null`-værdier ignoreres** — kaldet gør ingenting.
+- **Kun i hukommelsen** — "vedvarende" betyder gensendt i hvert batch, så længe instansen lever, ikke gemt. En genstart af appen rydder metrikkerne, og `setUserId()` kasserer dem sammen med den forrige brugers data.
 
 Brug attributter til *hvem* (dimensioner du grupperer efter) og metrics til *hvor meget* (mængder du måler).
 

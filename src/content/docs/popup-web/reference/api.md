@@ -229,10 +229,10 @@ Attributes are held in memory by the SDK instance. A page reload (or an app rest
 
 Other behavior worth knowing:
 
-- **Cumulative**: each call merges with what is already set, and repeating a key overwrites its value.
-- **Sent with the next batch**: a flush only leaves when there are pending events, so attributes set without any later activity travel with the first batch that has content.
-- **Cleared on a user change**: `setUserId()` discards them along with the metrics, because they belonged to the previous user.
-- **Respects the kill-switch**: it is a no-op while tracking is disabled.
+- **Cumulative** — each call merges with what is already set, and repeating a key overwrites its value.
+- **Sent with the next batch** — a flush only leaves when there are pending events, so attributes set without any later activity travel with the first batch that has content.
+- **Cleared on a user change** — `setUserId()` discards them along with the metrics, because they belonged to the previous user.
+- **Respects the kill-switch** — it is a no-op while tracking is disabled.
 
 For measurable values (cart total, item count) use [`setMetric`](#setmetrickey-value) instead, which fills the dedicated `metrics` field. See [Analytics → User attributes](/popup-web/guides/analytics/#user-attributes).
 
@@ -247,11 +247,11 @@ popups.setMetric('items_in_cart', 3);
 
 Signature: `setMetric(key: string, value: string | number | boolean): void`.
 
-- **Re-sent on every flush**: once set, the value rides along in every batch until it changes.
-- **Overwrites by key**: calling it again with the same key replaces the previous value.
-- **Coerced to string**: `49.99` is sent as `"49.99"`, and empty keys are ignored.
-- **In memory only**: like user attributes, a page reload clears them, and `setUserId()` discards them along with the previous user's data.
-- **Respects the kill-switch**: it is a no-op while tracking is disabled.
+- **Re-sent on every flush** — once set, the value rides along in every batch until it changes.
+- **Overwrites by key** — calling it again with the same key replaces the previous value.
+- **Coerced to string** — `49.99` is sent as `"49.99"`, and empty keys are ignored.
+- **In memory only** — like user attributes, a page reload clears them, and `setUserId()` discards them along with the previous user's data.
+- **Respects the kill-switch** — it is a no-op while tracking is disabled.
 
 Use [`setUserAttributes`](#setuserattributesattributes) for the dimensions you group by and `setMetric` for the quantities you measure. See [Analytics → Metrics](/popup-web/guides/analytics/#metrics).
 

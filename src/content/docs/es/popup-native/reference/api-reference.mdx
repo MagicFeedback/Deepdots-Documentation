@@ -51,10 +51,10 @@ Responsabilidades principales:
 ### Analytics e identidad
 
 - `track(name: String, params: Map<String, Any?>? = null)`
-- `setUserAttributes(attributes: Map<String, Any?>)`: dimensiones por las que
+- `setUserAttributes(attributes: Map<String, Any?>)` — dimensiones por las que
   desglosar los informes. Viven solo en memoria, así que vuelve a fijarlas
   después de cada `init()`.
-- `setMetric(key: String, value: Any?)`: valores medibles, enviados en el
+- `setMetric(key: String, value: Any?)` — valores medibles, enviados en el
   campo dedicado `feedback.metrics` del payload. Se reenvían en cada flush y
   viven solo en memoria, igual que los atributos de arriba.
 - `suspend setContactAttributes(attributes: Map<String, Any?>): Boolean`
