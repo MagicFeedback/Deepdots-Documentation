@@ -53,7 +53,9 @@ Main responsibilities:
 - `track(name: String, params: Map<String, Any?>? = null)`
 - `setUserAttributes(attributes: Map<String, Any?>)`: dimensions to break reports
   down by. Held in memory only, so set them again after every `init()`.
-- `setMetric(key: String, value: Any?)`
+- `setMetric(key: String, value: Any?)`: measurable values, sent in the
+  dedicated `feedback.metrics` field of the payload. Re-sent on every flush
+  and held in memory only, like the attributes above.
 - `suspend setContactAttributes(attributes: Map<String, Any?>): Boolean`
 - `setUserId(userId: String? = null)`
 - `setTrackingEnabled(enabled: Boolean)`

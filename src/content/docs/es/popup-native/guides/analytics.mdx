@@ -262,6 +262,8 @@ sdk.setMetric("items_in_cart", 3)
 - **Sobrescribe por clave** — la misma clave reemplaza el valor anterior.
 - **Coercionada a string** en el envío.
 - **Respeta el kill-switch** — es un no-op mientras el tracking está desactivado.
+- **Las claves en blanco y los valores `null` se ignoran**: la llamada no hace nada.
+- **Solo en memoria**: «persistente» significa que se reenvía en cada lote mientras viva la instancia, no que se almacene. Reiniciar la app borra las métricas, y `setUserId()` las descarta junto con los datos del usuario anterior.
 
 Usa los atributos para el *quién* (dimensiones por las que agrupas) y las métricas para el *cuánto* (cantidades que mides).
 

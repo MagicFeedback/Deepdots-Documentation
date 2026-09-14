@@ -54,7 +54,9 @@ Hovedansvar:
 - `setUserAttributes(attributes: Map<String, Any?>)`: dimensioner til at opdele
   rapporter efter. De ligger kun i hukommelsen, så sæt dem igen efter hvert
   `init()`.
-- `setMetric(key: String, value: Any?)`
+- `setMetric(key: String, value: Any?)`: målbare værdier, sendt i payloadens
+  dedikerede `feedback.metrics`-felt. Gensendes ved hvert flush og ligger kun
+  i hukommelsen, ligesom attributterne ovenfor.
 - `suspend setContactAttributes(attributes: Map<String, Any?>): Boolean`
 - `setUserId(userId: String? = null)`
 - `setTrackingEnabled(enabled: Boolean)`
