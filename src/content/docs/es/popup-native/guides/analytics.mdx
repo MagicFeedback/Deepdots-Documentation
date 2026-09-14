@@ -231,6 +231,12 @@ sdk.setUserAttributes(mapOf(
 ))
 ```
 
+:::caution[No sobreviven a reiniciar la app]
+Los atributos viven en memoria, en la instancia del SDK: matar o reiniciar la app los borra. Vuelve a fijarlos después de cada `init()`. `setContactAttributes`, más abajo, es la contraparte persistente.
+:::
+
+Siguen las mismas reglas que las [métricas](#métricas): los valores se convierten a texto, las claves en blanco y los valores `null` se ignoran, y la llamada no hace nada mientras el tracking está desactivado. Un lote solo sale si hay eventos pendientes, así que unos atributos fijados sin actividad posterior viajan en el primer lote con contenido.
+
 ### Registro de contacto
 
 `setContactAttributes` envía los atributos a `POST /sdk/popups/contact`, creando o actualizando el registro de contacto del usuario. Es una función `suspend` y solo se dispara cuando se proporcionó un `userId` y el tracking está activo; devuelve `true` si se hizo un POST, `false` si los atributos no cambiaron (deduplicación).

@@ -209,6 +209,33 @@ popups.off('popup_shown', onShown);
 
 Se [Events](/da/popup-web/guides/events/) for den fulde payload-form.
 
+## `setUserAttributes(attributes)`
+
+Knytter forretningsattributter til brugerens **analytics-kontekst**: de dimensioner, du opdeler dine rapporter efter (plan, sektor, registreringsstatus). De sendes med i `metadata` på hvert analytics-batch, side om side med events.
+
+```ts
+popups.setUserAttributes({
+  plan: 'pro',
+  registration_status: 'registered',
+  sector: 'retail',
+});
+```
+
+Værdier skal være `string`, `number` eller `boolean`. De konverteres til tekst, når de sendes (`34` sendes som `"34"`), og tomme nøgler ignoreres.
+
+:::caution[De overlever ikke en genindlæsning]
+Attributterne ligger i hukommelsen i SDK-instansen. En genindlæsning af siden (eller en genstart af appen i React Native) rydder dem, så sæt dem igen efter hvert `init()`. Det er forskellen fra [`setContactAttributes`](#setcontactattributesattributes) nedenfor, som gemmer en diff i storage og skriver til brugerens Contact.
+:::
+
+Anden adfærd, der er værd at kende:
+
+- **Kumulative**: hvert kald flettes med det, der allerede er sat, og gentagelse af en nøgle overskriver værdien.
+- **Sendes med næste batch**: et flush afsendes kun, når der er ventende events, så attributter, der sættes uden efterfølgende aktivitet, følger med det første batch med indhold.
+- **Ryddes ved brugerskift**: `setUserId()` kasserer dem sammen med metrikkerne, fordi de tilhørte den forrige bruger.
+- **Respekterer kill-switch**: kaldet er en no-op, mens tracking er deaktiveret.
+
+Til målbare værdier (kurvens total, antal varer) skal du bruge `setMetric`, som udfylder det dedikerede `metrics`-felt. Se [Analytics → Brugerattributter](/da/popup-web/guides/analytics/#brugerattributter).
+
 ## `setContactAttributes(attributes)`
 
 Sender interne brugerattributter, som kun din applikation kender — sprog, alder, plan, segment osv. — til brugerens **Contact** i Deepdots, så de kan bruges til targeting og segmentering af popups.

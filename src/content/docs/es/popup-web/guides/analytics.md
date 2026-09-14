@@ -219,6 +219,12 @@ popups.setUserAttributes({
 
 Los atributos son acumulativos — cada llamada se fusiona con los anteriores.
 
+:::caution[No sobreviven a una recarga]
+Los atributos viven en memoria, en la instancia del SDK: una recarga de página (o reiniciar la app en React Native) los borra. Vuelve a fijarlos después de cada `init()`. [`setContactAttributes`](#registro-de-contacto), más abajo, es la contraparte persistente.
+:::
+
+Siguen las mismas reglas que las [métricas](#métricas): los valores se convierten a texto, las claves vacías se ignoran y la llamada no hace nada mientras el tracking está desactivado. Un lote solo sale si hay eventos pendientes, así que unos atributos fijados sin actividad posterior viajan en el primer lote con contenido.
+
 ### Registro de contacto
 
 `setContactAttributes` envía los atributos a `POST /sdk/popups/contact`, creando o actualizando el registro de contacto del usuario en Deepdots. Este endpoint solo se llama cuando se proporcionó un `userId` en `init()` y el tracking está activado.
