@@ -219,6 +219,12 @@ popups.setUserAttributes({
 
 Attributter er kumulative — hvert kald flettes med tidligere angivne.
 
+:::caution[De overlever ikke en genindlæsning]
+Attributterne ligger i hukommelsen i SDK-instansen: en genindlæsning af siden (eller en genstart af appen i React Native) rydder dem. Sæt dem igen efter hvert `init()`. [`setContactAttributes`](#kontaktpost) nedenfor er den vedvarende modpart.
+:::
+
+De følger de samme regler som [metrikker](#metrikker): værdier konverteres til tekst, tomme nøgler ignoreres, og kaldet er en no-op, mens tracking er deaktiveret. Et batch afsendes kun, når der er ventende events, så attributter, der sættes uden efterfølgende aktivitet, følger med det første batch med indhold.
+
 ### Kontaktpost
 
 `setContactAttributes` sender attributterne til `POST /sdk/popups/contact` og opretter eller opdaterer brugerens kontaktpost i Deepdots. Dette endpoint kaldes kun, når et `userId` blev angivet i `init()`, og tracking er aktiveret.

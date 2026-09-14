@@ -231,6 +231,12 @@ sdk.setUserAttributes(mapOf(
 ))
 ```
 
+:::caution[De overlever ikke en genstart af appen]
+Attributterne ligger i hukommelsen i SDK-instansen: at lukke eller genstarte appen rydder dem. Sæt dem igen efter hvert `init()`. `setContactAttributes` nedenfor er den vedvarende modpart.
+:::
+
+De følger de samme regler som [metrikker](#metrics): værdier konverteres til tekst, tomme nøgler og `null`-værdier ignoreres, og kaldet er en no-op, mens tracking er deaktiveret. Et batch afsendes kun, når der er ventende events, så attributter, der sættes uden efterfølgende aktivitet, følger med det første batch med indhold.
+
 ### Kontaktpost
 
 `setContactAttributes` sender attributterne til `POST /sdk/popups/contact` og opretter eller opdaterer brugerens kontaktpost. Det er en `suspend`-funktion og udløses kun, når et `userId` blev angivet, og tracking er slået til; den returnerer `true`, hvis der blev lavet et POST, `false`, hvis attributterne var uændrede (deduplikering).
@@ -256,6 +262,8 @@ sdk.setMetric("items_in_cart", 3)
 - **Overskriver pr. nøgle** — samme nøgle erstatter den forrige værdi.
 - **Konverteres til string** på wiren.
 - **Respekterer kill-switchen** — en no-op, mens tracking er slået fra.
+- **Tomme nøgler og `null`-værdier ignoreres** — kaldet gør ingenting.
+- **Kun i hukommelsen** — "vedvarende" betyder gensendt i hvert batch, så længe instansen lever, ikke gemt. En genstart af appen rydder metrikkerne, og `setUserId()` kasserer dem sammen med den forrige brugers data.
 
 Brug attributter til *hvem* (dimensioner du grupperer efter) og metrics til *hvor meget* (mængder du måler).
 

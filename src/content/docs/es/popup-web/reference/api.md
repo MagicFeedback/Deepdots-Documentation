@@ -209,6 +209,52 @@ popups.off('popup_shown', onShown);
 
 Mira [Events](/es/popup-web/guides/events/) para el payload completo.
 
+## `setUserAttributes(attributes)`
+
+Adjunta atributos de negocio al **contexto de analytics** del usuario: las dimensiones por las que desglosas tus informes (plan, sector, estado de registro). Viajan en el `metadata` de cada lote de analytics, junto a los eventos.
+
+```ts
+popups.setUserAttributes({
+  plan: 'pro',
+  registration_status: 'registered',
+  sector: 'retail',
+});
+```
+
+Los valores deben ser `string`, `number` o `boolean`. Se convierten a texto al enviarse (`34` viaja como `"34"`) y las claves vacías se ignoran.
+
+:::caution[No sobreviven a una recarga]
+Los atributos viven en memoria, en la instancia del SDK. Una recarga de página (o reiniciar la app en React Native) los borra, así que vuelve a fijarlos después de cada `init()`. Esa es la diferencia con [`setContactAttributes`](#setcontactattributesattributes), más abajo, que persiste un diff en storage y escribe en el Contact del usuario.
+:::
+
+Otros comportamientos a tener en cuenta:
+
+- **Acumulativos** — cada llamada se fusiona con lo ya fijado, y repetir una clave sobrescribe su valor.
+- **Se envían con el siguiente lote** — un flush solo sale si hay eventos pendientes, así que unos atributos fijados sin actividad posterior viajan en el primer lote con contenido.
+- **Se descartan al cambiar de usuario** — `setUserId()` los borra junto con las métricas, porque pertenecían al usuario anterior.
+- **Respetan el kill-switch** — no hacen nada mientras el tracking está desactivado.
+
+Para valores medibles (total del carrito, número de artículos) usa [`setMetric`](#setmetrickey-value), que rellena el campo dedicado `metrics`. Ver [Analytics → Atributos de usuario](/es/popup-web/guides/analytics/#atributos-de-usuario).
+
+## `setMetric(key, value)`
+
+Registra un **valor medible** para reportarlo junto al contexto de analytics del usuario: total del carrito, número de artículos, una puntuación. Las métricas rellenan un campo dedicado `metrics` del payload de analytics, aparte del `metadata` por donde viajan los eventos y los [atributos de usuario](#setuserattributesattributes).
+
+```ts
+popups.setMetric('cart_value', 49.99);
+popups.setMetric('items_in_cart', 3);
+```
+
+Firma: `setMetric(key: string, value: string | number | boolean): void`.
+
+- **Se reenvía en cada flush** — una vez fijado, el valor viaja en todos los lotes hasta que cambie.
+- **Sobrescribe por clave** — volver a llamarlo con la misma clave reemplaza el valor anterior.
+- **Se convierte a texto** — `49.99` viaja como `"49.99"`, y las claves vacías se ignoran.
+- **Solo en memoria** — igual que los atributos de usuario, una recarga de página los borra y `setUserId()` los descarta junto con los datos del usuario anterior.
+- **Respeta el kill-switch** — no hace nada mientras el tracking está desactivado.
+
+Usa [`setUserAttributes`](#setuserattributesattributes) para las dimensiones por las que agrupas y `setMetric` para las cantidades que mides. Ver [Analytics → Métricas](/es/popup-web/guides/analytics/#métricas).
+
 ## `setContactAttributes(attributes)`
 
 Envía atributos internos del usuario que solo conoce tu aplicación — idioma, edad, plan, segmento, etc. — al **Contact** del usuario en Deepdots, para usarlos en la segmentación y el targeting de popups.

@@ -219,6 +219,12 @@ popups.setUserAttributes({
 
 Attributes are cumulative — each call merges with previously set ones.
 
+:::caution[They do not survive a reload]
+Attributes are held in memory by the SDK instance: a page reload (or an app restart on React Native) clears them. Set them again after every `init()`. [`setContactAttributes`](#contact-record) below is the persistent counterpart.
+:::
+
+They follow the same rules as [metrics](#metrics): values are coerced to string, empty keys are ignored, and the call is a no-op while tracking is disabled. A batch only leaves when there are pending events, so attributes set without any later activity travel with the first batch that has content.
+
 ### Contact record
 
 `setContactAttributes` sends the attributes to `POST /sdk/popups/contact`, creating or updating the user's contact record in Deepdots. This endpoint is only called when a `userId` was provided in `init()` and tracking is enabled.

@@ -48,6 +48,24 @@ Hovedansvar:
 - `on(event: Event, listener: (EventData) -> Unit)`
 - `off(event: Event, listener: (EventData) -> Unit)`
 
+### Analytics og identitet
+
+- `track(name: String, params: Map<String, Any?>? = null)`
+- `setUserAttributes(attributes: Map<String, Any?>)` — dimensioner til at opdele
+  rapporter efter. De ligger kun i hukommelsen, så sæt dem igen efter hvert
+  `init()`.
+- `setMetric(key: String, value: Any?)` — målbare værdier, sendt i payloadens
+  dedikerede `feedback.metrics`-felt. Gensendes ved hvert flush og ligger kun
+  i hukommelsen, ligesom attributterne ovenfor.
+- `suspend setContactAttributes(attributes: Map<String, Any?>): Boolean`
+- `setUserId(userId: String? = null)`
+- `setTrackingEnabled(enabled: Boolean)`
+- `endSession()`
+- `enterMiniService(name: String, entryPointType: String? = null)` /
+  `exitMiniService(name: String)`
+
+Se [Analytics](/da/popup-native/guides/analytics/) for hvad hver enkelt registrerer.
+
 ### Diagnostik
 
 - `environment: Environment` — read-only, afspejler den backend, SDK'et peger på

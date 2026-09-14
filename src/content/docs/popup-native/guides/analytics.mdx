@@ -231,6 +231,12 @@ sdk.setUserAttributes(mapOf(
 ))
 ```
 
+:::caution[They do not survive an app restart]
+Attributes are held in memory by the SDK instance: killing or restarting the app clears them. Set them again after every `init()`. `setContactAttributes` below is the persistent counterpart.
+:::
+
+They follow the same rules as [metrics](#metrics): values are coerced to string, blank keys and `null` values are ignored, and the call is a no-op while tracking is disabled. A batch only leaves when there are pending events, so attributes set without any later activity travel with the first batch that has content.
+
 ### Contact record
 
 `setContactAttributes` sends the attributes to `POST /sdk/popups/contact`, creating or updating the user's contact record. It is a `suspend` function and only fires when a `userId` was provided and tracking is enabled; it returns `true` if a POST was made, `false` if the attributes were unchanged (deduplication).
@@ -256,6 +262,8 @@ sdk.setMetric("items_in_cart", 3)
 - **Overwrites by key** — the same key replaces the previous value.
 - **Coerced to string** on the wire.
 - **Respects the kill-switch** — a no-op while tracking is disabled.
+- **Blank keys and `null` values are ignored** — the call does nothing.
+- **In memory only** — "persistent" means re-sent in every batch while the instance lives, not stored. Restarting the app clears the metrics, and `setUserId()` discards them along with the previous user's data.
 
 Use attributes for the *who* (dimensions you group by) and metrics for the *how much* (quantities you measure).
 

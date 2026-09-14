@@ -231,6 +231,12 @@ sdk.setUserAttributes(mapOf(
 ))
 ```
 
+:::caution[No sobreviven a reiniciar la app]
+Los atributos viven en memoria, en la instancia del SDK: matar o reiniciar la app los borra. Vuelve a fijarlos después de cada `init()`. `setContactAttributes`, más abajo, es la contraparte persistente.
+:::
+
+Siguen las mismas reglas que las [métricas](#métricas): los valores se convierten a texto, las claves en blanco y los valores `null` se ignoran, y la llamada no hace nada mientras el tracking está desactivado. Un lote solo sale si hay eventos pendientes, así que unos atributos fijados sin actividad posterior viajan en el primer lote con contenido.
+
 ### Registro de contacto
 
 `setContactAttributes` envía los atributos a `POST /sdk/popups/contact`, creando o actualizando el registro de contacto del usuario. Es una función `suspend` y solo se dispara cuando se proporcionó un `userId` y el tracking está activo; devuelve `true` si se hizo un POST, `false` si los atributos no cambiaron (deduplicación).
@@ -256,6 +262,8 @@ sdk.setMetric("items_in_cart", 3)
 - **Sobrescribe por clave** — la misma clave reemplaza el valor anterior.
 - **Coercionada a string** en el envío.
 - **Respeta el kill-switch** — es un no-op mientras el tracking está desactivado.
+- **Las claves en blanco y los valores `null` se ignoran** — la llamada no hace nada.
+- **Solo en memoria** — «persistente» significa que se reenvía en cada lote mientras viva la instancia, no que se almacene. Reiniciar la app borra las métricas, y `setUserId()` las descarta junto con los datos del usuario anterior.
 
 Usa los atributos para el *quién* (dimensiones por las que agrupas) y las métricas para el *cuánto* (cantidades que mides).
 
