@@ -23,7 +23,7 @@ Tilføj den publicerede afhængighed:
 
 ```kotlin
 dependencies {
-    implementation("com.deepdots.sdk:shared-android:0.3.0")
+    implementation("com.deepdots.sdk:shared-android:0.5.0")
 }
 ```
 
@@ -38,7 +38,28 @@ Android-eksempelappen i dette repository bruger præcis den koordinat.
 
 ## iOS
 
-Det medfølgende SPM-manifest er binær-baseret og hedder aktuelt `DeepdotsSDK`. Det eksponerer biblioteksproduktet `DeepdotsSDK`.
+SDK'et distribueres som en binær Swift-pakke fra [`MagicFeedback/DeepdotsSDK-SPM`](https://github.com/MagicFeedback/DeepdotsSDK-SPM). Den eksponerer biblioteksproduktet `DeepdotsSDK`.
+
+I Xcode: vælg **File → Add Package Dependencies…**, indtast repository-URL'en og vælg version `0.5.0`:
+
+```text
+https://github.com/MagicFeedback/DeepdotsSDK-SPM
+```
+
+Eller i en `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/MagicFeedback/DeepdotsSDK-SPM", from: "0.5.0")
+],
+targets: [
+    .target(name: "YourApp", dependencies: [
+        .product(name: "DeepdotsSDK", package: "DeepdotsSDK-SPM")
+    ])
+]
+```
+
+Selve pakkemanifestet er binært:
 
 ```swift
 // swift-tools-version: 5.7

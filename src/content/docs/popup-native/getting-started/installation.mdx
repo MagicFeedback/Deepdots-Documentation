@@ -23,7 +23,7 @@ Add the published dependency:
 
 ```kotlin
 dependencies {
-    implementation("com.deepdots.sdk:shared-android:0.3.0")
+    implementation("com.deepdots.sdk:shared-android:0.5.0")
 }
 ```
 
@@ -38,7 +38,28 @@ The Android example app in this repository uses that exact coordinate.
 
 ## iOS
 
-The checked-in SPM manifest is binary-based and currently named `DeepdotsSDK`. It exposes the library product `DeepdotsSDK`.
+The SDK is distributed as a binary Swift package from [`MagicFeedback/DeepdotsSDK-SPM`](https://github.com/MagicFeedback/DeepdotsSDK-SPM). It exposes the library product `DeepdotsSDK`.
+
+In Xcode, go to **File → Add Package Dependencies…**, enter the repository URL and pick version `0.5.0`:
+
+```text
+https://github.com/MagicFeedback/DeepdotsSDK-SPM
+```
+
+Or, in a `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/MagicFeedback/DeepdotsSDK-SPM", from: "0.5.0")
+],
+targets: [
+    .target(name: "YourApp", dependencies: [
+        .product(name: "DeepdotsSDK", package: "DeepdotsSDK-SPM")
+    ])
+]
+```
+
+The package manifest itself is binary-based:
 
 ```swift
 // swift-tools-version: 5.7
