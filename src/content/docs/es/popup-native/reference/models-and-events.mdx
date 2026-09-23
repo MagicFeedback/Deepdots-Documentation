@@ -9,14 +9,29 @@ description: Tipos de opciones principales, formas de trigger y eventos de ciclo
 
 ### `InitOptions`
 
-- `debug`
-- `popupOptions`
-- `provideLang`
-- `autoLaunch`
-- `renderChrome`
-- `metadata`
+| Campo | Por defecto | Para qué sirve |
+|---|---|---|
+| `debug` | `false` | Solo la verbosidad de los logs del SDK; no cambia el backend |
+| `environment` | `Environment.Production` | Backend con el que habla el SDK (`Production` o `Development`) |
+| `mode` | `Mode.Client` | Modo de funcionamiento (`Client` o `Server`) |
+| `popupOptions` | `PopupOptions()` | Credenciales: `id`, `publicKey`, `companyId` |
+| `provideLang` | `{ null }` | Resolver del idioma actual de la UI |
+| `autoLaunch` | `false` | Empieza a evaluar los triggers justo después de `initialize` |
+| `storage` | `null` (persistente) | `KeyValueStorage` del host; ver [Analítica](/es/popup-native/guides/analytics/) |
+| `trackingEnabled` | `true` | Arranca con el tracking activado, o desactivado a la espera de consentimiento |
+| `analytics` | `null` | `AnalyticsKeys` de la integración de analítica; sin ellas el canal funciona en dry-run |
+| `contactAttributes` | `null` | Atributos que se guardan en el Contact del backend (requiere `metadata["userId"]`) |
+| `renderChrome` | `true` | Si el SDK pinta el scrim y la tarjeta |
+| `showProgressBar` | `null` | Texto y barra de progreso bajo la cabecera del popup |
+| `metadata` | `null` | Metadatos arbitrarios del host que se envían al backend |
 
 `renderChrome` (por defecto `true`, desde **0.4.0**) controla si el SDK pinta el "modal" del popup — el scrim oscurecido y la tarjeta redondeada con elevación que dibuja `PopupView`. Ponlo en `false` para renderizar el popup transparente y a pantalla completa, de modo que se integre en tu propia pantalla; la encuesta sigue funcional (botón de cerrar en el header, footer con back/start/complete/send). Refleja el flag `renderChrome` de web/RN. Ten en cuenta la divergencia nativa: el chrome es Compose nativo (no HTML) y el SDK sigue auto-montando un overlay a pantalla completa, así que el flag quita el scrim y la tarjeta pero no cede a tu app el montaje del contenedor.
+
+`showProgressBar` (por defecto `null`, desde **0.5.0**) muestra un texto `Pregunta X de Y` con una barra de progreso bajo la cabecera del popup. Con `null` se respeta el `showProgressBar` configurado para la encuesta en la plataforma; `true` / `false` lo fuerzan desde el host. Respeta el `progressUnit` de la encuesta (número de preguntas o porcentaje), `showProgressUnit` y `loadingBarColor`, y se oculta en la pantalla de inicio, en la de fin y cuando la encuesta tiene una sola página. Refleja el flag `showProgressBar` de web/RN.
+
+:::note
+`surveyCss`, disponible en los SDK de Web y React Native, **no** está soportado en nativo: el chrome del popup es Compose, no HTML, así que no hay hoja de estilos donde inyectarlo. Usa en su lugar el estilo del popup configurado en la plataforma (`theme`, `position`, `font`).
+:::
 
 ### `PopupOptions`
 
@@ -67,6 +82,9 @@ Tipos de trigger soportados en el código:
 - `imageUrl`
 - `imageSize`
 - `imageAlignment`
+- `font` — `PopupFont(family, url?)`, desde **0.4.0**
+
+`font` aplica una fuente personalizada al chrome nativo (título del popup, botones y controles de formulario) y a la encuesta dentro del WebView. Refleja `PopupStyle.font` de Web. La fuente se descarga una vez y se cachea durante la sesión; `family` se sanea y `url` solo se acepta por `http(s)` o `data:`. Se configura con el estilo del popup en la plataforma.
 
 ### `Segments`
 

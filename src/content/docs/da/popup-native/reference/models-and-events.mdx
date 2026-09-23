@@ -9,14 +9,29 @@ description: Centrale option-typer, trigger-former og lifecycle-events defineret
 
 ### `InitOptions`
 
-- `debug`
-- `popupOptions`
-- `provideLang`
-- `autoLaunch`
-- `renderChrome`
-- `metadata`
+| Felt | Standard | Formål |
+|---|---|---|
+| `debug` | `false` | Kun SDK'ets log-niveau; det ændrer ikke backend |
+| `environment` | `Environment.Production` | Den backend SDK'et taler med (`Production` eller `Development`) |
+| `mode` | `Mode.Client` | Driftstilstand (`Client` eller `Server`) |
+| `popupOptions` | `PopupOptions()` | Legitimationsoplysninger: `id`, `publicKey`, `companyId` |
+| `provideLang` | `{ null }` | Resolver for det aktuelle UI-sprog |
+| `autoLaunch` | `false` | Begynd at evaluere triggers lige efter `initialize` |
+| `storage` | `null` (persistent) | Værtens `KeyValueStorage`; se [Analytics](/da/popup-native/guides/analytics/) |
+| `trackingEnabled` | `true` | Start med tracking slået til, eller fra mens der ventes på samtykke |
+| `analytics` | `null` | `AnalyticsKeys` for analytics-integrationen; uden dem kører kanalen i dry-run |
+| `contactAttributes` | `null` | Attributter der gemmes på backend-kontakten (kræver `metadata["userId"]`) |
+| `renderChrome` | `true` | Om SDK'et tegner scrim og kort |
+| `showProgressBar` | `null` | Fremskridtstekst og -bjælke under popuppens header |
+| `metadata` | `null` | Vilkårlige værtsmetadata, der sendes til backend |
 
 `renderChrome` (standard `true`, fra **0.4.0**) styrer, om SDK'et tegner popup-"modalen" — det nedtonede scrim og det afrundede kort med elevation, som `PopupView` tegner. Sæt den til `false` for at rendere popuppen gennemsigtig og fuld-bredde, så den falder ind i din egen skærm; surveyen forbliver funktionel (lukkeknap i headeren, footer med back/start/complete/send). Den spejler web/RN-flaget `renderChrome`. Bemærk den native divergens: chromet er native Compose (ikke HTML), og SDK'et auto-monterer stadig et fuldskærms-overlay, så flaget fjerner scrim og kort, men overlader ikke container-monteringen til din app.
+
+`showProgressBar` (standard `null`, fra **0.5.0**) viser en `Spørgsmål X af Y`-tekst med en fremskridtsbjælke under popuppens header. `null` følger den `showProgressBar`, der er konfigureret for surveyen i platformen; `true` / `false` tvinger den fra værten. Den respekterer surveyens `progressUnit` (antal spørgsmål eller procent), `showProgressUnit` og `loadingBarColor`, og er skjult på startskærmen, på afslutningsskærmen og når surveyen kun har én side. Den spejler web/RN-flaget `showProgressBar`.
+
+:::note
+`surveyCss`, som findes i Web- og React Native-SDK'erne, understøttes **ikke** på native: popup-chromet er Compose, ikke HTML, så der er intet stylesheet at injicere i. Brug i stedet den popup-stil, der er konfigureret i platformen (`theme`, `position`, `font`).
+:::
 
 ### `PopupOptions`
 
@@ -67,6 +82,9 @@ Understøttede trigger-typer i koden:
 - `imageUrl`
 - `imageSize`
 - `imageAlignment`
+- `font` — `PopupFont(family, url?)`, fra **0.4.0**
+
+`font` anvender en brugerdefineret skrifttype på det native chrome (popuppens titel, knapper og formularfelter) og på surveyen i WebView'et. Den spejler Webs `PopupStyle.font`. Skrifttypen hentes én gang og caches for sessionen; `family` saneres, og `url` accepteres kun over `http(s)` eller `data:`. Den konfigureres sammen med popup-stilen i platformen.
 
 ### `Segments`
 
