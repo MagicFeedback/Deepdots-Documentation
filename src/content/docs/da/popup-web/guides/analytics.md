@@ -7,7 +7,7 @@ Deepdots Popup SDK indeholder et indbygget analyselag, der indsamler adfærdsdat
 
 ## Opsætning
 
-Tilføj et `analytics`-objekt til `init()` med `publicKey` og `integration`-ID'et for den integration, der er oprettet i dit Deepdots-workspace. Uden det kører SDK'et i **dry-run-tilstand** — alle events logges til konsollen, men intet sendes.
+Tilføj et `analytics`-objekt til `init()` med `publicKey` og `integration`-ID'et for den integration, der er oprettet i dit Deepdots-workspace. Uden det kører SDK'et i **dry-run-tilstand** — intet sendes, og med `debug: true` logges hver event-payload til konsollen.
 
 ```ts
 import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
@@ -23,7 +23,7 @@ popups.init({
 ```
 
 :::tip
-Det er sikkert at udelade `analytics` under udvikling — dry-run-tilstand logger hver event-payload til konsollen præcis som den ville blive sendt, så du kan verificere dataene, før du går live.
+Det er sikkert at udelade `analytics` under udvikling — med `debug: true` logger dry-run-tilstand hver event-payload til konsollen præcis som den ville blive sendt, så du kan verificere dataene, før du går live.
 :::
 
 ---

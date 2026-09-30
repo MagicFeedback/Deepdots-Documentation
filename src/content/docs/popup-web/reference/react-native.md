@@ -57,7 +57,7 @@ export default function App() {
         nodeEnv: __DEV__ ? 'development' : 'production',
         userId: 'customer-123',
         appVersion: '1.4.0',
-        // Omit `analytics` to stay in dry-run mode (events logged, nothing sent).
+        // Omit `analytics` to stay in dry-run mode (nothing sent; events logged with `debug: true`).
         analytics: {
           publicKey: 'YOUR_ANALYTICS_PUBLIC_KEY',
           integration: 'YOUR_INTEGRATION_ID',

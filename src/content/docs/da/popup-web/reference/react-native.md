@@ -57,7 +57,7 @@ export default function App() {
         nodeEnv: __DEV__ ? 'development' : 'production',
         userId: 'customer-123',
         appVersion: '1.4.0',
-        // Udelad `analytics` for at forblive i dry-run-tilstand (events logges, intet sendes).
+        // Udelad `analytics` for at forblive i dry-run-tilstand (intet sendes; events logges med `debug: true`).
         analytics: {
           publicKey: 'YOUR_ANALYTICS_PUBLIC_KEY',
           integration: 'YOUR_INTEGRATION_ID',

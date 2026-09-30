@@ -7,7 +7,7 @@ The Deepdots Popup SDK includes a built-in analytics layer that collects behavio
 
 ## Setup
 
-Add an `analytics` object to `init()` with the `publicKey` and `integration` ID of the integration created in your Deepdots workspace. Without it the SDK runs in **dry-run mode** — all events are logged to the console but nothing is sent.
+Add an `analytics` object to `init()` with the `publicKey` and `integration` ID of the integration created in your Deepdots workspace. Without it the SDK runs in **dry-run mode** — nothing is sent, and with `debug: true` every event payload is logged to the console.
 
 ```ts
 import { DeepdotsPopups } from '@magicfeedback/popup-sdk';
@@ -23,7 +23,7 @@ popups.init({
 ```
 
 :::tip
-Omitting `analytics` is safe during development — dry-run mode logs every event payload to the console exactly as it would be sent, so you can verify the data before going live.
+Omitting `analytics` is safe during development — with `debug: true`, dry-run mode logs every event payload to the console exactly as it would be sent, so you can verify the data before going live.
 :::
 
 ---
