@@ -29,13 +29,24 @@ val sdk = DeepdotsPopups().apply { initialize(options) }
 ### iOS
 
 ```swift
+// Swift kræver alle parametre i InitOptions: se den fulde liste i Quickstart.
 let options = InitOptions(
-    popupOptions: PopupOptions(id: nil, publicKey: "<your-public-key>", companyId: nil),
+    debug: false,
+    environment: Environment.production,
+    mode: nil,
+    popupOptions: PopupOptions(id: nil, publicKey: "<your-public-key>", popups: nil, companyId: nil),
     provideLang: { Locale.current.language.languageCode?.identifier ?? "da" },
+    autoLaunch: true,
+    storage: nil,
+    trackingEnabled: true,
     analytics: AnalyticsKeys(
         publicKey: "<your-analytics-public-key>",
         integration: "<your-integration-id>"
     ),
+    geolocation: true,
+    contactAttributes: nil,
+    renderChrome: true,
+    showProgressBar: nil,
     metadata: ["userId": "customer-123"]
 )
 let instance = DeepdotsSDK.DeepdotsPopups()
@@ -90,10 +101,12 @@ Forbind SDK'et til app-livscyklussen, så en session åbnes i foreground og lukk
 #### Android
 
 ```kotlin
-// I din Activity / livscyklus-observer:
+// App med én activity, i din Activity:
 override fun onStart() { super.onStart(); sdk.onForeground() }
 override fun onStop()  { super.onStop();  sdk.onBackground() }
 ```
+
+Med flere activities udløses `onStop` også ved skift fra én activity til den næste og ville dele besøget op i flere sessioner. Observér i stedet hele processen med `ProcessLifecycleOwner`: se [Best practices](/da/popup-native/guides/best-practices/#android).
 
 #### iOS
 

@@ -33,13 +33,17 @@ Comprueba:
 
 ## Problemas al renderizar la encuesta
 
-El repositorio usa el HTML de encuesta de MagicFeedback renderizado dentro de web views nativas.
+La encuesta se pinta dentro de una web view nativa, que carga el script y la hoja de estilos de la encuesta desde el CDN de jsDelivr (`cdn.jsdelivr.net`) y la encuesta desde la API de Deepdots.
 
 Comprueba:
 
-- el empaquetado de assets en Android para `magicfeedback-sdk.browser.js`
-- el bundling del recurso en iOS para el mismo asset
-- el cableado del puente de la web view para la propagación de eventos
+- que el dispositivo tiene red y que ningún proxy, VPN o firewall bloquea `cdn.jsdelivr.net`
+- que la encuesta está publicada y pertenece al mismo entorno que el `publicKey`
+- los logs del SDK con `debug = true` (Logcat / consola de Xcode) por si hay errores de la web view
+
+## La app se cierra al abrir un popup en iOS
+
+Comprueba que el `Info.plist` de la app tiene `CADisableMinimumFrameDurationOnPhone` a `true`. El popup se pinta con Compose Multiplatform, que la necesita en dispositivos ProMotion (120 Hz). Consulta [Installation](/es/popup-native/getting-started/installation/#ios).
 
 ## Errores de validación o de envío en los flujos de encuesta
 

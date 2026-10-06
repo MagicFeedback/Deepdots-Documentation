@@ -13,13 +13,14 @@ description: Tipos de opciones principales, formas de trigger y eventos de ciclo
 |---|---|---|
 | `debug` | `false` | Solo la verbosidad de los logs del SDK; no cambia el backend |
 | `environment` | `Environment.Production` | Backend con el que habla el SDK (`Production` o `Development`) |
-| `mode` | `Mode.Client` | Modo de funcionamiento (`Client` o `Server`) |
+| `mode` | `Mode.Client` | Se ignora: los popups siempre llegan desde Deepdots. Se mantiene por compatibilidad (pasa `nil` desde Swift) |
 | `popupOptions` | `PopupOptions()` | Credenciales: `id`, `publicKey`, `companyId` |
 | `provideLang` | `{ null }` | Resolver del idioma actual de la UI |
 | `autoLaunch` | `false` | Empieza a evaluar los triggers justo después de `initialize` |
 | `storage` | `null` (persistente) | `KeyValueStorage` del host; ver [Analítica](/es/popup-native/guides/analytics/) |
 | `trackingEnabled` | `true` | Arranca con el tracking activado, o desactivado a la espera de consentimiento |
 | `analytics` | `null` | `AnalyticsKeys` de la integración de analítica; sin ellas el canal funciona en dry-run |
+| `geolocation` | `true` | País y ciudad por IP en analytics; `false` desactiva la consulta y el valor guardado |
 | `contactAttributes` | `null` | Atributos que se guardan en el Contact del backend (requiere `metadata["userId"]`) |
 | `renderChrome` | `true` | Si el SDK pinta el scrim y la tarjeta |
 | `showProgressBar` | `null` | Texto y barra de progreso bajo la cabecera del popup |

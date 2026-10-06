@@ -13,13 +13,14 @@ description: Centrale option-typer, trigger-former og lifecycle-events defineret
 |---|---|---|
 | `debug` | `false` | Kun SDK'ets log-niveau; det ændrer ikke backend |
 | `environment` | `Environment.Production` | Den backend SDK'et taler med (`Production` eller `Development`) |
-| `mode` | `Mode.Client` | Driftstilstand (`Client` eller `Server`) |
+| `mode` | `Mode.Client` | Ignoreres: popups kommer altid fra Deepdots. Bevares af kompatibilitetshensyn (angiv `nil` fra Swift) |
 | `popupOptions` | `PopupOptions()` | Legitimationsoplysninger: `id`, `publicKey`, `companyId` |
 | `provideLang` | `{ null }` | Resolver for det aktuelle UI-sprog |
 | `autoLaunch` | `false` | Begynd at evaluere triggers lige efter `initialize` |
 | `storage` | `null` (persistent) | Værtens `KeyValueStorage`; se [Analytics](/da/popup-native/guides/analytics/) |
 | `trackingEnabled` | `true` | Start med tracking slået til, eller fra mens der ventes på samtykke |
 | `analytics` | `null` | `AnalyticsKeys` for analytics-integrationen; uden dem kører kanalen i dry-run |
+| `geolocation` | `true` | Land og by via IP i analytics; `false` slår opslaget og den gemte værdi fra |
 | `contactAttributes` | `null` | Attributter der gemmes på backend-kontakten (kræver `metadata["userId"]`) |
 | `renderChrome` | `true` | Om SDK'et tegner scrim og kort |
 | `showProgressBar` | `null` | Fremskridtstekst og -bjælke under popuppens header |

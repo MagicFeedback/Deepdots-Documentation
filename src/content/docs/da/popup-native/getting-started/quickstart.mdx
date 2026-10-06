@@ -39,26 +39,38 @@ eller logs.
 
 ### Lokaliserede knaptekster
 
-`provideLang` bruges også til at lokalisere SDK'ets indbyggede standard-knaptekster
-(Send / Cancel / Start survey / Complete survey / Back). Understøttede sprog ud af boksen:
-**en, es, da, no, sv, fi, zh-CN**. Regionstags som `es-ES`, `nb-NO`, `zh-Hans` eller
-underscore-varianter som `es_419` accepteres. Ikke-understøttede sprog falder tilbage til
-engelsk. Etiketter leveret af server eller vært i `PopupDefinition.actions` har altid forrang
-over standardværdierne.
+Popuppens indbyggede tekster (knapper, `Spørgsmål X af Y`, fejlbeskeder og
+tilgængelighedsetiketter) følger **surveyens sprog**, så snart den er indlæst, og `provideLang`
+indtil da. Understøttede sprog: **en, es, da, fi, no, sv, ar, bn, de, pt, fr** (de sprog,
+platformen tilbyder for en survey) plus **zh-CN**. Regionstags som `es-ES`, `nb-NO`, `zh-Hans`
+eller underscore-varianter som `es_419` accepteres. Ikke-understøttede sprog falder tilbage til
+engelsk. Arabiske surveys spejler popuppens layout fra højre mod venstre. Etiketter angivet i
+`PopupDefinition.actions` har altid forrang over de indbyggede tekster.
 
 ### iOS
+
+Swift kan ikke se Kotlins standardværdier, så alle parametre i `InitOptions` og `PopupOptions` skal angives i denne rækkefølge. Brug `nil` til dem, du ikke har brug for:
 
 ```swift
 let options = InitOptions(
     debug: true,                               // kun SDK-logs — ændrer IKKE backend
-    environment: Environment.development,      // udelad (eller brug .production) for prod
+    environment: Environment.development,      // brug .production for prod
+    mode: nil,                                 // ignoreres: popups kommer altid fra Deepdots
     popupOptions: PopupOptions(
         id: nil,
         publicKey: "<your-public-key>",
+        popups: nil,                           // ignoreres: popups kommer altid fra Deepdots
         companyId: nil
     ),
     provideLang: { Locale.current.language.languageCode?.identifier ?? "en" },
     autoLaunch: true,
+    storage: nil,                              // nil = persistent standardlager (UserDefaults)
+    trackingEnabled: true,                     // false for at vente på samtykke
+    analytics: nil,                            // AnalyticsKeys(...) for at sende analytics
+    geolocation: true,
+    contactAttributes: nil,
+    renderChrome: true,
+    showProgressBar: nil,                      // nil = følg surveyens konfiguration
     metadata: ["userId": "demo-user"]
 )
 
@@ -117,3 +129,5 @@ sdk.show(
 - At værtsappen opdaterer `setPath(...)`, når skærme ændres
 - At værtsappen kalder `onScroll`, `triggerEvent` eller andre trigger-helpers, når det er relevant
 - At event-listenere er tilsluttet, så teamet kan bekræfte popup-lifecycle-adfærden
+
+Gennemgå [best practices](/da/popup-native/guides/best-practices/), før I går i produktion.

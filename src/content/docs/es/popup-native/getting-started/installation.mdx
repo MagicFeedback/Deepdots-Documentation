@@ -40,7 +40,7 @@ La app de ejemplo de Android de este repositorio usa exactamente esa coordenada.
 
 El SDK se distribuye como paquete Swift binario desde [`MagicFeedback/DeepdotsSDK-SPM`](https://github.com/MagicFeedback/DeepdotsSDK-SPM). Expone el producto de librería `DeepdotsSDK`.
 
-En Xcode, ve a **File → Add Package Dependencies…**, introduce la URL del repositorio y elige la versión `0.5.0`:
+En Xcode, ve a **File → Add Package Dependencies…**, introduce la URL del repositorio y elige la versión `0.6.0` con la regla **Up to Next Minor Version**:
 
 ```text
 https://github.com/MagicFeedback/DeepdotsSDK-SPM
@@ -50,7 +50,7 @@ O, en un `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/MagicFeedback/DeepdotsSDK-SPM", from: "0.5.0")
+    .package(url: "https://github.com/MagicFeedback/DeepdotsSDK-SPM", .upToNextMinor(from: "0.6.0"))
 ],
 targets: [
     .target(name: "YourApp", dependencies: [
@@ -74,6 +74,15 @@ let package = Package(
         .library(name: "DeepdotsSDK", targets: ["DeepdotsSDK"])
     ]
 )
+```
+
+### Clave obligatoria del `Info.plist`
+
+Añade esta clave al `Info.plist` de tu app. El popup se pinta con Compose Multiplatform, que la necesita en iOS; sin ella la app puede cerrarse en dispositivos ProMotion (120 Hz) al mostrar un popup:
+
+```xml
+<key>CADisableMinimumFrameDurationOnPhone</key>
+<true/>
 ```
 
 ### Flujo del ejemplo iOS en este repositorio

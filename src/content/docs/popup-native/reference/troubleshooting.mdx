@@ -33,13 +33,17 @@ Check:
 
 ## Survey rendering issues
 
-The repository uses MagicFeedback survey HTML rendered inside native web views.
+The survey is rendered inside a native web view, which loads the survey script and stylesheet from the jsDelivr CDN (`cdn.jsdelivr.net`) and the survey from the Deepdots API.
 
 Check:
 
-- Android asset packaging for `magicfeedback-sdk.browser.js`
-- iOS resource bundling for the same asset
-- web view bridge wiring for event propagation
+- the device has network access and `cdn.jsdelivr.net` is not blocked by a proxy, VPN or firewall
+- the survey is published and belongs to the same environment as the `publicKey`
+- the SDK logs with `debug = true` (Logcat / Xcode console) for web view errors
+
+## The app crashes when a popup opens on iOS
+
+Check that the app's `Info.plist` contains `CADisableMinimumFrameDurationOnPhone` set to `true`. The popup is rendered with Compose Multiplatform, which requires it on ProMotion (120 Hz) devices. See [Installation](/popup-native/getting-started/installation/#ios).
 
 ## Validation or submit errors in survey flows
 
