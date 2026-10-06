@@ -1,0 +1,138 @@
+---
+title: Buenas prácticas
+description: Recomendaciones para integrar el Deepdots Popup SDK en una app Android o iOS en producción.
+---
+
+# Buenas prácticas
+
+El SDK nativo no puede observar tu app por sí solo. Las pantallas, el ciclo de vida y la identidad del usuario llegan desde tu código, y la mayoría de los problemas de integración vienen de que una de esas señales falta o llega en el momento equivocado. Esta página recoge lo que recomendamos para una integración en producción.
+
+## Configuración
+
+### Crea una sola instancia
+
+Inicializa el SDK una vez, al arrancar la app (`Application.onCreate` en Android, el inicializador de `App` o el `AppDelegate` en iOS), y comparte esa instancia en toda la app.
+
+`initialize()` solo funciona una vez por instancia: una segunda llamada se ignora. No sirve para cambiar de usuario ni de opciones. Para cambiar de usuario, usa [`setUserId`](#identidad).
+
+### Adjunta un contexto
+
+Los popups que lanzan los triggers solo se muestran cuando el SDK tiene un contexto desde el que presentarlos:
+
+- **iOS:** adjunta el root view controller cuando exista la ventana, y vuelve a adjuntarlo si tu app sustituye el root (por ejemplo, después de un flujo de login).
+- **Android:** adjunta la `Activity` actual (`PlatformContext(activity)`). Si la app tiene varias activities, adjunta la que está en primer plano (por ejemplo en `onResume`), para que el SDK nunca se quede con una destruida.
+
+```swift
+if let root = UIApplication.shared.connectedScenes
+    .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+    .first?.rootViewController {
+    deepdots.attachContext(context: PlatformContext(viewController: root))
+}
+```
+
+### Desde Swift, pasa todos los parámetros
+
+Swift no ve los valores por defecto de Kotlin, así que `InitOptions` y `PopupOptions` necesitan todos sus parámetros, en orden. Tienes una llamada completa en el [Quickstart](/es/popup-native/getting-started/quickstart/#ios). `mode` y `PopupOptions.popups` se ignoran (los popups siempre llegan desde Deepdots): pasa `nil`.
+
+### iOS: añade la clave obligatoria del `Info.plist`
+
+El popup se pinta con Compose Multiplatform, que necesita `CADisableMinimumFrameDurationOnPhone` a `true`. Sin ella la app puede cerrarse en dispositivos ProMotion (120 Hz) al abrir un popup. Consulta [Installation](/es/popup-native/getting-started/installation/#ios).
+
+### Separa desarrollo y producción
+
+- Durante la integración: `debug = true` y `Environment.Development`.
+- En la build de release: `debug = false` y `Environment.Production`.
+- `debug` solo controla los logs del SDK; el backend lo elige `environment`. Asegúrate de que cada public key pertenece al entorno al que apuntas.
+
+## Navegación
+
+Llama a `setPath` en **cada** cambio de pantalla, también cuando el usuario vuelve a una pantalla anterior. El path decide qué popups se muestran (`segments.path`, `segments.excludedPaths`, triggers de salida) y alimenta las vistas de pantalla en analytics.
+
+- **Engánchalo en un solo sitio.** Usa tu capa de navegación (`NavController.addOnDestinationChangedListener` en Android, tu router o coordinator en iOS) en vez de llamarlo desde cada pantalla: una pantalla olvidada rompe la segmentación sin avisar.
+- **Usa nombres de ruta estables**, como `/home` o `/product/123`, no títulos de pantalla ni textos traducidos. Los segmentos numéricos y los UUID se normalizan a `:id` en analytics.
+- **Nunca pongas datos personales en un path** (email, nombre, teléfono). Los paths se envían a analytics.
+- **Acordad la lista de paths** con quien configure los popups en Deepdots. Si no coinciden, los popups no salen.
+- **Los paths coinciden como prefijo y subcadena.** Una regla sobre `/cart` también aplica a `/cart-recovery`, y `/` a secas aplica a todas las pantallas. Tenlo en cuenta al nombrar las rutas que vayas a segmentar o excluir.
+
+## Ciclo de vida
+
+Avisa al SDK cuando la **app** (no una pantalla concreta) pasa entre primer y segundo plano. `onBackground()` cierra la sesión de analytics y la envía; `onForeground()` abre una nueva.
+
+### iOS
+
+Usa las notificaciones a nivel de app:
+
+```swift
+NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+    deepdots.onForeground()
+}
+NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+    deepdots.onBackground()
+}
+```
+
+Con SwiftUI puedes usar `scenePhase`: llama a `onBackground()` en `.background` y a `onForeground()` al volver a `.active` desde `.background`.
+
+### Android
+
+En una app con varias activities, `Activity.onStop` también salta al pasar de una activity a otra, lo que partiría una visita en varias sesiones. Observa el proceso entero (`androidx.lifecycle:lifecycle-process`), desde `Application.onCreate`:
+
+```kotlin
+ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+    override fun onStart(owner: LifecycleOwner) { sdk.onForeground() }
+    override fun onStop(owner: LifecycleOwner) { sdk.onBackground() }
+})
+```
+
+:::caution[No en estados transitorios]
+No llames a `onBackground()` desde `onPause` ni desde `willResignActive` / `.inactive`. Son estados pasajeros (una llamada entrante, el selector de apps) y partirían una visita en dos sesiones.
+:::
+
+Si el usuario mata la app, ninguna plataforma avisa, así que esa sesión la cierra el backend tras un periodo de inactividad. No hay nada que hacer en la app.
+
+## Identidad
+
+- **Usuarios logueados:** pasa un id interno y estable en `metadata["userId"]` al inicializar. No uses el email ni el teléfono como id.
+- **Login, logout o cambio de cuenta después del init:** llama a `setUserId("<id>")`, o a `setUserId(nil)` / `setUserId(null)` para volver a anónimo. Cierra la sesión del usuario anterior y abre una nueva. No crees una segunda instancia ni vuelvas a llamar a `initialize()`.
+- **Usuarios anónimos:** reciben un id que genera el SDK y que se guarda en el dispositivo (`UserDefaults` / `SharedPreferences`). Si tu logout borra todo ese almacenamiento, a partir de ahí el dispositivo contará como usuario nuevo.
+- **Datos para segmentar** (plan, tipo de cliente…): van en `contactAttributes` o `setContactAttributes`, que necesitan un `userId`. Envía solo lo que necesites para segmentar.
+
+## Consentimiento y privacidad
+
+- Si necesitas consentimiento antes de recoger datos, arranca con `trackingEnabled = false` y llama a `setTrackingEnabled(true)` cuando el usuario acepte. `setTrackingEnabled(false)` vuelve a parar la recogida.
+- El país y la ciudad se obtienen por IP a través de servicios de terceros (ipapi.co, ipwho.is, ipinfo.io), solo cuando hay `analytics` configurado, el tracking está activo y el resultado guardado en el dispositivo (30 días) falta o ha caducado. Pon `geolocation = false` si tu política de privacidad no lo permite.
+- No envíes datos personales en nombres de evento, parámetros, métricas ni paths.
+
+## Triggers
+
+- **Scroll:** informa de un porcentaje de 0 a 100 con `onScroll`, y solo cuando cambia, no en cada frame de scroll.
+- **Eventos propios:** los nombres de `triggerEvent` tienen que coincidir exactamente con el evento configurado en Deepdots. Acordad una lista fija (en minúsculas y `snake_case`) y usad los mismos nombres en Android e iOS.
+- **Mejor triggers que mostrar a mano.** `show(...)` muestra el popup en el acto, sin segmentación por path ni reglas de frecuencia. Los popups que lanzan los triggers se pueden reprogramar, resegmentar o pausar desde Deepdots sin sacar una versión de la app.
+- **Deja fuera de los popups los flujos críticos**, como el pago o el onboarding, añadiendo esas rutas a las rutas excluidas del popup.
+
+## Idioma
+
+`provideLang` debe devolver el idioma de la interfaz de tu app. Si tu app tiene su propio ajuste de idioma, devuelve ese, no el del dispositivo. Lo usa la segmentación por idioma, y también los botones del popup hasta que carga el survey; a partir de ahí, los botones siguen el idioma del survey.
+
+## Analytics
+
+- **Usa los helpers** (`trackFunnelStep`, `trackSearch`, `trackFindabilityFriction`, `trackMeaningfulInteraction`, `enterMiniService` / `exitMiniService`) en lugar de nombres de evento propios: los paneles se construyen sobre ellos.
+- **Eventos propios:** nombres estables en `snake_case`; los valores variables van en los parámetros, no en el nombre (`add_to_cart` con `product_id`, no `add_to_cart_p123`).
+- **Los atributos de usuario y las métricas viven en memoria.** Vuelve a ponerlos en cada arranque de la app y después de `setUserId`.
+- **Mensajes push e in-app:** sigue las [reglas para un funnel correcto](/es/popup-native/guides/analytics/#reglas-para-un-funnel-correcto). Toma los `delivered` de push de tu proveedor de envío.
+- **Los datos en bruto son at-least-once.** Si montas informes sobre los datos en bruto de la integración, deduplica por usuario, nombre de evento y timestamp.
+
+## Antes de publicar
+
+- [ ] `debug = false` y `Environment.Production`
+- [ ] `publicKey` y claves de `analytics` de producción
+- [ ] `CADisableMinimumFrameDurationOnPhone` en el `Info.plist` de iOS
+- [ ] `setPath` llamado desde la capa de navegación, en todas las pantallas
+- [ ] `onForeground` / `onBackground` conectados a nivel de app, no en estados transitorios
+- [ ] `setUserId` llamado en el login y en el logout
+- [ ] Flujo de consentimiento probado, si lo usas
+- [ ] Cada popup probado en el dispositivo más pequeño que soportas, en todos los idiomas que publicas
+
+## Mantén el SDK al día
+
+El SDK sigue en `0.x`, donde una versión minor puede traer cambios incompatibles. Fíjalo a **Up to Next Minor Version** en Swift Package Manager, o a una versión exacta en Android, y lee las [notas de la versión](https://github.com/MagicFeedback/deepdots-popup-mobile-native-sdk/releases) antes de actualizar.

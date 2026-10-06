@@ -1,0 +1,138 @@
+---
+title: Best practices
+description: Anbefalinger til at integrere Deepdots Popup SDK i en Android- eller iOS-app i produktion.
+---
+
+# Best practices
+
+Det native SDK kan ikke selv observere din app. Skærme, livscyklus og brugeridentitet kommer alle fra din kode, og de fleste integrationsproblemer skyldes, at et af de signaler mangler eller sendes på det forkerte tidspunkt. Denne side samler det, vi anbefaler til en integration i produktion.
+
+## Opsætning
+
+### Opret én instans
+
+Initialisér SDK'et én gang ved app-start (`Application.onCreate` på Android, `App`-initializeren eller `AppDelegate` på iOS), og del den instans i hele appen.
+
+`initialize()` virker kun én gang pr. instans: et andet kald ignoreres. Det kan ikke bruges til at skifte bruger eller ændre indstillinger. Brug [`setUserId`](#identitet) til at skifte bruger.
+
+### Tilføj en kontekst
+
+Popups, der startes af triggers, vises først, når SDK'et har en kontekst at præsentere dem fra:
+
+- **iOS:** tilføj root view controlleren, når vinduet findes, og tilføj den igen, hvis appen udskifter root (for eksempel efter et login-flow).
+- **Android:** tilføj den aktuelle `Activity` (`PlatformContext(activity)`). Har appen flere activities, så tilføj den, der er i forgrunden (for eksempel i `onResume`), så SDK'et aldrig holder fast i en destrueret activity.
+
+```swift
+if let root = UIApplication.shared.connectedScenes
+    .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+    .first?.rootViewController {
+    deepdots.attachContext(context: PlatformContext(viewController: root))
+}
+```
+
+### Fra Swift: angiv alle parametre
+
+Swift kan ikke se Kotlins standardværdier, så `InitOptions` og `PopupOptions` skal have alle parametre i rækkefølge. Se et komplet kald i [Quickstart](/da/popup-native/getting-started/quickstart/#ios). `mode` og `PopupOptions.popups` ignoreres (popups kommer altid fra Deepdots): angiv `nil`.
+
+### iOS: tilføj den påkrævede nøgle i `Info.plist`
+
+Popuppen renderes med Compose Multiplatform, som kræver `CADisableMinimumFrameDurationOnPhone` sat til `true`. Uden den kan appen crashe på ProMotion-enheder (120 Hz), når en popup åbner. Se [Installation](/da/popup-native/getting-started/installation/#ios).
+
+### Hold udvikling og produktion adskilt
+
+- Under integrationen: `debug = true` og `Environment.Development`.
+- I release-buildet: `debug = false` og `Environment.Production`.
+- `debug` styrer kun SDK'ets logs; backend vælges af `environment`. Sørg for, at hver public key hører til det miljø, du peger på.
+
+## Navigation
+
+Kald `setPath` ved **hvert** skærmskift, også når brugeren går tilbage til en tidligere skærm. Path'en styrer, hvilke popups der vises (`segments.path`, `segments.excludedPaths`, exit-triggers), og skærmvisningerne i analytics.
+
+- **Kobl det på ét sted.** Brug dit navigationslag (`NavController.addOnDestinationChangedListener` på Android, din router eller coordinator på iOS) i stedet for at kalde det fra hver skærm: en glemt skærm ødelægger målretningen uden varsel.
+- **Brug stabile rutenavne** som `/home` eller `/product/123`, ikke skærmtitler eller oversat tekst. Numeriske segmenter og UUID'er normaliseres til `:id` i analytics.
+- **Læg aldrig persondata i en path** (e-mail, navn, telefonnummer). Paths sendes til analytics.
+- **Aftal listen over paths** med dem, der konfigurerer popups i Deepdots. Matcher de ikke, vises popups ikke.
+- **Paths matcher som præfiks og delstreng.** En regel på `/cart` matcher også `/cart-recovery`, og `/` alene matcher alle skærme. Husk det, når du navngiver ruter, som du vil målrette eller udelukke.
+
+## Livscyklus
+
+Fortæl SDK'et, når **appen** (ikke en enkelt skærm) skifter mellem forgrund og baggrund. `onBackground()` afslutter analytics-sessionen og sender den; `onForeground()` åbner en ny.
+
+### iOS
+
+Brug notifikationerne på app-niveau:
+
+```swift
+NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+    deepdots.onForeground()
+}
+NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+    deepdots.onBackground()
+}
+```
+
+Med SwiftUI kan du bruge `scenePhase` i stedet: kald `onBackground()` ved `.background` og `onForeground()`, når appen vender tilbage til `.active` fra `.background`.
+
+### Android
+
+I en app med flere activities udløses `Activity.onStop` også ved skift fra én activity til den næste, hvilket ville dele ét besøg op i flere sessioner. Observér i stedet hele processen (`androidx.lifecycle:lifecycle-process`) fra `Application.onCreate`:
+
+```kotlin
+ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+    override fun onStart(owner: LifecycleOwner) { sdk.onForeground() }
+    override fun onStop(owner: LifecycleOwner) { sdk.onBackground() }
+})
+```
+
+:::caution[Ikke ved midlertidige tilstande]
+Kald ikke `onBackground()` fra `onPause` eller fra `willResignActive` / `.inactive`. De tilstande er midlertidige (et indgående opkald, app-skifteren) og ville dele ét besøg op i to sessioner.
+:::
+
+Hvis brugeren lukker appen helt, giver ingen platform et callback, så den session lukkes af backend efter en periode uden aktivitet. Der er intet at gøre i appen.
+
+## Identitet
+
+- **Indloggede brugere:** angiv et stabilt internt id i `metadata["userId"]` ved init. Brug ikke e-mail eller telefonnummer som id.
+- **Login, logout eller kontoskift efter init:** kald `setUserId("<id>")`, eller `setUserId(nil)` / `setUserId(null)` for at gå tilbage til anonym. Det lukker den forrige brugers session og åbner en ny. Opret ikke en ny instans, og kald ikke `initialize()` igen.
+- **Anonyme brugere** får et id, som SDK'et genererer og gemmer på enheden (`UserDefaults` / `SharedPreferences`). Hvis jeres logout rydder hele det lager, tæller enheden fremover som en ny bruger.
+- **Data til målretning** (abonnement, kundetype…) skal i `contactAttributes` eller `setContactAttributes`, som kræver et `userId`. Send kun det, du har brug for til målretning.
+
+## Samtykke og privatliv
+
+- Kræver I samtykke, før der indsamles data, så start med `trackingEnabled = false`, og kald `setTrackingEnabled(true)`, når brugeren accepterer. `setTrackingEnabled(false)` stopper indsamlingen igen.
+- Land og by slås op via IP hos tredjepartstjenester (ipapi.co, ipwho.is, ipinfo.io), kun når `analytics` er konfigureret, tracking er slået til, og resultatet gemt på enheden (30 dage) mangler eller er udløbet. Sæt `geolocation = false`, hvis jeres privatlivspolitik ikke tillader det.
+- Send ikke persondata i eventnavne, eventparametre, metrikker eller paths.
+
+## Triggers
+
+- **Scroll:** rapportér en procent fra 0 til 100 med `onScroll`, og kun når den ændrer sig, ikke for hver scroll-frame.
+- **Egne events:** navnene i `triggerEvent` skal matche det event, der er konfigureret i Deepdots, præcist. Aftal en fast liste (små bogstaver og `snake_case`), og brug de samme navne på Android og iOS.
+- **Foretræk triggers frem for manuel visning.** `show(...)` viser popuppen med det samme, uden path-segmentering og cooldown-regler. Popups, der startes af triggers, kan omplanlægges, målrettes om eller sættes på pause fra Deepdots uden en ny app-version.
+- **Hold popups ude af kritiske flows** som betaling eller onboarding ved at tilføje de ruter til popuppens udelukkede paths.
+
+## Sprog
+
+`provideLang` skal returnere sproget i appens brugerflade. Har appen sin egen sprogindstilling, så returnér den, ikke enhedens sprog. Sprogsegmenteringen bruger det, og det gør popuppens knapper også, indtil surveyen er indlæst; derefter følger knapperne surveyens sprog.
+
+## Analytics
+
+- **Brug helperne** (`trackFunnelStep`, `trackSearch`, `trackFindabilityFriction`, `trackMeaningfulInteraction`, `enterMiniService` / `exitMiniService`) i stedet for egne eventnavne: dashboards er bygget på dem.
+- **Egne events:** stabile navne i `snake_case`; variable værdier hører til i parametrene, ikke i navnet (`add_to_cart` med `product_id`, ikke `add_to_cart_p123`).
+- **Brugerattributter og metrikker ligger i hukommelsen.** Sæt dem igen ved hver app-start og efter `setUserId`.
+- **Push- og in-app-beskeder:** følg [reglerne for en korrekt funnel](/da/popup-native/guides/analytics/#regler-for-en-korrekt-funnel). Tag `delivered` for push fra jeres afsendelsesudbyder.
+- **Rådata er at-least-once.** Bygger I rapporter på integrationens rådata, så deduplikér på bruger, eventnavn og timestamp.
+
+## Før I udgiver
+
+- [ ] `debug = false` og `Environment.Production`
+- [ ] `publicKey` og `analytics`-nøgler til produktion
+- [ ] `CADisableMinimumFrameDurationOnPhone` i iOS-appens `Info.plist`
+- [ ] `setPath` kaldes fra navigationslaget, for hver skærm
+- [ ] `onForeground` / `onBackground` koblet på app-niveau, ikke på midlertidige tilstande
+- [ ] `setUserId` kaldes ved login og logout
+- [ ] Samtykkeflowet testet, hvis I bruger et
+- [ ] Hver popup testet på den mindste enhed, I understøtter, på alle sprog, I udgiver
+
+## Hold SDK'et opdateret
+
+SDK'et er stadig på `0.x`, hvor en minor-version kan indeholde ændringer, der bryder kompatibiliteten. Lås det til **Up to Next Minor Version** i Swift Package Manager, eller til en præcis version på Android, og læs [release notes](https://github.com/MagicFeedback/deepdots-popup-mobile-native-sdk/releases) før opgradering.

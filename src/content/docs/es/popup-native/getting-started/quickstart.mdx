@@ -39,26 +39,38 @@ diagnósticos o logs.
 
 ### Etiquetas de botones localizadas
 
-`provideLang` también se usa para localizar las etiquetas por defecto de los botones internos del
-SDK (Send / Cancel / Start survey / Complete survey / Back). Idiomas soportados de fábrica:
-**en, es, da, no, sv, fi, zh-CN**. Se aceptan etiquetas con región como `es-ES`, `nb-NO`,
-`zh-Hans`, o variantes con guion bajo como `es_419`. Los idiomas no soportados caen a inglés. Las
-etiquetas provistas por el servidor o el host en `PopupDefinition.actions` siempre tienen prioridad
-sobre los valores por defecto.
+Los textos propios del popup (botones, `Pregunta X de Y`, avisos de error y etiquetas de
+accesibilidad) siguen el **idioma del survey** en cuanto carga, y `provideLang` hasta entonces.
+Idiomas soportados: **en, es, da, fi, no, sv, ar, bn, de, pt, fr** (los que ofrece la plataforma
+para un survey) más **zh-CN**. Se aceptan etiquetas con región como `es-ES`, `nb-NO`, `zh-Hans`,
+o variantes con guion bajo como `es_419`. Los idiomas no soportados caen a inglés. Los surveys en
+árabe invierten el popup de derecha a izquierda. Las etiquetas definidas en
+`PopupDefinition.actions` siempre tienen prioridad sobre los textos propios.
 
 ### iOS
+
+Swift no ve los valores por defecto de Kotlin, así que hay que pasar todos los parámetros de `InitOptions` y `PopupOptions`, en este orden. Usa `nil` en los que no necesites:
 
 ```swift
 let options = InitOptions(
     debug: true,                               // solo logs del SDK — NO cambia el backend
-    environment: Environment.development,      // omite (o usa .production) para apuntar a prod
+    environment: Environment.development,      // usa .production para apuntar a prod
+    mode: nil,                                 // se ignora: los popups siempre llegan desde Deepdots
     popupOptions: PopupOptions(
         id: nil,
         publicKey: "<your-public-key>",
+        popups: nil,                           // se ignora: los popups siempre llegan desde Deepdots
         companyId: nil
     ),
     provideLang: { Locale.current.language.languageCode?.identifier ?? "en" },
     autoLaunch: true,
+    storage: nil,                              // nil = almacenamiento persistente (UserDefaults)
+    trackingEnabled: true,                     // false para esperar al consentimiento
+    analytics: nil,                            // AnalyticsKeys(...) para enviar analytics
+    geolocation: true,
+    contactAttributes: nil,
+    renderChrome: true,
+    showProgressBar: nil,                      // nil = lo que diga la configuración del survey
     metadata: ["userId": "demo-user"]
 )
 
@@ -117,3 +129,5 @@ sdk.show(
 - Que la app host actualice `setPath(...)` al cambiar de pantalla
 - Que la app host llame a `onScroll`, `triggerEvent` u otros helpers de trigger cuando corresponda
 - Que los listeners de eventos estén cableados para que el equipo pueda confirmar el comportamiento del ciclo de vida del popup
+
+Antes de pasar a producción, revisa las [buenas prácticas](/es/popup-native/guides/best-practices/).

@@ -13,13 +13,14 @@ description: Core option types, trigger shapes, and lifecycle events defined in 
 |---|---|---|
 | `debug` | `false` | SDK log verbosity only — it does not change the backend |
 | `environment` | `Environment.Production` | Backend the SDK talks to (`Production` or `Development`) |
-| `mode` | `Mode.Client` | Operating mode (`Client` or `Server`) |
+| `mode` | `Mode.Client` | Ignored: popups always come from Deepdots. Kept for compatibility (pass `nil` from Swift) |
 | `popupOptions` | `PopupOptions()` | Credentials: `id`, `publicKey`, `companyId` |
 | `provideLang` | `{ null }` | Resolver for the current UI language |
 | `autoLaunch` | `false` | Start evaluating triggers right after `initialize` |
 | `storage` | `null` (persistent) | Host `KeyValueStorage`; see [Analytics](/popup-native/guides/analytics/) |
 | `trackingEnabled` | `true` | Start with tracking on, or off while waiting for consent |
 | `analytics` | `null` | `AnalyticsKeys` of the analytics integration; without them the channel runs in dry-run |
+| `geolocation` | `true` | Country and city by IP in analytics; `false` disables the lookup and the cached value |
 | `contactAttributes` | `null` | Attributes persisted on the backend Contact (requires `metadata["userId"]`) |
 | `renderChrome` | `true` | Whether the SDK paints the scrim and the card |
 | `showProgressBar` | `null` | Progress label and bar under the popup header |
