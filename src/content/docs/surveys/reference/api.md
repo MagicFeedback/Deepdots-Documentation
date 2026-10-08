@@ -111,6 +111,7 @@ await form.generate("survey-root", {
     { key: "customer-id", value: ["acme-42"] },
     { key: "plan",        value: ["enterprise"] },
   ],
+  autofocus: "navigation",
   onLoadedEvent:     ({ formData, progress, total, error }) => {},
   beforeSubmitEvent: ({ progress, total }) => {},
   afterSubmitEvent:  ({ response, progress, total, completed, followup, error }) => {},
@@ -120,7 +121,7 @@ await form.generate("survey-root", {
 
 | Option              | Default                                | Description                                                            |
 | ------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
-| `addButton`         | `true`                                 | Renders built-in action buttons. Disable to control navigation yourself. |
+| `addButton`         | `true`                                 | Renders built-in action buttons. Disable to control navigation yourself (keep a Next control, see [Auto-advance](/surveys/guides/customization/#auto-advance)). |
 | `sendButtonText`    | `"Send"`                               | Label for the final submit button.                                     |
 | `backButtonText`    | `"Back"`                               | Label for the back button.                                             |
 | `nextButtonText`    | `"Next"`                               | Label for the next button in multi-step flows.                         |
@@ -134,14 +135,31 @@ await form.generate("survey-root", {
 | `beforeSubmitEvent` | `undefined`                            | Called before a page is submitted.                                     |
 | `afterSubmitEvent`  | `undefined`                            | Called after a page submit, follow-up render, or final completion.     |
 | `onBackEvent`       | `undefined`                            | Called after navigating back.                                          |
+| `autofocus`         | `false`                                | `"always"` or `"navigation"`. Focuses the first question of a page when it is a text field. See [Focus on text questions](#focus-on-text-questions). |
 
 When `getMetaData: true`, the SDK adds: current URL, origin, pathname, query string, user agent, browser language, platform, app metadata, screen size, and the session id when rendering from `session()`. Query params are expanded as `query-<param>`.
+
+#### Focus on text questions
+
+> **Since 2.2.31.**
+
+With `autofocus`, the cursor goes to the first question of a page when it is a text field: `TEXT`, `LONGTEXT`, `EMAIL`, `NUMBER`, or the first field of `CONTACT`. Only the first question counts: a page that starts with a rating and has a text field after it is left alone.
+
+- `"always"`: also on the first page, as soon as the survey is rendered. Fits a survey that fills the page.
+- `"navigation"`: only after Start, Next or Back, when the respondent has just tapped. Fits an embedded survey, where taking the focus on load would open the keyboard on a phone before the respondent has touched anything.
+- Missing or `false`: no automatic focus (the behavior before 2.2.31).
+
+The focus never moves away from an editable field outside the survey, so someone typing in your page's own form keeps their cursor. It is applied after `onLoadedEvent`, `afterSubmitEvent` or `onBackEvent`: if you disable the questions while a page loads, enable them again in that hook and the focus still lands. It is not applied to conversational (AGENT) surveys.
+
+If you show the survey later than it is rendered (for example, a popup revealed once painted), a hidden field cannot take the focus: use `"navigation"` and call [`form.focusFirstQuestion()`](#formfocusfirstquestion) when it becomes visible.
 
 ### `form.send(metadata?, metrics?, profile?, answers?)`
 
 Submits the **current page**.
 
 By default, the SDK scrapes the rendered questions from the DOM, validates required fields, and submits whatever the user entered through the built-in widgets. Use this overload when you used `addButton: false` and want to drive your own next/back buttons.
+
+On a page with a single choice or rating question, the SDK also sends the page by itself when an option is picked. See [Auto-advance](/surveys/guides/customization/#auto-advance).
 
 ```ts
 form.send(
@@ -192,6 +210,20 @@ Navigates to the previous page. Use this when `addButton: false`.
 
 ```ts
 form.back();
+```
+
+### `form.focusFirstQuestion()`
+
+> **Since 2.2.31.**
+
+Moves the focus to the first question of the current page when it is a text field, with the same rules as the [`autofocus`](#focus-on-text-questions) option. Use it when the survey becomes visible later than it is rendered. Returns `true` if the focus moved.
+
+```ts
+await form.generate("survey-root", { autofocus: "navigation" });
+
+// Later, once the popup is visible:
+openPopup();
+form.focusFirstQuestion(); // false when the first question is not a text field
 ```
 
 ### `form.previewQuestion(containerId, question, options?)`

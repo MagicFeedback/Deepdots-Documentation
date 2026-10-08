@@ -74,6 +74,10 @@ function FeedbackModal({ open, onClose }) {
 
 `questionFormat: "slim"` holder hvert trin kompakt inde i en modal.
 
+:::tip
+Åbner modalen med en animation, renderes surveyen, før den er synlig, og kan endnu ikke få fokus. Send `autofocus: "navigation"` og kald [`form.focusFirstQuestion()`](/da/surveys/reference/api/#formfocusfirstquestion), når modalen vises (fra 2.2.31).
+:::
+
 ---
 
 ## Drawer / sidepanel

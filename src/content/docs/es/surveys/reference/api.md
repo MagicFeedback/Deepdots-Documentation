@@ -111,6 +111,7 @@ await form.generate("survey-root", {
     { key: "customer-id", value: ["acme-42"] },
     { key: "plan",        value: ["enterprise"] },
   ],
+  autofocus: "navigation",
   onLoadedEvent:     ({ formData, progress, total, error }) => {},
   beforeSubmitEvent: ({ progress, total }) => {},
   afterSubmitEvent:  ({ response, progress, total, completed, followup, error }) => {},
@@ -120,7 +121,7 @@ await form.generate("survey-root", {
 
 | Opción              | Por defecto                            | Descripción                                                                |
 | ------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
-| `addButton`         | `true`                                 | Renderiza los botones de acción integrados. Desactívalo para controlar la navegación tú. |
+| `addButton`         | `true`                                 | Renderiza los botones de acción integrados. Desactívalo para controlar la navegación tú (mantén un control de Siguiente, mira [Avance automático](/es/surveys/guides/customization/#avance-automático)). |
 | `sendButtonText`    | `"Send"`                               | Label del botón final de submit.                                           |
 | `backButtonText`    | `"Back"`                               | Label del botón atrás.                                                     |
 | `nextButtonText`    | `"Next"`                               | Label del botón siguiente en flujos multi-paso.                            |
@@ -134,14 +135,31 @@ await form.generate("survey-root", {
 | `beforeSubmitEvent` | `undefined`                            | Se llama antes de enviar una página.                                       |
 | `afterSubmitEvent`  | `undefined`                            | Se llama tras enviar una página, renderizar follow-up o completar.         |
 | `onBackEvent`       | `undefined`                            | Se llama tras navegar atrás.                                               |
+| `autofocus`         | `false`                                | `"always"` o `"navigation"`. Pone el foco en la primera pregunta de la página cuando es un campo de texto. Mira [Foco en preguntas de texto](#foco-en-preguntas-de-texto). |
 
 Con `getMetaData: true`, el SDK añade: URL actual, origin, pathname, query string, user agent, idioma del navegador, plataforma, app metadata, tamaño de pantalla y el session id si renderizas desde `session()`. Los query params se expanden como `query-<param>`.
+
+#### Foco en preguntas de texto
+
+> **Disponible desde 2.2.31.**
+
+Con `autofocus`, el cursor va a la primera pregunta de la página cuando es un campo de texto: `TEXT`, `LONGTEXT`, `EMAIL`, `NUMBER` o el primer campo de `CONTACT`. Solo cuenta la primera pregunta: una página que empieza con un rating y tiene un campo de texto después se deja como está.
+
+- `"always"`: también en la primera página, en cuanto se renderiza la encuesta. Va bien para una encuesta a página completa.
+- `"navigation"`: solo después de Empezar, Siguiente o Atrás, cuando el usuario acaba de pulsar. Va bien para una encuesta embebida, donde tomar el foco al cargar abriría el teclado del móvil antes de que el usuario haya tocado nada.
+- Sin definir o `false`: sin foco automático (el comportamiento anterior a 2.2.31).
+
+El foco nunca se quita de un campo editable fuera de la encuesta, así que quien esté escribiendo en un formulario de tu página conserva el cursor. Se aplica después de `onLoadedEvent`, `afterSubmitEvent` u `onBackEvent`: si desactivas las preguntas mientras carga una página, vuelve a activarlas en ese hook y el foco seguirá llegando. No se aplica a las encuestas conversacionales (AGENT).
+
+Si muestras la encuesta más tarde de lo que se renderiza (por ejemplo, un popup que se revela una vez pintado), un campo oculto no puede recibir el foco: usa `"navigation"` y llama a [`form.focusFirstQuestion()`](#formfocusfirstquestion) cuando sea visible.
 
 ### `form.send(metadata?, metrics?, profile?, answers?)`
 
 Envía la **página actual**.
 
 Por defecto, el SDK escanea las preguntas renderizadas del DOM, valida los campos obligatorios y envía lo que el usuario haya introducido en los widgets integrados. Usa esta llamada cuando hayas puesto `addButton: false` y quieras controlar tu propio next/back.
+
+En una página con una sola pregunta de elección o de rating, el SDK también envía la página por sí solo al elegir una opción. Mira [Avance automático](/es/surveys/guides/customization/#avance-automático).
 
 ```ts
 form.send(
@@ -192,6 +210,20 @@ Navega a la página anterior. Úsalo cuando `addButton: false`.
 
 ```ts
 form.back();
+```
+
+### `form.focusFirstQuestion()`
+
+> **Disponible desde 2.2.31.**
+
+Mueve el foco a la primera pregunta de la página actual cuando es un campo de texto, con las mismas reglas que la opción [`autofocus`](#foco-en-preguntas-de-texto). Úsalo cuando la encuesta se hace visible más tarde de lo que se renderiza. Devuelve `true` si el foco se ha movido.
+
+```ts
+await form.generate("survey-root", { autofocus: "navigation" });
+
+// Más tarde, cuando el popup ya es visible:
+openPopup();
+form.focusFirstQuestion(); // false si la primera pregunta no es un campo de texto
 ```
 
 ### `form.previewQuestion(containerId, question, options?)`
