@@ -74,6 +74,10 @@ function FeedbackModal({ open, onClose }) {
 
 `questionFormat: "slim"` mantiene cada paso compacto dentro de un modal.
 
+:::tip
+Si el modal se abre con una animación, la encuesta se renderiza antes de ser visible y todavía no puede recibir el foco. Pasa `autofocus: "navigation"` y llama a [`form.focusFirstQuestion()`](/es/surveys/reference/api/#formfocusfirstquestion) cuando el modal ya se vea (desde 2.2.31).
+:::
+
 ---
 
 ## Drawer / panel lateral

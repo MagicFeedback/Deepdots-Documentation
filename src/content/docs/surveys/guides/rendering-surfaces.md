@@ -74,6 +74,10 @@ function FeedbackModal({ open, onClose }) {
 
 `questionFormat: "slim"` keeps each step compact inside a modal.
 
+:::tip
+If the modal opens with an animation, the survey is rendered before it is visible and cannot take the focus yet. Pass `autofocus: "navigation"` and call [`form.focusFirstQuestion()`](/surveys/reference/api/#formfocusfirstquestion) once the modal is shown (since 2.2.31).
+:::
+
 ---
 
 ## Drawer / side panel

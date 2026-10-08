@@ -296,6 +296,8 @@ document.getElementById("next")?.addEventListener("click", () => form.send());
 document.getElementById("back")?.addEventListener("click", () => form.back());
 ```
 
+Mantén tu botón Siguiente visible en todas las páginas: las páginas de una sola pregunta suelen [avanzar solas](#avance-automático), pero no cuando una pregunta tiene el avance automático desactivado.
+
 ### Controla toda la encuesta desde tus propios widgets
 
 Si quieres ir más allá y renderizar también las **preguntas** con tus propios componentes — no solo los botones — pasa las respuestas programáticamente a `form.send()`. El SDK se salta el escaneo del DOM y la validación, y envía directamente.
@@ -510,6 +512,37 @@ await form.generate("survey-root", {
 
 - `"standard"` — espaciado generoso, inputs grandes. Va bien para encuestas a página completa.
 - `"slim"` — compacto, encaja dentro de modales, drawers o sidebars.
+
+---
+
+## Avance automático
+
+En una página con **una sola pregunta**, elegir una opción envía la página sola, sin pulsar Siguiente. Se aplica a:
+
+- `BOOLEAN`, `CONSENT` y `RATING_STAR`.
+- `RADIO`, salvo su opción extra "Otro" (necesita texto).
+- `RATING_NUMBER` y `RATING_EMOJI`, incluida su opción extra.
+- `MULTIPLECHOISE_IMAGE` en modo de selección única.
+- La casilla "saltar" de un `LONGTEXT` con `maxCharacters` y opción extra.
+
+> **Disponible desde 2.2.31.**
+
+- La página se envía **300 ms** después de elegir, para que el usuario vea la opción marcada.
+- Elegir otra vez dentro de ese margen lo reinicia. Solo se envía la última elección, una vez.
+- Pulsar Siguiente dentro del margen envía la página una sola vez. No se envía nada si la página ha cambiado (Atrás, una página nueva).
+- Elegir con el teclado funciona igual que con un clic o un toque.
+
+Las páginas con varias preguntas nunca avanzan solas. En una página de una sola pregunta, Enter en un campo `TEXT` también envía la página al momento: es una acción explícita, no avance automático. Las encuestas conversacionales (AGENT) muestran una pregunta por turno, así que siguen las mismas reglas.
+
+### Desactivarlo por pregunta
+
+> **Disponible desde 2.2.31.**
+
+Pon `autoAdvance: false` en los assets de la pregunta (en la pregunta en MagicFeedback, no en `generate()`). Así, elegir una opción solo la marca y el usuario pulsa Siguiente. Sin definir o `true` mantiene el comportamiento por defecto, y `true` nunca añade avance automático a otros tipos de pregunta.
+
+:::caution
+Con `addButton: false`, renderiza tu propio control de Siguiente que llame a `form.send()`. Si no, no se puede salir de una pregunta con el avance automático desactivado.
+:::
 
 ---
 

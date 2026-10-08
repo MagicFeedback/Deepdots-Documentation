@@ -296,6 +296,8 @@ document.getElementById("next")?.addEventListener("click", () => form.send());
 document.getElementById("back")?.addEventListener("click", () => form.back());
 ```
 
+Keep your Next button visible on every page: single-question pages usually [advance on their own](#auto-advance), but not when a question has auto-advance turned off.
+
 ### Drive the whole survey from your own widgets
 
 If you want to go further and render the **questions themselves** with your own components — not just the buttons — pass the answers programmatically to `form.send()`. The SDK then skips the DOM scrape and validation and just submits.
@@ -510,6 +512,37 @@ await form.generate("survey-root", {
 
 - `"standard"` — generous spacing, larger inputs. Good for full-page surveys.
 - `"slim"` — compact, fits well inside modals, drawers, or sidebars.
+
+---
+
+## Auto-advance
+
+On a page with a **single question**, picking an option sends the page by itself, with no need to press Next. It applies to:
+
+- `BOOLEAN`, `CONSENT` and `RATING_STAR`.
+- `RADIO`, except its extra "Other" option (it needs text).
+- `RATING_NUMBER` and `RATING_EMOJI`, including their extra option.
+- `MULTIPLECHOISE_IMAGE` in single-choice mode.
+- The "skip" checkbox of a `LONGTEXT` with `maxCharacters` and an extra option.
+
+> **Since 2.2.31.**
+
+- The page is sent **300 ms** after the pick, so the respondent sees the option checked.
+- Picking again inside that window restarts it. Only the last pick is sent, once.
+- Pressing Next inside the window sends the page once. Nothing is sent if the page has changed (Back, a new page).
+- Selecting with the keyboard behaves the same as a click or tap.
+
+Pages with several questions never auto-advance. On a single-question page, Enter in a `TEXT` field also sends the page right away: that is an explicit action, not auto-advance. Conversational (AGENT) surveys show one question per turn, so the same rules apply.
+
+### Turn it off per question
+
+> **Since 2.2.31.**
+
+Set `autoAdvance: false` in the question's assets (on the question in MagicFeedback, not in `generate()`). Picking an option then only checks it, and the respondent presses Next. Missing or `true` keeps the default, and `true` never adds auto-advance to other question types.
+
+:::caution
+With `addButton: false`, render your own Next control that calls `form.send()`. Otherwise a question with auto-advance turned off cannot be left.
+:::
 
 ---
 

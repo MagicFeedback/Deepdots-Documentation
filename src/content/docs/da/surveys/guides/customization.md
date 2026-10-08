@@ -296,6 +296,8 @@ document.getElementById("next")?.addEventListener("click", () => form.send());
 document.getElementById("back")?.addEventListener("click", () => form.back());
 ```
 
+Hold din Næste-knap synlig på alle sider: sider med ét spørgsmål [går som regel selv videre](#automatisk-videre), men ikke når et spørgsmål har det slået fra.
+
 ### Styr hele surveyen fra dine egne widgets
 
 Vil du gå videre og rendere selve **spørgsmålene** med dine egne komponenter — ikke kun knapperne — så send svarene programmatisk til `form.send()`. SDK'et springer DOM-scanningen og valideringen over og indsender direkte.
@@ -510,6 +512,37 @@ await form.generate("survey-root", {
 
 - `"standard"` — generøs spacing, store inputs. Velegnet til full-page-undersøgelser.
 - `"slim"` — kompakt, passer i modaler, drawers eller sidebars.
+
+---
+
+## Automatisk videre
+
+På en side med **ét spørgsmål** indsendes siden af sig selv, når en mulighed vælges, uden at der trykkes Næste. Det gælder:
+
+- `BOOLEAN`, `CONSENT` og `RATING_STAR`.
+- `RADIO`, undtagen dens ekstra "Andet"-mulighed (den kræver tekst).
+- `RATING_NUMBER` og `RATING_EMOJI`, inklusive deres ekstra mulighed.
+- `MULTIPLECHOISE_IMAGE` med enkeltvalg.
+- "Spring over"-afkrydsningsfeltet på et `LONGTEXT` med `maxCharacters` og en ekstra mulighed.
+
+> **Tilgængelig fra 2.2.31.**
+
+- Siden indsendes **300 ms** efter valget, så brugeren ser muligheden markeret.
+- Et nyt valg inden for det vindue starter det forfra. Kun det sidste valg indsendes, én gang.
+- Trykkes der Næste inden for vinduet, indsendes siden én gang. Intet indsendes, hvis siden er skiftet (Tilbage, en ny side).
+- Valg med tastaturet virker som et klik eller tryk.
+
+Sider med flere spørgsmål går aldrig automatisk videre. På en side med ét spørgsmål indsender Enter i et `TEXT`-felt også siden med det samme: det er en eksplicit handling, ikke automatisk videre. Konversationelle (AGENT) surveys viser ét spørgsmål ad gangen, så de samme regler gælder.
+
+### Slå det fra pr. spørgsmål
+
+> **Tilgængelig fra 2.2.31.**
+
+Sæt `autoAdvance: false` i spørgsmålets assets (på spørgsmålet i MagicFeedback, ikke i `generate()`). Et valg markerer så kun muligheden, og brugeren trykker Næste. Udeladt eller `true` beholder standardadfærden, og `true` tilføjer aldrig automatisk videre til andre spørgsmålstyper.
+
+:::caution
+Med `addButton: false` skal du rendere din egen Næste-knap, der kalder `form.send()`. Ellers kan man ikke komme videre fra et spørgsmål, hvor automatisk videre er slået fra.
+:::
 
 ---
 

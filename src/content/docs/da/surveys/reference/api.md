@@ -111,6 +111,7 @@ await form.generate("survey-root", {
     { key: "customer-id", value: ["acme-42"] },
     { key: "plan",        value: ["enterprise"] },
   ],
+  autofocus: "navigation",
   onLoadedEvent:     ({ formData, progress, total, error }) => {},
   beforeSubmitEvent: ({ progress, total }) => {},
   afterSubmitEvent:  ({ response, progress, total, completed, followup, error }) => {},
@@ -120,7 +121,7 @@ await form.generate("survey-root", {
 
 | Option              | Default                                | Beskrivelse                                                            |
 | ------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
-| `addButton`         | `true`                                 | Renderer indbyggede action-knapper. Slå fra for selv at styre navigation. |
+| `addButton`         | `true`                                 | Renderer indbyggede action-knapper. Slå fra for selv at styre navigation (behold en Næste-knap, se [Automatisk videre](/da/surveys/guides/customization/#automatisk-videre)). |
 | `sendButtonText`    | `"Send"`                               | Label på den endelige submit-knap.                                     |
 | `backButtonText`    | `"Back"`                               | Label på tilbage-knappen.                                              |
 | `nextButtonText`    | `"Next"`                               | Label på næste-knappen i multi-step-flows.                             |
@@ -134,14 +135,31 @@ await form.generate("survey-root", {
 | `beforeSubmitEvent` | `undefined`                            | Kaldes før en side indsendes.                                          |
 | `afterSubmitEvent`  | `undefined`                            | Kaldes efter side-indsendelse, followup-render eller endelig færdiggørelse. |
 | `onBackEvent`       | `undefined`                            | Kaldes efter tilbage-navigation.                                       |
+| `autofocus`         | `false`                                | `"always"` eller `"navigation"`. Sætter fokus i sidens første spørgsmål, når det er et tekstfelt. Se [Fokus på tekstspørgsmål](#fokus-på-tekstspørgsmål). |
 
 Når `getMetaData: true` tilføjer SDK'et: nuværende URL, origin, pathname, query string, user agent, browsersprog, platform, app-metadata, skærmstørrelse og session-id ved render fra `session()`. Query params udvides som `query-<param>`.
+
+#### Fokus på tekstspørgsmål
+
+> **Tilgængelig fra 2.2.31.**
+
+Med `autofocus` placeres markøren i sidens første spørgsmål, når det er et tekstfelt: `TEXT`, `LONGTEXT`, `EMAIL`, `NUMBER` eller det første felt i `CONTACT`. Kun det første spørgsmål tæller: en side, der starter med en rating og har et tekstfelt bagefter, lades i fred.
+
+- `"always"`: også på første side, så snart surveyen er renderet. Passer til en survey, der fylder hele siden.
+- `"navigation"`: kun efter Start, Næste eller Tilbage, når brugeren lige har trykket. Passer til en indlejret survey, hvor fokus ved indlæsning ville åbne tastaturet på en telefon, før brugeren har rørt noget.
+- Udeladt eller `false`: intet automatisk fokus (adfærden før 2.2.31).
+
+Fokus flyttes aldrig væk fra et redigerbart felt uden for surveyen, så en bruger, der skriver i din sides egen formular, beholder markøren. Det anvendes efter `onLoadedEvent`, `afterSubmitEvent` eller `onBackEvent`: deaktiverer du spørgsmålene, mens en side indlæses, så aktivér dem igen i det hook, og fokus lander stadig. Det anvendes ikke i konversationelle (AGENT) surveys.
+
+Viser du surveyen senere, end den renderes (f.eks. en popup, der først vises, når den er tegnet), kan et skjult felt ikke få fokus: brug `"navigation"` og kald [`form.focusFirstQuestion()`](#formfocusfirstquestion), når den bliver synlig.
 
 ### `form.send(metadata?, metrics?, profile?, answers?)`
 
 Indsender den **aktuelle side**.
 
 Som standard scanner SDK'et de renderede spørgsmål fra DOM'en, validerer påkrævede felter og indsender det, brugeren har udfyldt via de indbyggede widgets. Brug dette kald, når du har sat `addButton: false` og vil styre dine egne next/back-knapper.
+
+På en side med ét valg- eller rating-spørgsmål indsender SDK'et også selv siden, når en mulighed vælges. Se [Automatisk videre](/da/surveys/guides/customization/#automatisk-videre).
 
 ```ts
 form.send(
@@ -192,6 +210,20 @@ Navigerer til forrige side. Brug det med `addButton: false`.
 
 ```ts
 form.back();
+```
+
+### `form.focusFirstQuestion()`
+
+> **Tilgængelig fra 2.2.31.**
+
+Flytter fokus til første spørgsmål på den aktuelle side, når det er et tekstfelt, med samme regler som [`autofocus`](#fokus-på-tekstspørgsmål)-optionen. Brug det, når surveyen bliver synlig senere, end den renderes. Returnerer `true`, hvis fokus blev flyttet.
+
+```ts
+await form.generate("survey-root", { autofocus: "navigation" });
+
+// Senere, når popup'en er synlig:
+openPopup();
+form.focusFirstQuestion(); // false, når første spørgsmål ikke er et tekstfelt
 ```
 
 ### `form.previewQuestion(containerId, question, options?)`
