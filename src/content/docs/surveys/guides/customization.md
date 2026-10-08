@@ -538,7 +538,7 @@ Pages with several questions never auto-advance. On a single-question page, Ente
 
 > **Since 2.2.31.**
 
-Set `autoAdvance: false` in the question's assets (on the question in MagicFeedback, not in `generate()`). Picking an option then only checks it, and the respondent presses Next. Missing or `true` keeps the default, and `true` never adds auto-advance to other question types.
+A question can have auto-advance turned off (`autoAdvance: false` in its assets). It is set on the question, not in `generate()`, and it can't be changed from the admin panel yet: ask your Deepdots contact to turn it off for the questions you need. Picking an option then only checks it, and the respondent presses Next. Missing or `true` keeps the default, and `true` never adds auto-advance to other question types.
 
 :::caution
 With `addButton: false`, render your own Next control that calls `form.send()`. Otherwise a question with auto-advance turned off cannot be left.

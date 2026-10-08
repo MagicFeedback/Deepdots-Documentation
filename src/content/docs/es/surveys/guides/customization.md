@@ -538,7 +538,7 @@ Las páginas con varias preguntas nunca avanzan solas. En una página de una sol
 
 > **Disponible desde 2.2.31.**
 
-Pon `autoAdvance: false` en los assets de la pregunta (en la pregunta en MagicFeedback, no en `generate()`). Así, elegir una opción solo la marca y el usuario pulsa Siguiente. Sin definir o `true` mantiene el comportamiento por defecto, y `true` nunca añade avance automático a otros tipos de pregunta.
+Una pregunta puede tener el avance automático desactivado (`autoAdvance: false` en sus assets). Se configura en la pregunta, no en `generate()`, y todavía no se puede cambiar desde el panel de administración: pide a tu contacto de Deepdots que lo desactive en las preguntas que necesites. Así, elegir una opción solo la marca y el usuario pulsa Siguiente. Sin definir o `true` mantiene el comportamiento por defecto, y `true` nunca añade avance automático a otros tipos de pregunta.
 
 :::caution
 Con `addButton: false`, renderiza tu propio control de Siguiente que llame a `form.send()`. Si no, no se puede salir de una pregunta con el avance automático desactivado.

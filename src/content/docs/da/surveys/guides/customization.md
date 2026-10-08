@@ -538,7 +538,7 @@ Sider med flere spørgsmål går aldrig automatisk videre. På en side med ét s
 
 > **Tilgængelig fra 2.2.31.**
 
-Sæt `autoAdvance: false` i spørgsmålets assets (på spørgsmålet i MagicFeedback, ikke i `generate()`). Et valg markerer så kun muligheden, og brugeren trykker Næste. Udeladt eller `true` beholder standardadfærden, og `true` tilføjer aldrig automatisk videre til andre spørgsmålstyper.
+Et spørgsmål kan have automatisk videre slået fra (`autoAdvance: false` i dets assets). Det sættes på spørgsmålet, ikke i `generate()`, og kan endnu ikke ændres fra administrationspanelet: bed din kontaktperson hos Deepdots om at slå det fra for de spørgsmål, du har brug for. Et valg markerer så kun muligheden, og brugeren trykker Næste. Udeladt eller `true` beholder standardadfærden, og `true` tilføjer aldrig automatisk videre til andre spørgsmålstyper.
 
 :::caution
 Med `addButton: false` skal du rendere din egen Næste-knap, der kalder `form.send()`. Ellers kan man ikke komme videre fra et spørgsmål, hvor automatisk videre er slået fra.
