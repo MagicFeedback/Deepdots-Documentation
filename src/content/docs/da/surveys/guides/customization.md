@@ -523,7 +523,7 @@ På en side med **ét spørgsmål** indsendes siden af sig selv, når en mulighe
 - `RADIO`, undtagen dens ekstra "Andet"-mulighed (den kræver tekst).
 - `RATING_NUMBER` og `RATING_EMOJI`, inklusive deres ekstra mulighed.
 - `MULTIPLECHOISE_IMAGE` med enkeltvalg.
-- "Spring over"-afkrydsningsfeltet på et `LONGTEXT` med `maxCharacters` og en ekstra mulighed.
+- "Spring over"-afkrydsningsfeltet på et `LONGTEXT` med `maxCharacters` og en ekstra mulighed med tekst.
 
 > **Tilgængelig fra 2.2.31.**
 
@@ -538,7 +538,7 @@ Sider med flere spørgsmål går aldrig automatisk videre. På en side med ét s
 
 > **Tilgængelig fra 2.2.31.**
 
-Et spørgsmål kan have automatisk videre slået fra (`autoAdvance: false` i dets assets). Det sættes på spørgsmålet, ikke i `generate()`, og kan endnu ikke ændres fra administrationspanelet: bed din kontaktperson hos Deepdots om at slå det fra for de spørgsmål, du har brug for. Et valg markerer så kun muligheden, og brugeren trykker Næste. Udeladt eller `true` beholder standardadfærden, og `true` tilføjer aldrig automatisk videre til andre spørgsmålstyper.
+Et spørgsmål kan have automatisk videre slået fra (`autoAdvance: false` i dets assets). Det sættes på spørgsmålet, ikke i `generate()`: åbn spørgsmålet i administrationspanelet og slå **Automatisk videre** fra. Kontakten vises kun for spørgsmålstyperne ovenfor. Et valg markerer så kun muligheden, og brugeren trykker Næste. Udeladt eller `true` beholder standardadfærden, og `true` tilføjer aldrig automatisk videre til andre spørgsmålstyper.
 
 :::caution
 Med `addButton: false` skal du rendere din egen Næste-knap, der kalder `form.send()`. Ellers kan man ikke komme videre fra et spørgsmål, hvor automatisk videre er slået fra.

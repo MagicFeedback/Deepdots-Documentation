@@ -523,7 +523,7 @@ En una página con **una sola pregunta**, elegir una opción envía la página s
 - `RADIO`, salvo su opción extra "Otro" (necesita texto).
 - `RATING_NUMBER` y `RATING_EMOJI`, incluida su opción extra.
 - `MULTIPLECHOISE_IMAGE` en modo de selección única.
-- La casilla "saltar" de un `LONGTEXT` con `maxCharacters` y opción extra.
+- La casilla "saltar" de un `LONGTEXT` con `maxCharacters` y opción extra con su texto.
 
 > **Disponible desde 2.2.31.**
 
@@ -538,7 +538,7 @@ Las páginas con varias preguntas nunca avanzan solas. En una página de una sol
 
 > **Disponible desde 2.2.31.**
 
-Una pregunta puede tener el avance automático desactivado (`autoAdvance: false` en sus assets). Se configura en la pregunta, no en `generate()`, y todavía no se puede cambiar desde el panel de administración: pide a tu contacto de Deepdots que lo desactive en las preguntas que necesites. Así, elegir una opción solo la marca y el usuario pulsa Siguiente. Sin definir o `true` mantiene el comportamiento por defecto, y `true` nunca añade avance automático a otros tipos de pregunta.
+Una pregunta puede tener el avance automático desactivado (`autoAdvance: false` en sus assets). Se configura en la pregunta, no en `generate()`: en el panel de administración, abre la pregunta y desactiva **Avance automático**. El interruptor solo aparece en los tipos de pregunta de la lista anterior. Así, elegir una opción solo la marca y el usuario pulsa Siguiente. Sin definir o `true` mantiene el comportamiento por defecto, y `true` nunca añade avance automático a otros tipos de pregunta.
 
 :::caution
 Con `addButton: false`, renderiza tu propio control de Siguiente que llame a `form.send()`. Si no, no se puede salir de una pregunta con el avance automático desactivado.

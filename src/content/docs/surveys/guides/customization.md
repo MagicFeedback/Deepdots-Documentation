@@ -523,7 +523,7 @@ On a page with a **single question**, picking an option sends the page by itself
 - `RADIO`, except its extra "Other" option (it needs text).
 - `RATING_NUMBER` and `RATING_EMOJI`, including their extra option.
 - `MULTIPLECHOISE_IMAGE` in single-choice mode.
-- The "skip" checkbox of a `LONGTEXT` with `maxCharacters` and an extra option.
+- The "skip" checkbox of a `LONGTEXT` with `maxCharacters` and an extra option with its text.
 
 > **Since 2.2.31.**
 
@@ -538,7 +538,7 @@ Pages with several questions never auto-advance. On a single-question page, Ente
 
 > **Since 2.2.31.**
 
-A question can have auto-advance turned off (`autoAdvance: false` in its assets). It is set on the question, not in `generate()`, and it can't be changed from the admin panel yet: ask your Deepdots contact to turn it off for the questions you need. Picking an option then only checks it, and the respondent presses Next. Missing or `true` keeps the default, and `true` never adds auto-advance to other question types.
+A question can have auto-advance turned off (`autoAdvance: false` in its assets). It is set on the question, not in `generate()`: in the admin panel, open the question and turn off **Auto-advance**. The switch only shows on the question types listed above. Picking an option then only checks it, and the respondent presses Next. Missing or `true` keeps the default, and `true` never adds auto-advance to other question types.
 
 :::caution
 With `addButton: false`, render your own Next control that calls `form.send()`. Otherwise a question with auto-advance turned off cannot be left.
