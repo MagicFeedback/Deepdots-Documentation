@@ -86,11 +86,22 @@ El lote de cierre hace flush de todo lo que quedaba abierto, en orden: el `deepd
 
 | `reason` | Cuándo |
 | --- | --- |
-| `page_hide` | Se cierra la página (`pagehide`) — web |
+| `page_hide` | Se cierra la página (`pagehide`) y la sesión no se puede suspender, o el backend cierra una suspendida — web (ver abajo) |
 | `background` | La app pasa a segundo plano (`onBackground()`) — React Native |
 | `user_change` | `setUserId()` cambió de usuario |
 | `tracking_disabled` | `setTrackingEnabled(false)` |
 | `manual` | `endSession()` |
+
+### Recargar no parte la sesión
+
+Desde la **1.11.0**, `pagehide` ya no cierra la sesión en web. El navegador lo lanza igual al recargar (Cmd+R / F5) o al navegar con carga completa que al cerrar la pestaña, así que cerrar ahí partía cada recarga en dos registros. Ahora la sesión se **suspende**:
+
+1. El último lote de la página manda lo pendiente (el `deepdots_page_view` actual, las salidas de mini-service y el engagement) con un evento `deepdots_session_suspend` y **sin** `completed`.
+2. El id del registro se guarda en `sessionStorage`, que sobrevive a una recarga y desaparece al cerrar la pestaña.
+3. Si la página vuelve a cargar en la misma pestaña en menos de **1 minuto**, el SDK sigue en el mismo registro. Su primer lote lleva un evento `deepdots_session_resume` (con `suspended_ms`) en lugar de `deepdots_session_start`, así que no cuenta como sesión nueva.
+4. Si la pestaña se cerró, el backend cierra la sesión a los pocos minutos y añade el `deepdots_session_end` con `reason: page_hide`.
+
+Otra pestaña, otro usuario u otra integración de analytics nunca heredan una sesión suspendida. Si al ocultarse la página todavía no se conoce el registro (el primer lote sigue en vuelo) o no hay `sessionStorage`, la sesión se cierra como antes.
 
 ### `endSession()`
 
