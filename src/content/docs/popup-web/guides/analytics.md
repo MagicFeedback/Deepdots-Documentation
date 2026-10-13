@@ -86,11 +86,22 @@ The closing batch flushes everything still open, in order: the current screen's 
 
 | `reason` | When |
 | --- | --- |
-| `page_hide` | The page closes (`pagehide`) — web |
+| `page_hide` | The page closes (`pagehide`) and the session cannot be suspended, or the backend closes a suspended one — web (see below) |
 | `background` | The app goes to background (`onBackground()`) — React Native |
 | `user_change` | `setUserId()` switched the user |
 | `tracking_disabled` | `setTrackingEnabled(false)` |
 | `manual` | `endSession()` |
+
+### Reloads keep the session
+
+Since **1.11.0**, `pagehide` no longer closes the session on the web. The browser fires it the same way on a reload (Cmd+R / F5) or a full-page navigation as when the tab is closed, so closing there split every reload into two records. Now the session is **suspended**:
+
+1. The last batch of the page flushes what is pending (the current `deepdots_page_view`, mini-service exits, engagement) with a `deepdots_session_suspend` event and **without** `completed`.
+2. The record id is kept in `sessionStorage`, which survives a reload and dies with the tab.
+3. If the page loads again in the same tab within **1 minute**, the SDK carries on in the same record. Its first batch has a `deepdots_session_resume` event (with `suspended_ms`) instead of `deepdots_session_start`, so it does not count as a new session.
+4. If the tab was closed, the backend closes the session a few minutes later and adds the `deepdots_session_end` with `reason: page_hide`.
+
+Another tab, another user or another analytics integration never inherits a suspended session. If the record is not known yet when the page hides (the first batch is still in flight) or `sessionStorage` is not available, the session closes as before.
 
 ### `endSession()`
 

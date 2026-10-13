@@ -37,4 +37,8 @@ popups.off('popup_shown', onShown);
 
 ## Nota sobre `popup_clicked`
 
-`popup_clicked` es un evento de interaccion general. Dependiendo del flujo, `data.action` puede incluir valores como `loaded`, `start_survey`, `manual_send`, `back`, `complete` o `close_icon`.
+`popup_clicked` significa que el usuario ha hecho algo en el popup. En web, `data.action` es uno de `start_survey`, `manual_send`, `back`, `complete`, `close_icon` o `partial` (el usuario respondió una página y avanzó; este además marca el popup como `PARTIAL` en el backend).
+
+Cargar el survey, el inicio de un envío y los errores de validación o de envío no son interacción y no lo emiten. Las versiones anteriores también enviaban `loaded`, `before_submit`, `validation_error_required` y `submit_error`, y dos eventos `back` por cada toque en Volver.
+
+En React Native el puente lo emite una vez por popup, con `action: 'partial'`, en la primera interacción real (enviar una respuesta o volver atrás). Cargar el survey no cuenta.

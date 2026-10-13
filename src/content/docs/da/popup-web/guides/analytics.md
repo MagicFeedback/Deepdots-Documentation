@@ -86,11 +86,22 @@ Afslutningsbatchen flusher alt, der stadig var åbent, i denne rækkefølge: den
 
 | `reason` | Hvornår |
 | --- | --- |
-| `page_hide` | Siden lukkes (`pagehide`) — web |
+| `page_hide` | Siden lukkes (`pagehide`), og sessionen kan ikke sættes på pause, eller backenden lukker en sat på pause — web (se nedenfor) |
 | `background` | Appen går i baggrunden (`onBackground()`) — React Native |
 | `user_change` | `setUserId()` skiftede bruger |
 | `tracking_disabled` | `setTrackingEnabled(false)` |
 | `manual` | `endSession()` |
+
+### Genindlæsning deler ikke sessionen
+
+Fra **1.11.0** lukker `pagehide` ikke længere sessionen på web. Browseren udløser det på samme måde ved en genindlæsning (Cmd+R / F5) eller en navigation med fuld sideindlæsning som når fanen lukkes, så lukning der delte hver genindlæsning i to poster. Nu bliver sessionen **sat på pause**:
+
+1. Sidens sidste batch sender det ventende (den aktuelle `deepdots_page_view`, mini-service-exits og engagement) med en `deepdots_session_suspend`-hændelse og **uden** `completed`.
+2. Postens id gemmes i `sessionStorage`, som overlever en genindlæsning og forsvinder, når fanen lukkes.
+3. Hvis siden indlæses igen i samme fane inden for **1 minut**, fortsætter SDK'et i samme post. Dens første batch har en `deepdots_session_resume`-hændelse (med `suspended_ms`) i stedet for `deepdots_session_start`, så den tæller ikke som en ny session.
+4. Hvis fanen blev lukket, lukker backenden sessionen nogle minutter senere og tilføjer `deepdots_session_end` med `reason: page_hide`.
+
+En anden fane, en anden bruger eller en anden analytics-integration arver aldrig en session sat på pause. Hvis posten endnu ikke kendes, når siden skjules (den første batch er stadig undervejs), eller `sessionStorage` ikke er tilgængelig, lukkes sessionen som før.
 
 ### `endSession()`
 
