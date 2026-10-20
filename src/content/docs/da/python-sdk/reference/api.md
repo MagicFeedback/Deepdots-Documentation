@@ -56,7 +56,7 @@ Adgang via `client.feedbacks`.
 
 ### `create(feedback)`
 
-Returnerer det oprettede feedback-objekt. Se [Administration af Feedback](/da/python-sdk/guides/feedback/).
+Kontrollerer at de påkrævede nøgler er til stede (og kaster `ValueError`, hvis en af dem mangler), pakker `value`-værdier der ikke er lister, ind i lister (se [Automatisk indpakning af svarværdier](/da/python-sdk/guides/feedback/#automatisk-indpakning-af-svarværdier)) og sender `feedback` som JSON-body i `POST /feedbacks` uden at ændre dine nøgler. Returnerer det oprettede feedback-objekt. Hvis `external_id` matcher et feedback der allerede findes for samme virksomhed, produkt og integration, og som ikke er slettet, returneres i stedet det eksisterende feedback uændret. Se [Administration af Feedback](/da/python-sdk/guides/feedback/).
 
 ### `get(filter=None)`
 
@@ -68,11 +68,11 @@ Returnerer et enkelt feedback-objekt.
 
 ### `update(feedback_id, feedback)`
 
-Returnerer det opdaterede feedback-objekt.
+Sender `PATCH /feedbacks/{feedback_id}` kun med de felter du angiver. Returnerer et tomt dict (`{}`), fordi API'en svarer `204 No Content`. Medtag `"status": "REGISTERED"` for at få feedbacket analyseret igen (se [Kør analysen igen](/da/python-sdk/guides/feedback/#kør-analysen-igen)).
 
 ### `delete(feedback_id)`
 
-Returnerer det slettede feedback-objekt.
+Udfaser feedbacket (dets status bliver `DEPRECATED`, og det skjules i rapporter og i opslag der ikke filtrerer på `status`). Returnerer et tomt dict (`{}`).
 
 ### `upload_attachment(feedback_id, file_path, filename=None, extra_data=None)`
 
@@ -166,12 +166,12 @@ Adgang via `client.integrations_questions`.
 
 ### `get(integration_id, filter=None)`
 
-Returnerer listen af spørgsmål konfigureret for den angivne integration.
+Returnerer listen af spørgsmål konfigureret for den angivne integration. Brug den til at slå gyldige svarnøgler op, før du opretter feedback: hvert spørgsmåls `ref` er den `key` du skal bruge i `answers`.
 
 ```python
-questions = client.integrations_questions.get("0eb9d270-6dd7-11ef-9987-21e04f383573")
+questions = client.integrations_questions.get("DIT_INTEGRATION_ID")
 for q in questions:
-    print(q["key"], q["type"])
+    print(q["ref"], q["type"], q["title"])
 ```
 
 ---
@@ -197,6 +197,15 @@ Returnerer newsletter-specifikke rapportdata.
 
 Returnerer det opdaterede rapportobjekt.
 
+### `regenerate(report_id, body=None)`
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `report_id` | string | ID på rapporten der skal regenereres |
+| `body` | dict \| None | Valgfri publiceringskonfiguration |
+
+Genudgiver rapporten ved at kalde `POST /reporting/report/{report_id}/publish`. Returnerer svaret fra publicerings-endpointet.
+
 ---
 
 ## Fejlhåndtering
@@ -213,3 +222,36 @@ except requests.exceptions.HTTPError as e:
 ```
 
 Klient-side validering (manglende påkrævede felter) kaster `ValueError` inden requesten sendes.
+
+Statuskoder du kan støde på:
+
+| Status | Betydning |
+|---|---|
+| `400` | Requesten er forkert opbygget eller ikke tilladt — for eksempel en filterværdi der indeholder `&` eller `#` (se [Forespørgsler](/da/python-sdk/guides/querying/)), eller en kontakt i `crmContactId` der tilhører en anden virksomhed |
+| `401` | Tokenet mangler, er ugyldigt eller er udløbet, eller din bruger er deaktiveret. Tokens udløber efter cirka en time: i langvarige jobs som en import skal du oprette en ny klient (eller, fra SDK 1.0.17, kalde `client.refresh_token()`) og prøve igen |
+| `403` | Du har filtreret på en virksomhed som din bruger ikke har adgang til, for eksempel et forkert `companyId` i `where` |
+| `404` | Noget som requesten henviser til, findes ikke eller er ikke synligt for dig — for eksempel en kontakt i `crmContactId`, en kampagne eller en rapport |
+| `405` | Din brugers rolle tillader ikke denne operation (f.eks. opdatering af feedback) |
+| `406` | Posten findes ikke, er blevet slettet eller tilhører en virksomhed du ikke har adgang til — for eksempel `feedbacks.get_id()`, `update()` eller `delete()` på sådan et feedback (de returnerer 406, ikke 404) |
+| `422` | Request-body'en er ugyldig — et ukendt eller fejlstavet felt, en forkert type eller en værdi der ikke er blandt de tilladte |
+
+Et `422`-svar oplister alle problemer i `details`; med SDK'en læser du listen fra undtagelsen som `e.response.json()["error"]["details"]`. Hvis du f.eks. sender `externalId` i stedet for `external_id`, returneres:
+
+```json
+{
+  "error": {
+    "statusCode": 422,
+    "name": "UnprocessableEntityError",
+    "message": "The request body is invalid. See error object `details` property for more info.",
+    "code": "VALIDATION_FAILED",
+    "details": [
+      {
+        "path": "",
+        "code": "additionalProperties",
+        "message": "must NOT have additional properties",
+        "info": {"additionalProperty": "externalId"}
+      }
+    ]
+  }
+}
+```

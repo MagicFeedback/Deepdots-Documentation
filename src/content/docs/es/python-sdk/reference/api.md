@@ -56,7 +56,7 @@ Acceso via `client.feedbacks`.
 
 ### `create(feedback)`
 
-Retorna el objeto de feedback creado. Ver [Gestión de Feedback](/es/python-sdk/guides/feedback/).
+Comprueba que las claves requeridas estén presentes (lanza `ValueError` si falta alguna), envuelve en una lista cada `value` que no sea una lista (ver [Envoltura de valores de respuesta](/es/python-sdk/guides/feedback/#envoltura-de-valores-de-respuesta)) y envía `feedback` como cuerpo JSON de `POST /feedbacks` con tus claves sin cambios. Retorna el objeto de feedback creado. Si `external_id` coincide con un feedback que ya existe para la misma empresa, producto e integración y que no se ha eliminado, retorna en su lugar ese feedback existente, sin cambios. Ver [Gestión de Feedback](/es/python-sdk/guides/feedback/).
 
 ### `get(filter=None)`
 
@@ -68,11 +68,11 @@ Retorna un único objeto de feedback.
 
 ### `update(feedback_id, feedback)`
 
-Retorna el objeto de feedback actualizado.
+Envía `PATCH /feedbacks/{feedback_id}` solo con los campos que pasas. Retorna un dict vacío (`{}`), porque la API responde `204 No Content`. Incluye `"status": "REGISTERED"` para que el feedback se analice de nuevo (ver [Volver a ejecutar el análisis](/es/python-sdk/guides/feedback/#volver-a-ejecutar-el-análisis)).
 
 ### `delete(feedback_id)`
 
-Retorna el objeto de feedback eliminado.
+Retira el feedback (su estado pasa a ser `DEPRECATED`, y se oculta de los reportes y de las lecturas que no filtren por `status`). Retorna un dict vacío (`{}`).
 
 ### `upload_attachment(feedback_id, file_path, filename=None, extra_data=None)`
 
@@ -166,12 +166,12 @@ Acceso via `client.integrations_questions`.
 
 ### `get(integration_id, filter=None)`
 
-Retorna la lista de preguntas configuradas para la integración indicada.
+Retorna la lista de preguntas configuradas para la integración indicada. Úsalo para consultar las claves de respuesta válidas antes de crear feedback: el `ref` de cada pregunta es la `key` que debes usar en `answers`.
 
 ```python
-questions = client.integrations_questions.get("0eb9d270-6dd7-11ef-9987-21e04f383573")
+questions = client.integrations_questions.get("TU_INTEGRATION_ID")
 for q in questions:
-    print(q["key"], q["type"])
+    print(q["ref"], q["type"], q["title"])
 ```
 
 ---
@@ -197,6 +197,15 @@ Retorna datos de reportes específicos de newsletter.
 
 Retorna el objeto de reporte actualizado.
 
+### `regenerate(report_id, body=None)`
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `report_id` | string | ID del reporte a regenerar |
+| `body` | dict \| None | Configuración de publicación opcional |
+
+Vuelve a publicar el reporte llamando a `POST /reporting/report/{report_id}/publish`. Retorna la respuesta del endpoint de publicación.
+
 ---
 
 ## Manejo de errores
@@ -213,3 +222,36 @@ except requests.exceptions.HTTPError as e:
 ```
 
 La validación del lado del cliente (campos requeridos faltantes) lanza `ValueError` antes de que se envíe el request.
+
+Códigos de estado que puedes recibir:
+
+| Código | Significado |
+|---|---|
+| `400` | El request está mal formado o no está permitido — por ejemplo, un valor de filtro que contiene `&` o `#` (ver [Consultas](/es/python-sdk/guides/querying/)), o un `crmContactId` que pertenece a otra empresa |
+| `401` | El token falta, no es válido o ha caducado, o tu usuario está desactivado. Los tokens caducan después de aproximadamente una hora: en procesos largos, como una importación, crea un nuevo cliente (o, a partir del SDK 1.0.17, llama a `client.refresh_token()`) y vuelve a intentarlo |
+| `403` | Filtraste por una empresa a la que tu usuario no tiene acceso, por ejemplo con un `companyId` incorrecto en `where` |
+| `404` | Algo a lo que hace referencia el request no existe o no es visible para ti — por ejemplo, un `crmContactId`, una campaña o un reporte |
+| `405` | El rol de tu usuario no permite esta operación (ej. actualizar feedback) |
+| `406` | El registro no existe, fue eliminado o pertenece a una empresa a la que no tienes acceso — por ejemplo, `feedbacks.get_id()`, `update()` o `delete()` sobre un feedback así (estas llamadas retornan 406, no 404) |
+| `422` | El cuerpo del request no es válido — un campo desconocido o mal escrito, un tipo incorrecto o un valor fuera de la lista permitida |
+
+Una respuesta `422` lista todos los problemas en `details`; con el SDK, léelo desde la excepción como `e.response.json()["error"]["details"]`. Por ejemplo, enviar `externalId` en lugar de `external_id` retorna:
+
+```json
+{
+  "error": {
+    "statusCode": 422,
+    "name": "UnprocessableEntityError",
+    "message": "The request body is invalid. See error object `details` property for more info.",
+    "code": "VALIDATION_FAILED",
+    "details": [
+      {
+        "path": "",
+        "code": "additionalProperties",
+        "message": "must NOT have additional properties",
+        "info": {"additionalProperty": "externalId"}
+      }
+    ]
+  }
+}
+```
