@@ -61,13 +61,20 @@ feedbacks = client.feedbacks.get({
 })
 ```
 
+:::caution
+Brug én operator pr. betingelse. API'en anvender kun den første operator i en betingelse, så `{"createdAt": {"gte": ..., "lt": ...}}` ignorerer `lt` uden varsel og returnerer alt fra den første dato og frem. Vil du afgrænse et vindue i begge ender, så brug `between`, eller sæt hver grænse i sin egen betingelse inde i `and`, som vist nedenfor.
+:::
+
 ### Filtrer feedback efter hvornår det fandt sted
 
-`createdAt` er det tidspunkt hvor API'en modtog en post. For feedback der kommer fra et andet system, er den dato der tæller — den dashboardet viser — `externalGeneratedAt` (se [Kildesystemfelter](/da/python-sdk/guides/feedback/#kildesystemfelter)). Filtrer på den med et halvåbent interval af rene datoer: `gte` den første dag og `lt` dagen efter den sidste:
+`createdAt` er det tidspunkt hvor API'en modtog en post. For feedback der kommer fra et andet system, er den dato der tæller — den dashboardet viser — `externalGeneratedAt` (se [Kildesystemfelter](/da/python-sdk/guides/feedback/#kildesystemfelter)). Filtrer på den med et halvåbent interval af rene datoer: `gte` den første dag og `lt` dagen efter den sidste, hver i sin egen betingelse inde i `and`:
 
 ```python
 feedbacks = client.feedbacks.get({
-    "where": {"externalGeneratedAt": {"gte": "2026-09-01", "lt": "2026-10-01"}},
+    "where": {"and": [
+        {"externalGeneratedAt": {"gte": "2026-09-01"}},
+        {"externalGeneratedAt": {"lt": "2026-10-01"}},
+    ]},
     "order": "externalGeneratedAt DESC",
 })
 ```

@@ -156,7 +156,7 @@ client.feedbacks.update("feedback-uuid-aqui", {
 
 Solo se cambian los campos que pasas; el resto permanece sin cambios. `update()` retorna un dict vacío (`{}`), porque la API responde `204 No Content`. Llama a `get_id()` si necesitas el feedback actualizado.
 
-Algunos campos no se pueden cambiar una vez que el feedback existe: `external_id`, `type`, `identity`, `integrationId`, `productId`, `profile` y `data`. Enviar cualquiera de ellos hace fallar todo el request con HTTP 422. Envía solo los campos que estás cambiando, no un objeto completo leído con `get_id()`.
+Algunos campos no se pueden cambiar una vez que el feedback existe: `external_id`, `type`, `identity`, `integrationId`, `productId`, `profile` y `data`, además de `id`, `createdAt` y `userId`, que define la propia API. Enviar cualquiera de ellos hace fallar todo el request con HTTP 422. Para corregir la fecha de un feedback, cambia `externalGeneratedAt`, no `createdAt` (ver [Corregir la fecha de un feedback existente](#corregir-la-fecha-de-un-feedback-existente)). Envía solo los campos que estás cambiando, no un objeto completo leído con `get_id()`.
 
 `update()` necesita un usuario de la API cuyo rol permita actualizar feedback. Si tu usuario puede crear feedback pero no actualizarlo, la llamada falla con HTTP 405 (ver [Manejo de errores](/es/python-sdk/reference/api/#manejo-de-errores)); pide a tu contacto de Deepdots que cambie el rol del usuario.
 
@@ -223,7 +223,10 @@ from datetime import datetime, timedelta, timezone
 today = datetime.now(timezone.utc).date()
 yesterday = today - timedelta(days=1)
 feedbacks = client.feedbacks.get({
-    "where": {"createdAt": {"gte": f"{yesterday}T00:00:00.000Z", "lt": f"{today}T00:00:00.000Z"}},
+    "where": {"and": [
+        {"createdAt": {"gte": f"{yesterday}T00:00:00.000Z"}},
+        {"createdAt": {"lt": f"{today}T00:00:00.000Z"}},
+    ]},
 })
 
 for fb in feedbacks:
@@ -256,6 +259,22 @@ Envía los valores como strings — `["9"]`, no `[9]`. Los nombres y valores de 
 `update()` reemplaza la lista completa de `metrics` (o `metadata`) — no fusiona entradas individuales. Empieza siempre desde la lista existente, como arriba, para conservar los valores que no estás cambiando.
 :::
 
+### Agregar metadatos a muchos feedbacks a la vez
+
+Para los metadatos hay una forma más sencilla que no necesita leer nada antes. `update_metadata_batch()` agrega o sobrescribe las claves de metadatos que envías en muchos feedbacks con un solo request, conserva todas las demás claves y hace que cada feedback se analice de nuevo. Disponible a partir del SDK 1.0.21.
+
+```python
+result = client.feedbacks.update_metadata_batch([
+    {"feedbackId": "feedback-uuid-1", "metadata": [{"key": "source", "value": ["crm-import"]}]},
+    {"feedbackId": "feedback-uuid-2", "metadata": [{"key": "source", "value": ["crm-import"]}]},
+])
+print(result)  # {"feedbacks": 2, "triggered": 2, "failed": []}
+```
+
+- **Sobrescribir o agregar:** una clave que envías reemplaza los valores que tenía, así que una clave enviada sin valor (`None`, `""` o `[]`) se vacía. Las claves que no envías se conservan, y nunca se elimina ninguna clave. Pasa `mode="append"` (SDK 1.0.22) para agregar tus valores a los que la clave ya tiene; los valores que ya tiene se omiten, así que un reintento no agrega nada dos veces.
+- **Todo o nada:** si algún id de feedback no existe, está eliminado o pertenece a una empresa a la que no tienes acceso, la API responde 404 indicando cuáles y no se escribe nada.
+- **`failed`:** lista un feedback solo cuando falló al escribirlo o al ponerlo en cola para el análisis.
+
 ## Eliminar una submission
 
 ```python
@@ -271,6 +290,12 @@ El SDK no puede deshacer una eliminación. El feedback se retira (su estado pasa
 ## Adjuntar un archivo
 
 Adjunta un archivo a una submission existente. El archivo se envía como una carga multipart.
+
+Antes de subirlo, el SDK lee los adjuntos del feedback y lanza `ValueError`, sin subir nada, si:
+- el feedback ya tiene `max_attachments` archivos (3 por defecto);
+- el mismo contenido ya está adjunto, aunque sea con otro nombre (`check_duplicate_content=True`, el valor por defecto). Para compararlo, descarga cada adjunto existente; pasa `check_duplicate_content=False` para omitir esta comprobación.
+
+Si no se pueden leer los adjuntos existentes, la subida se rechaza.
 
 ```python
 attachment = client.feedbacks.upload_attachment(
@@ -296,3 +321,5 @@ attachment = client.feedbacks.upload_attachment(
 | `file_path` | string | Ruta absoluta o relativa al archivo en disco |
 | `filename` | string \| None | Nombre de visualización en el panel — por defecto el nombre del archivo |
 | `extra_data` | dict \| None | Cualquier dict JSON-serializable almacenado junto al adjunto |
+| `max_attachments` | int | Número máximo de adjuntos que puede tener un feedback; por defecto `3` |
+| `check_duplicate_content` | bool | Rechaza un archivo cuyo contenido ya está adjunto; por defecto `True` |

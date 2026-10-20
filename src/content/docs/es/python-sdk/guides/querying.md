@@ -61,13 +61,20 @@ feedbacks = client.feedbacks.get({
 })
 ```
 
+:::caution
+Usa un solo operador por condición. La API solo aplica el primer operador de una condición, así que `{"createdAt": {"gte": ..., "lt": ...}}` ignora `lt` sin avisar y retorna todo desde la primera fecha en adelante. Para acotar una ventana por ambos lados, usa `between`, o pon cada límite en su propia condición dentro de `and`, como se muestra más abajo.
+:::
+
 ### Filtrar feedback por la fecha en que ocurrió
 
-`createdAt` es el momento en que la API recibió un registro. Para el feedback que viene de otro sistema, la fecha que importa — la que muestra el panel — es `externalGeneratedAt` (ver [Campos del sistema de origen](/es/python-sdk/guides/feedback/#campos-del-sistema-de-origen)). Fíltralo con un rango semiabierto de fechas simples: `gte` el primer día y `lt` el día siguiente al último:
+`createdAt` es el momento en que la API recibió un registro. Para el feedback que viene de otro sistema, la fecha que importa — la que muestra el panel — es `externalGeneratedAt` (ver [Campos del sistema de origen](/es/python-sdk/guides/feedback/#campos-del-sistema-de-origen)). Fíltralo con un rango semiabierto de fechas simples: `gte` el primer día y `lt` el día siguiente al último, cada uno en su propia condición dentro de `and`:
 
 ```python
 feedbacks = client.feedbacks.get({
-    "where": {"externalGeneratedAt": {"gte": "2026-09-01", "lt": "2026-10-01"}},
+    "where": {"and": [
+        {"externalGeneratedAt": {"gte": "2026-09-01"}},
+        {"externalGeneratedAt": {"lt": "2026-10-01"}},
+    ]},
     "order": "externalGeneratedAt DESC",
 })
 ```

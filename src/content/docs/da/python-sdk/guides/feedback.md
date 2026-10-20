@@ -156,7 +156,7 @@ client.feedbacks.update("feedback-uuid-her", {
 
 Kun de felter du sender, bliver ændret; resten forbliver uændret. `update()` returnerer et tomt dict (`{}`), fordi API'en svarer `204 No Content`. Kald `get_id()`, hvis du har brug for det opdaterede feedback.
 
-Nogle felter kan ikke ændres, når feedbacket først er oprettet: `external_id`, `type`, `identity`, `integrationId`, `productId`, `profile` og `data`. Sender du et af dem, fejler hele requesten med HTTP 422. Send kun de felter du ændrer, ikke et helt objekt som du har læst tilbage fra `get_id()`.
+Nogle felter kan ikke ændres, når feedbacket først er oprettet: `external_id`, `type`, `identity`, `integrationId`, `productId`, `profile` og `data` samt `id`, `createdAt` og `userId`, som serveren selv sætter. Sender du et af dem, fejler hele requesten med HTTP 422. Vil du rette datoen på et feedback, skal du ændre `externalGeneratedAt`, ikke `createdAt` (se [Ret datoen på et eksisterende feedback](#ret-datoen-på-et-eksisterende-feedback)). Send kun de felter du ændrer, ikke et helt objekt som du har læst tilbage fra `get_id()`.
 
 `update()` kræver en API-bruger hvis rolle har lov til at opdatere feedback. Kan din bruger oprette feedback, men ikke opdatere det, fejler kaldet med HTTP 405 (se [Fejlhåndtering](/da/python-sdk/reference/api/#fejlhåndtering)); bed din kontaktperson hos Deepdots om at ændre brugerens rolle.
 
@@ -223,7 +223,10 @@ from datetime import datetime, timedelta, timezone
 today = datetime.now(timezone.utc).date()
 yesterday = today - timedelta(days=1)
 feedbacks = client.feedbacks.get({
-    "where": {"createdAt": {"gte": f"{yesterday}T00:00:00.000Z", "lt": f"{today}T00:00:00.000Z"}},
+    "where": {"and": [
+        {"createdAt": {"gte": f"{yesterday}T00:00:00.000Z"}},
+        {"createdAt": {"lt": f"{today}T00:00:00.000Z"}},
+    ]},
 })
 
 for fb in feedbacks:
@@ -256,6 +259,22 @@ Send værdier som strings — `["9"]`, ikke `[9]`. Metric-navne og -værdier kon
 `update()` erstatter hele `metrics`- (eller `metadata`-)listen — den fletter ikke enkelte poster. Start altid fra den eksisterende liste, som vist ovenfor, så du beholder de værdier du ikke ændrer.
 :::
 
+### Tilføj metadata til mange feedbacks på én gang
+
+Til metadata findes der en enklere måde, som ikke kræver at du læser først. `update_metadata_batch()` tilføjer eller overskriver de metadata-nøgler du sender, på mange feedbacks i én request, bevarer alle andre nøgler og får hvert feedback analyseret igen. Tilgængelig fra SDK 1.0.21.
+
+```python
+result = client.feedbacks.update_metadata_batch([
+    {"feedbackId": "feedback-uuid-1", "metadata": [{"key": "source", "value": ["crm-import"]}]},
+    {"feedbackId": "feedback-uuid-2", "metadata": [{"key": "source", "value": ["crm-import"]}]},
+])
+print(result)  # {"feedbacks": 2, "triggered": 2, "failed": []}
+```
+
+- **Overskriv eller tilføj:** en nøgle du sender, får sine værdier erstattet, så en nøgle der sendes uden værdi (`None`, `""` eller `[]`), bliver tømt. Nøgler du ikke sender, bevares, og ingen nøgle bliver nogensinde fjernet. Send `mode="append"` (SDK 1.0.22) for at føje dine værdier til dem nøglen allerede har; værdier den allerede har, springes over, så et nyt forsøg aldrig tilføjer noget to gange.
+- **Alt eller intet:** hvis et feedback-id ikke findes, er slettet eller tilhører en virksomhed du ikke har adgang til, svarer API'en 404 med de pågældende id'er, og intet bliver skrevet.
+- **`failed`:** viser kun et feedback, når det ikke lykkedes at skrive det eller at sætte det i kø til analyse.
+
 ## Slet en submission
 
 ```python
@@ -271,6 +290,12 @@ SDK'en kan ikke fortryde en sletning. Feedbacket udfases (dets status bliver `DE
 ## Upload en fil-vedhæftning
 
 Vedhæft en fil til en eksisterende feedback-submission. Filen sendes som en multipart-upload.
+
+Før uploaden læser SDK'en feedbackets vedhæftninger og kaster `ValueError` uden at uploade noget, hvis:
+- feedbacket allerede har `max_attachments` filer (3 som standard);
+- det samme indhold allerede er vedhæftet, også under et andet navn (`check_duplicate_content=True`, standard). Det downloader hver eksisterende vedhæftning for at sammenligne; send `check_duplicate_content=False` for at springe det over.
+
+Hvis de eksisterende vedhæftninger ikke kan læses, afvises uploaden.
 
 ```python
 attachment = client.feedbacks.upload_attachment(
@@ -296,3 +321,5 @@ attachment = client.feedbacks.upload_attachment(
 | `file_path` | string | Absolut eller relativ sti til filen på disk |
 | `filename` | string \| None | Visningsnavn i dashboardet — standard er filnavnet |
 | `extra_data` | dict \| None | Et JSON-serialiserbart dict gemt sammen med vedhæftningen |
+| `max_attachments` | int | Største antal vedhæftninger et feedback må have; standard `3` |
+| `check_duplicate_content` | bool | Afvis en fil med indhold der allerede er vedhæftet; standard `True` |

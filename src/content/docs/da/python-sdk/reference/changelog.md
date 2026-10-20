@@ -7,6 +7,26 @@ Alle udgivne versioner, nyeste først. Datoerne er udgivelsesdatoerne på PyPI.
 
 Se [Installation](/da/python-sdk/getting-started/installation/) for at installere en bestemt version.
 
+## 1.0.23 — 2026-10-20
+
+- **Nyt `client.crm`** til CRM-objekter som billetter, kampe og medlemskaber: `upsert_objects()` og `get_objects()`, plus to connectors der tager en kundes poster som de er, `sync_fck_users()` (FCK-brugere til kontakter) og `ingest_roboticket()` (Roboticket-linjer for billetter og medlemskaber). Lister af vilkårlig længde sendes i portioner af 500. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
+- Hver `client.crm`-request sendes igen, når den fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout), og klienten logger ind igen én gang, når tokenet er udløbet.
+
+## 1.0.22 — 2026-09-25
+
+- `contacts.upsert()` og `contacts.upsert_batch()` opretter en kontakt eller opdaterer den med samme e-mail, én ad gangen eller i portioner af vilkårlig størrelse. Se [Kontakter](/da/python-sdk/guides/contacts/#opret-eller-opdater-ud-fra-e-mail).
+- `contacts.update_fields()` tilføjer eller ændrer brugerdefinerede felter uden at fjerne de øvrige.
+- `feedbacks.update_metadata_batch()` tager `mode="append"` for at føje værdier til en metadata-nøgle i stedet for at erstatte dem.
+
+## 1.0.21 — 2026-09-16
+
+- `feedbacks.update_metadata_batch()` tilføjer eller overskriver metadata på mange feedbacks i én request, og hvert af dem analyseres igen. Se [Opdater metrics og metadata](/da/python-sdk/guides/feedback/#opdater-metrics-og-metadata).
+
+## 1.0.20 — 2026-08-24
+
+- Hver `value` i `answers`, `metrics`, `metadata` og `profile` er en liste, både i det du sender, og i det `get()` og `get_id()` returnerer.
+- `upload_attachment()` afviser en fil, når feedbacket allerede har 3 vedhæftninger (`max_attachments`) eller allerede har en fil med samme indhold (`check_duplicate_content`). Se [Upload en fil-vedhæftning](/da/python-sdk/guides/feedback/#upload-en-fil-vedhæftning).
+
 ## 1.0.19 — 2026-08-20
 
 - Distributionsnavne skrives nu med små bogstaver: `deepdots` og `magicfeedback`. Rent kosmetisk — PyPI skelner ikke mellem store og små bogstaver i pakkenavne, så `pip install MagicFeedback` virker fortsat.

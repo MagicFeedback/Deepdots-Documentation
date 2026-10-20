@@ -156,7 +156,7 @@ client.feedbacks.update("feedback-uuid-here", {
 
 Only the fields you pass are changed; the rest remain unchanged. `update()` returns an empty dict (`{}`), because the API answers `204 No Content`. Call `get_id()` if you need the updated feedback.
 
-Some fields cannot be changed once the feedback exists: `external_id`, `type`, `identity`, `integrationId`, `productId`, `profile` and `data`. Sending any of them fails the whole request with HTTP 422. Send only the fields you are changing, not a whole object read back from `get_id()`.
+Some fields cannot be changed once the feedback exists: `external_id`, `type`, `identity`, `integrationId`, `productId`, `profile` and `data`, plus the server-set `id`, `createdAt` and `userId`. Sending any of them fails the whole request with HTTP 422. To correct a feedback's date, change `externalGeneratedAt`, not `createdAt` (see [Correct the date of an existing feedback](#correct-the-date-of-an-existing-feedback)). Send only the fields you are changing, not a whole object read back from `get_id()`.
 
 `update()` needs an API user whose role may update feedback. If your user can create feedback but not update it, the call fails with HTTP 405 (see [Error handling](/python-sdk/reference/api/#error-handling)); ask your Deepdots contact to change the user's role.
 
@@ -223,7 +223,10 @@ from datetime import datetime, timedelta, timezone
 today = datetime.now(timezone.utc).date()
 yesterday = today - timedelta(days=1)
 feedbacks = client.feedbacks.get({
-    "where": {"createdAt": {"gte": f"{yesterday}T00:00:00.000Z", "lt": f"{today}T00:00:00.000Z"}},
+    "where": {"and": [
+        {"createdAt": {"gte": f"{yesterday}T00:00:00.000Z"}},
+        {"createdAt": {"lt": f"{today}T00:00:00.000Z"}},
+    ]},
 })
 
 for fb in feedbacks:
@@ -256,6 +259,22 @@ Send values as strings — `["9"]`, not `[9]`. Metric names and values are lower
 `update()` replaces the entire `metrics` (or `metadata`) list — it does not merge individual entries. Always start from the existing list, as shown above, so you keep the values you're not changing.
 :::
 
+### Add metadata to many feedbacks at once
+
+For metadata there is a simpler way that needs no read first. `update_metadata_batch()` adds or overwrites the metadata keys you send on many feedbacks in one request, keeps every other key, and has each feedback analysed again. Available from SDK 1.0.21.
+
+```python
+result = client.feedbacks.update_metadata_batch([
+    {"feedbackId": "feedback-uuid-1", "metadata": [{"key": "source", "value": ["crm-import"]}]},
+    {"feedbackId": "feedback-uuid-2", "metadata": [{"key": "source", "value": ["crm-import"]}]},
+])
+print(result)  # {"feedbacks": 2, "triggered": 2, "failed": []}
+```
+
+- **Overwrite or append:** a key you send replaces the values it holds, so a key sent with no value (`None`, `""` or `[]`) is emptied. Keys you don't send are kept, and no key is ever removed. Pass `mode="append"` (SDK 1.0.22) to add your values to the ones the key already holds; values it already has are skipped, so a retry adds nothing twice.
+- **All or nothing:** if any feedback id doesn't exist, is deleted or belongs to a company you can't access, the API answers 404 naming them and nothing is written.
+- **`failed`:** lists a feedback only when writing it, or queuing it for analysis, failed.
+
 ## Delete a submission
 
 ```python
@@ -271,6 +290,12 @@ The SDK cannot undo a deletion. The feedback is retired (its status becomes `DEP
 ## Upload a file attachment
 
 Attach a file to an existing feedback submission. The file is sent as a multipart upload.
+
+Before uploading, the SDK reads the feedback's attachments and raises `ValueError`, uploading nothing, if:
+- the feedback already has `max_attachments` files (3 by default);
+- the same content is already attached, even under another name (`check_duplicate_content=True`, the default). This downloads each existing attachment to compare it; pass `check_duplicate_content=False` to skip it.
+
+If the existing attachments can't be read, the upload is refused.
 
 ```python
 attachment = client.feedbacks.upload_attachment(
@@ -296,3 +321,5 @@ attachment = client.feedbacks.upload_attachment(
 | `file_path` | string | Absolute or relative path to the file on disk |
 | `filename` | string \| None | Display name in the dashboard — defaults to the file's base name |
 | `extra_data` | dict \| None | Any JSON-serialisable dict stored alongside the attachment |
+| `max_attachments` | int | Most attachments a feedback may have; default `3` |
+| `check_duplicate_content` | bool | Refuse a file whose content is already attached; default `True` |
