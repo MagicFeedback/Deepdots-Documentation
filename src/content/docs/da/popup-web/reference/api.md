@@ -27,6 +27,7 @@ popups.init({
 | `renderChrome` | nej | **Kun React Native** (fra 1.4.0). Standard `true`. Sæt `false`, når du monterer din egen dekorerede container, så survey-WebView'en renderes uden SDK'ets eget kort og backdrop. Se [React Native → renderChrome](/da/popup-web/reference/react-native/#render-surveyen-uden-sdkets-kort-renderchrome). |
 | `showProgressBar` | nej | Fra 1.5.0. Viser en `Question X of Y`-etiket og en fremdriftslinje i popup-headeren. Udelad den for at følge det, platformen har konfigureret for surveyen. Se [Fremdriftslinje](#fremdriftslinje). |
 | `surveyCss` | nej | Fra 1.5.0. Din egen CSS, indsat som det sidste stylesheet, så den vinder i kaskaden. Måden at omstyle spørgsmålsområdet på pr. integration. Se [Tilpasset CSS](#tilpasset-css). |
+| `cspNonce` | nej | Fra 1.15.0. Noncen fra din sides Content-Security-Policy, til strikse CSP'er (`style-src 'nonce-…'` uden `'unsafe-inline'`). Popuppen sætter den på hvert `<style>`, den indsætter; uden den vises surveyen uden styling. Kun web. Se [Angular → Content Security Policy](/da/popup-web/reference/angular/#content-security-policy). |
 
 ### Fremdriftslinje
 

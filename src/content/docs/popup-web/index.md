@@ -50,4 +50,4 @@ You install the SDK, give it your API key, and the popups, triggers, targeting, 
 - [Quickstart](/popup-web/getting-started/quickstart/)
 - [Triggers in detail](/popup-web/guides/triggers/)
 - [API reference](/popup-web/reference/api/)
-- [React](/popup-web/reference/react/) · [React Native](/popup-web/reference/react-native/)
+- [React](/popup-web/reference/react/) · [Angular](/popup-web/reference/angular/) · [React Native](/popup-web/reference/react-native/)

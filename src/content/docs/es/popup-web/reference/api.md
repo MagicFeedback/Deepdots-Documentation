@@ -27,6 +27,7 @@ popups.init({
 | `renderChrome` | no | **Solo React Native** (desde 1.4.0). Por defecto `true`. Ponlo en `false` cuando montas tu propio contenedor decorado, para que el WebView del survey se renderice sin la tarjeta ni el backdrop propios del SDK. Ver [React Native → renderChrome](/es/popup-web/reference/react-native/#renderizar-el-survey-sin-la-tarjeta-del-sdk-renderchrome). |
 | `showProgressBar` | no | Desde 1.5.0. Muestra una etiqueta `Question X of Y` y una barra de progreso en la cabecera del popup. Omítelo para respetar lo que la plataforma haya configurado para el survey. Ver [Barra de progreso](#barra-de-progreso). |
 | `surveyCss` | no | Desde 1.5.0. Tu propio CSS, inyectado como última hoja de estilos para que gane en cascada. Es la vía para reestilar el área de preguntas por integración. Ver [CSS personalizado](#css-personalizado). |
+| `cspNonce` | no | Desde 1.15.0. El nonce de la Content-Security-Policy de tu página, para CSP estrictas (`style-src 'nonce-…'` sin `'unsafe-inline'`). El popup lo pone en cada `<style>` que inyecta; sin él, el survey sale sin estilos. Solo web. Ver [Angular → Content Security Policy](/es/popup-web/reference/angular/#content-security-policy). |
 
 ### Barra de progreso
 

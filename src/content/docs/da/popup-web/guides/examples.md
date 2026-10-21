@@ -145,5 +145,5 @@ python3 -m http.server 4173
 ```
 
 :::tip
-For framework-specifikke integrationer, se [React](/da/popup-web/reference/react/) og [React Native](/da/popup-web/reference/react-native/).
+For framework-specifikke integrationer, se [React](/da/popup-web/reference/react/), [Angular](/da/popup-web/reference/angular/) og [React Native](/da/popup-web/reference/react-native/).
 :::
