@@ -27,6 +27,7 @@ popups.init({
 | `renderChrome` | no | **React Native only** (from 1.4.0). Default `true`. Set `false` when you mount your own decorated container so the survey WebView renders without the SDK's own card and backdrop. See [React Native → renderChrome](/popup-web/reference/react-native/#rendering-the-survey-without-the-sdks-card-renderchrome). |
 | `showProgressBar` | no | From 1.5.0. Shows a `Question X of Y` label and a progress bar in the popup header. Omit it to respect whatever the platform configured for the survey. See [Progress bar](#progress-bar). |
 | `surveyCss` | no | From 1.5.0. Your own CSS, injected as the last stylesheet so it wins the cascade. The way to restyle the question area per integration. See [Custom CSS](#custom-css). |
+| `cspNonce` | no | From 1.15.0. The nonce of your page's Content-Security-Policy, for strict CSPs (`style-src 'nonce-…'` without `'unsafe-inline'`). The popup puts it on every `<style>` it injects; without it the survey renders unstyled. Web only. See [Angular → Content Security Policy](/popup-web/reference/angular/#content-security-policy). |
 
 ### Progress bar
 

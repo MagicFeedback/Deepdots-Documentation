@@ -50,4 +50,4 @@ Du installerer SDK'et, giver det din API-nøgle, og popups, triggers, targeting 
 - [Quickstart](/da/popup-web/getting-started/quickstart/)
 - [Triggers i detaljer](/da/popup-web/guides/triggers/)
 - [API-reference](/da/popup-web/reference/api/)
-- [React](/da/popup-web/reference/react/) · [React Native](/da/popup-web/reference/react-native/)
+- [React](/da/popup-web/reference/react/) · [Angular](/da/popup-web/reference/angular/) · [React Native](/da/popup-web/reference/react-native/)

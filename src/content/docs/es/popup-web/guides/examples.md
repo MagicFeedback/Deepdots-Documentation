@@ -145,5 +145,5 @@ python3 -m http.server 4173
 ```
 
 :::tip
-Para integraciones específicas de framework, mira [React](/es/popup-web/reference/react/) y [React Native](/es/popup-web/reference/react-native/).
+Para integraciones específicas de framework, mira [React](/es/popup-web/reference/react/), [Angular](/es/popup-web/reference/angular/) y [React Native](/es/popup-web/reference/react-native/).
 :::
