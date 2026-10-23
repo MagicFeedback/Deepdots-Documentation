@@ -7,6 +7,26 @@ Todas las versiones publicadas, de más reciente a más antigua. Las fechas son 
 
 Para instalar una versión concreta, consulta [Instalación](/es/python-sdk/getting-started/installation/).
 
+## 1.0.23 — 2026-10-20
+
+- **Nuevo `client.crm`** para objetos CRM como tickets, partidos y membresías: `upsert_objects()` y `get_objects()`, más dos conectores que reciben los registros de un cliente tal cual, `sync_fck_users()` (usuarios de FCK a contactos) e `ingest_roboticket()` (líneas de tickets y membresías de Roboticket). Las listas de cualquier longitud se envían en lotes de 500. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
+- Cada request de `client.crm` se reenvía cuando falla de forma temporal (502, 503, 504, un error de conexión o un timeout), y el cliente vuelve a iniciar sesión una vez si el token ha caducado.
+
+## 1.0.22 — 2026-09-25
+
+- `contacts.upsert()` y `contacts.upsert_batch()` crean un contacto o actualizan el que tiene el mismo email, de uno en uno o en lotes de cualquier tamaño. Ver [Contactos](/es/python-sdk/guides/contacts/#crear-o-actualizar-por-email).
+- `contacts.update_fields()` agrega o cambia campos personalizados sin eliminar los demás.
+- `feedbacks.update_metadata_batch()` acepta `mode="append"` para agregar valores a una clave de metadatos en lugar de reemplazarlos.
+
+## 1.0.21 — 2026-09-16
+
+- `feedbacks.update_metadata_batch()` agrega o sobrescribe metadatos en muchos feedbacks con un solo request, y cada uno de ellos se analiza de nuevo. Ver [Actualizar métricas y metadatos](/es/python-sdk/guides/feedback/#actualizar-métricas-y-metadatos).
+
+## 1.0.20 — 2026-08-24
+
+- Cada `value` de `answers`, `metrics`, `metadata` y `profile` es una lista, tanto en lo que envías como en lo que retornan `get()` y `get_id()`.
+- `upload_attachment()` rechaza un archivo cuando el feedback ya tiene 3 adjuntos (`max_attachments`) o ya tiene un archivo con el mismo contenido (`check_duplicate_content`). Ver [Adjuntar un archivo](/es/python-sdk/guides/feedback/#adjuntar-un-archivo).
+
 ## 1.0.19 — 2026-08-20
 
 - Los nombres de distribución pasan a escribirse en minúscula: `deepdots` y `magicfeedback`. Es solo cosmético — PyPI trata los nombres de paquete sin distinguir mayúsculas, así que `pip install MagicFeedback` sigue funcionando.

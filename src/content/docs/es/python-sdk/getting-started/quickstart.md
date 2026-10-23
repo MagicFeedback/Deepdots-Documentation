@@ -19,8 +19,11 @@ from deepdots_sdk import Deepdots
 client = Deepdots(
     user="tu@ejemplo.com",
     password="tu-contraseña",
+    auth_source="identity",
 )
 ```
+
+`auth_source="identity"` inicia sesión con tu email y tu contraseña. Sin él, el cliente busca primero un token cacheado en el propio Google Cloud de Deepdots, algo que solo funciona dentro de la infraestructura de Deepdots, y si no lo encuentra hace ese mismo login.
 
 ## 3. Tu primera llamada
 

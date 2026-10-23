@@ -7,6 +7,26 @@ Every published release, newest first. Dates are the PyPI publication dates.
 
 To install a specific version, see [Installation](/python-sdk/getting-started/installation/).
 
+## 1.0.23 — 2026-10-20
+
+- **New `client.crm`** for CRM objects such as tickets, matches and memberships: `upsert_objects()` and `get_objects()`, plus two connectors that take a client's records as they are, `sync_fck_users()` (FCK users to contacts) and `ingest_roboticket()` (Roboticket ticket and membership lines). Lists of any length are sent in batches of 500. See [CRM objects](/python-sdk/guides/crm-objects/).
+- Every `client.crm` request is resent when it fails temporarily (502, 503, 504, a connection error or a timeout), and logs in again once when the token has expired.
+
+## 1.0.22 — 2026-09-25
+
+- `contacts.upsert()` and `contacts.upsert_batch()` create a contact or update the one with the same email, one at a time or in batches of any size. See [Contacts](/python-sdk/guides/contacts/#create-or-update-by-email).
+- `contacts.update_fields()` adds or changes custom fields without removing the others.
+- `feedbacks.update_metadata_batch()` takes `mode="append"` to add values to a metadata key instead of replacing them.
+
+## 1.0.21 — 2026-09-16
+
+- `feedbacks.update_metadata_batch()` adds or overwrites metadata on many feedbacks in one request, and each of them is analysed again. See [Update metrics and metadata](/python-sdk/guides/feedback/#update-metrics-and-metadata).
+
+## 1.0.20 — 2026-08-24
+
+- Every `value` in `answers`, `metrics`, `metadata` and `profile` is a list, in what you send and also in what `get()` and `get_id()` return.
+- `upload_attachment()` refuses a file when the feedback already has 3 attachments (`max_attachments`) or already holds a file with the same content (`check_duplicate_content`). See [Upload a file attachment](/python-sdk/guides/feedback/#upload-a-file-attachment).
+
 ## 1.0.19 — 2026-08-20
 
 - Distribution names are now written in lowercase: `deepdots` and `magicfeedback`. Cosmetic only — PyPI treats package names case-insensitively, so `pip install MagicFeedback` keeps working.
