@@ -43,7 +43,7 @@ Comprueba:
 
 ## La app se cierra al abrir un popup en iOS
 
-Comprueba que el `Info.plist` de la app tiene `CADisableMinimumFrameDurationOnPhone` a `true`. El popup se pinta con Compose Multiplatform, que la necesita en dispositivos ProMotion (120 Hz). Consulta [Installation](/es/popup-native/getting-started/installation/#ios).
+Actualiza a la 0.7.2 o posterior. Las versiones anteriores cierran la app si el `Info.plist` no tiene `CADisableMinimumFrameDurationOnPhone` a `true`; si aún no puedes actualizar, añade esa clave. El popup se pinta con Compose Multiplatform, que la comprueba. Consulta [Installation](/es/popup-native/getting-started/installation/#ios).
 
 ## Errores de validación o de envío en los flujos de encuesta
 

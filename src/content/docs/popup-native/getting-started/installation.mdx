@@ -23,7 +23,7 @@ Add the published dependency:
 
 ```kotlin
 dependencies {
-    implementation("com.deepdots.sdk:shared-android:0.7.1")
+    implementation("com.deepdots.sdk:shared-android:0.7.2")
 }
 ```
 
@@ -40,7 +40,7 @@ The Android example app in this repository uses that exact coordinate.
 
 The SDK is distributed as a binary Swift package from [`MagicFeedback/DeepdotsSDK-SPM`](https://github.com/MagicFeedback/DeepdotsSDK-SPM). It exposes the library product `DeepdotsSDK`.
 
-In Xcode, go to **File → Add Package Dependencies…**, enter the repository URL and pick version `0.7.1` with the **Up to Next Minor Version** rule:
+In Xcode, go to **File → Add Package Dependencies…**, enter the repository URL and pick version `0.7.2` with the **Up to Next Minor Version** rule:
 
 ```text
 https://github.com/MagicFeedback/DeepdotsSDK-SPM
@@ -50,7 +50,7 @@ Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/MagicFeedback/DeepdotsSDK-SPM", .upToNextMinor(from: "0.7.1"))
+    .package(url: "https://github.com/MagicFeedback/DeepdotsSDK-SPM", .upToNextMinor(from: "0.7.2"))
 ],
 targets: [
     .target(name: "YourApp", dependencies: [
@@ -76,9 +76,9 @@ let package = Package(
 )
 ```
 
-### Required `Info.plist` key
+### Recommended `Info.plist` key
 
-Add this key to your app's `Info.plist`. The popup is rendered with Compose Multiplatform, which requires it on iOS; without it the app can crash on ProMotion (120 Hz) devices when a popup is shown:
+Add this key to your app's `Info.plist`. The popup is rendered with Compose Multiplatform, which uses it to animate at 120 Hz on ProMotion devices. Without it the popup animates at 60 Hz. Before 0.7.2 the key was required: without it the app closed when a popup opened.
 
 ```xml
 <key>CADisableMinimumFrameDurationOnPhone</key>

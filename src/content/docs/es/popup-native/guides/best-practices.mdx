@@ -34,9 +34,9 @@ if let root = UIApplication.shared.connectedScenes
 
 Swift no ve los valores por defecto de Kotlin, así que `InitOptions` y `PopupOptions` necesitan todos sus parámetros, en orden. Tienes una llamada completa en el [Quickstart](/es/popup-native/getting-started/quickstart/#ios). `mode` y `PopupOptions.popups` se ignoran (los popups siempre llegan desde Deepdots): pasa `nil`.
 
-### iOS: añade la clave obligatoria del `Info.plist`
+### iOS: añade la clave recomendada del `Info.plist`
 
-El popup se pinta con Compose Multiplatform, que necesita `CADisableMinimumFrameDurationOnPhone` a `true`. Sin ella la app puede cerrarse en dispositivos ProMotion (120 Hz) al abrir un popup. Consulta [Installation](/es/popup-native/getting-started/installation/#ios).
+El popup se pinta con Compose Multiplatform, que usa `CADisableMinimumFrameDurationOnPhone` a `true` para animarse a 120 Hz en dispositivos ProMotion. Sin ella el popup se anima a 60 Hz. En versiones del SDK anteriores a la 0.7.2 la clave es obligatoria: sin ella la app se cierra al abrir un popup. Consulta [Installation](/es/popup-native/getting-started/installation/#ios).
 
 ### Separa desarrollo y producción
 
@@ -126,7 +126,7 @@ Si el usuario mata la app, ninguna plataforma avisa, así que esa sesión la cie
 
 - [ ] `debug = false` y `Environment.Production`
 - [ ] `publicKey` y claves de `analytics` de producción
-- [ ] `CADisableMinimumFrameDurationOnPhone` en el `Info.plist` de iOS
+- [ ] `CADisableMinimumFrameDurationOnPhone` en el `Info.plist` de iOS (obligatoria antes de la 0.7.2)
 - [ ] `setPath` llamado desde la capa de navegación, en todas las pantallas
 - [ ] `onForeground` / `onBackground` conectados a nivel de app, no en estados transitorios
 - [ ] `setUserId` llamado en el login y en el logout

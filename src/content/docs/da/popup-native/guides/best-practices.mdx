@@ -34,9 +34,9 @@ if let root = UIApplication.shared.connectedScenes
 
 Swift kan ikke se Kotlins standardværdier, så `InitOptions` og `PopupOptions` skal have alle parametre i rækkefølge. Se et komplet kald i [Quickstart](/da/popup-native/getting-started/quickstart/#ios). `mode` og `PopupOptions.popups` ignoreres (popups kommer altid fra Deepdots): angiv `nil`.
 
-### iOS: tilføj den påkrævede nøgle i `Info.plist`
+### iOS: tilføj den anbefalede nøgle i `Info.plist`
 
-Popuppen renderes med Compose Multiplatform, som kræver `CADisableMinimumFrameDurationOnPhone` sat til `true`. Uden den kan appen crashe på ProMotion-enheder (120 Hz), når en popup åbner. Se [Installation](/da/popup-native/getting-started/installation/#ios).
+Popuppen renderes med Compose Multiplatform, som bruger `CADisableMinimumFrameDurationOnPhone` sat til `true` til at animere med 120 Hz på ProMotion-enheder. Uden den animeres popuppen med 60 Hz. I SDK-versioner før 0.7.2 er nøglen påkrævet: uden den lukker appen, når en popup åbner. Se [Installation](/da/popup-native/getting-started/installation/#ios).
 
 ### Hold udvikling og produktion adskilt
 
@@ -126,7 +126,7 @@ Hvis brugeren lukker appen helt, giver ingen platform et callback, så den sessi
 
 - [ ] `debug = false` og `Environment.Production`
 - [ ] `publicKey` og `analytics`-nøgler til produktion
-- [ ] `CADisableMinimumFrameDurationOnPhone` i iOS-appens `Info.plist`
+- [ ] `CADisableMinimumFrameDurationOnPhone` i iOS-appens `Info.plist` (påkrævet før 0.7.2)
 - [ ] `setPath` kaldes fra navigationslaget, for hver skærm
 - [ ] `onForeground` / `onBackground` koblet på app-niveau, ikke på midlertidige tilstande
 - [ ] `setUserId` kaldes ved login og logout
