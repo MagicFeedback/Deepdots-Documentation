@@ -43,7 +43,7 @@ Tjek:
 
 ## Appen crasher, når en popup åbner på iOS
 
-Tjek, at appens `Info.plist` indeholder `CADisableMinimumFrameDurationOnPhone` sat til `true`. Popuppen renderes med Compose Multiplatform, som kræver den på ProMotion-enheder (120 Hz). Se [Installation](/da/popup-native/getting-started/installation/#ios).
+Opdater til 0.7.2 eller nyere. Tidligere versioner lukker appen, hvis `Info.plist` mangler `CADisableMinimumFrameDurationOnPhone` sat til `true`; kan du ikke opdatere endnu, så tilføj nøglen. Popuppen renderes med Compose Multiplatform, som tjekker den. Se [Installation](/da/popup-native/getting-started/installation/#ios).
 
 ## Validerings- eller submit-fejl i survey-flows
 
