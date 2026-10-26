@@ -77,6 +77,16 @@ export default defineConfig({
               { label: 'Reference', autogenerate: { directory: 'python-sdk/reference' } },
             ],
           },
+          {
+            label: { en: 'REST API', es: 'API REST', da: 'REST API' },
+            link: '/rest-api/',
+            icon: 'seti:json',
+            items: [
+              { label: 'Getting Started', autogenerate: { directory: 'rest-api/getting-started' } },
+              { label: 'Guides', autogenerate: { directory: 'rest-api/guides' } },
+              { label: 'Reference', autogenerate: { directory: 'rest-api/reference' } },
+            ],
+          },
         ]),
       ],
     }),

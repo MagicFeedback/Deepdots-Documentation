@@ -1,0 +1,58 @@
+---
+title: REST API
+description: Send feedback and manage CRM contacts in Deepdots directly over HTTP, from any backend.
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+The Deepdots REST API lets your backend send feedback and keep your CRM contacts in Deepdots up to date, without installing an SDK. Every call is a plain HTTPS request with a JSON body and a bearer token.
+
+## What you can do
+
+- **Send feedback** — one at a time or in bulk, with answers, metrics and metadata.
+- **Manage contacts** — create or update CRM contacts by email, with your own custom fields.
+- **Link feedback to contacts** — record who gave each feedback.
+
+Deepdots analyses every feedback you send: topics, sentiment, KPIs and everything else you see in the dashboard.
+
+## Base URLs
+
+| Environment | URL |
+|---|---|
+| Production | `https://api.deepdots.com` |
+| Development | `https://api-dev.deepdots.com` |
+
+Use the development environment while you build and test your integration. It has its own data and credentials.
+
+## What you need from Deepdots
+
+- An API user (email and password) for each environment.
+- The authentication key used to sign in.
+- Your `companyId` and the `integrationId` of each source you send feedback from.
+
+Your Deepdots contact gives you all of these when your integration is set up.
+
+## Start here
+
+<CardGrid>
+  <Card title="Authentication" icon="approve-check">
+    Get a bearer token and keep it fresh.
+
+    <LinkButton href="/rest-api/getting-started/authentication/" icon="right-arrow">Read</LinkButton>
+  </Card>
+  <Card title="Quickstart" icon="rocket">
+    Send your first feedback in three steps.
+
+    <LinkButton href="/rest-api/getting-started/quickstart/" icon="right-arrow">Read</LinkButton>
+  </Card>
+  <Card title="Feedback" icon="comment">
+    Answers, metrics, metadata and bulk sends.
+
+    <LinkButton href="/rest-api/guides/feedback/" icon="right-arrow">Read</LinkButton>
+  </Card>
+  <Card title="Contacts" icon="list-format">
+    Create or update contacts and their custom fields.
+
+    <LinkButton href="/rest-api/guides/contacts/" icon="right-arrow">Read</LinkButton>
+  </Card>
+</CardGrid>
