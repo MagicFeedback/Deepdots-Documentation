@@ -1,0 +1,58 @@
+---
+title: API REST
+description: Envía feedback y gestiona contactos del CRM en Deepdots directamente por HTTP, desde cualquier backend.
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+La API REST de Deepdots permite a tu backend enviar feedback y mantener al día tus contactos del CRM en Deepdots, sin instalar ningún SDK. Cada llamada es una petición HTTPS normal, con un cuerpo JSON y un token bearer.
+
+## Qué puedes hacer
+
+- **Enviar feedback** — de uno en uno o en bloque, con respuestas, métricas y metadatos.
+- **Gestionar contactos** — crear o actualizar contactos del CRM por email, con tus propios campos personalizados.
+- **Vincular feedback a contactos** — registrar quién dio cada feedback.
+
+Deepdots analiza todo el feedback que envías: temas, sentimiento, KPIs y todo lo demás que ves en el dashboard.
+
+## URLs base
+
+| Entorno | URL |
+|---|---|
+| Producción | `https://api.deepdots.com` |
+| Desarrollo | `https://api-dev.deepdots.com` |
+
+Usa el entorno de desarrollo mientras construyes y pruebas tu integración. Tiene sus propios datos y credenciales.
+
+## Qué necesitas de Deepdots
+
+- Un usuario de API (email y contraseña) para cada entorno.
+- La clave de autenticación con la que se inicia sesión.
+- Tu `companyId` y el `integrationId` de cada fuente desde la que envías feedback.
+
+Tu contacto en Deepdots te da todo esto al configurar tu integración.
+
+## Empieza aquí
+
+<CardGrid>
+  <Card title="Autenticación" icon="approve-check">
+    Obtén un token bearer y mantenlo vigente.
+
+    <LinkButton href="/es/rest-api/getting-started/authentication/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+  <Card title="Inicio rápido" icon="rocket">
+    Envía tu primer feedback en tres pasos.
+
+    <LinkButton href="/es/rest-api/getting-started/quickstart/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+  <Card title="Feedback" icon="comment">
+    Respuestas, métricas, metadatos y envíos en bloque.
+
+    <LinkButton href="/es/rest-api/guides/feedback/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+  <Card title="Contactos" icon="list-format">
+    Crea o actualiza contactos y sus campos personalizados.
+
+    <LinkButton href="/es/rest-api/guides/contacts/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+</CardGrid>
