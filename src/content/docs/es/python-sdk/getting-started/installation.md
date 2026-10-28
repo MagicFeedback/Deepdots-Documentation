@@ -58,13 +58,13 @@ print("SDK importado correctamente")
 
 ## Entornos
 
-El SDK se conecta a `https://api.magicfeedback.io` por defecto. Puedes apuntarlo a otra URL base pasando el argumento `base_url` al constructor:
+El SDK se conecta a la API de producción por defecto. Para usar el entorno de desarrollo, pasa su `base_url` al constructor, con credenciales de desarrollo:
 
 ```python
 client = Deepdots(
     user="tu@ejemplo.com",
     password="tu-contraseña",
-    base_url="https://api-dev.magicfeedback.io",
+    base_url="https://api-dev.deepdots.com",
 )
 ```
 

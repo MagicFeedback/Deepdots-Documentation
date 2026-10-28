@@ -5,10 +5,12 @@ sidebar:
   order: 1
 ---
 
-Todos los endpoints reciben y devuelven JSON, y necesitan `Authorization: Bearer <token>` (ver [Autenticación](/es/rest-api/getting-started/authentication/)).
+Todos los endpoints reciben y devuelven JSON. Todos salvo los dos de `/auth/token` necesitan `Authorization: Bearer <token>` (ver [Autenticación](/es/rest-api/getting-started/authentication/)).
 
 | Método | Ruta | Qué hace |
 |---|---|---|
+| `POST` | `/auth/token` | Inicia sesión con el email y la contraseña de un usuario de API |
+| `POST` | `/auth/token/refresh` | Renueva un token de inicio de sesión |
 | `POST` | `/feedbacks` | Envía un feedback |
 | `POST` | `/feedbacks/bulk` | Envía muchos feedbacks de una compañía y un producto |
 | `GET` | `/feedbacks/{id}` | Lee un feedback |
@@ -16,6 +18,46 @@ Todos los endpoints reciben y devuelven JSON, y necesitan `Authorization: Bearer
 | `POST` | `/crm/contacts/upsert/batch` | Crea o actualiza hasta 500 contactos |
 | `PATCH` | `/crm/contacts/{id}/fields` | Actualiza los campos personalizados y los datos de un contacto |
 | `GET` | `/crm/contacts` | Busca contactos |
+
+---
+
+## `POST /auth/token`
+
+Inicia sesión con el email y la contraseña de un usuario de API. No necesita cabecera `Authorization`.
+
+**Cuerpo**
+
+| Campo | Tipo | Obligatorio | Notas |
+|---|---|---|---|
+| `email` | string | Sí | |
+| `password` | string | Sí | |
+
+**Respuesta `200`:**
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `idToken` | string | Envíalo como `Authorization: Bearer <idToken>` |
+| `refreshToken` | string | Para `POST /auth/token/refresh` |
+| `expiresIn` | number | Segundos hasta que caduca `idToken` (3600) |
+| `tokenType` | string | Siempre `Bearer` |
+
+**Errores:** `401` con un email o contraseña incorrectos, `403` cuando el usuario está deshabilitado, `429` tras demasiados intentos fallidos, `422` cuando falta un campo.
+
+---
+
+## `POST /auth/token/refresh`
+
+Obtén un `idToken` nuevo sin volver a enviar la contraseña. No necesita cabecera `Authorization`.
+
+**Cuerpo**
+
+| Campo | Tipo | Obligatorio | Notas |
+|---|---|---|---|
+| `refreshToken` | string | Sí | El del inicio de sesión o de la renovación anterior |
+
+**Respuesta `200`:** los mismos campos que `POST /auth/token`, con un `refreshToken` nuevo para la próxima vez.
+
+**Errores:** `401` cuando el token de refresco no es válido o ha caducado (vuelve a iniciar sesión), `403` cuando el usuario está deshabilitado.
 
 ---
 

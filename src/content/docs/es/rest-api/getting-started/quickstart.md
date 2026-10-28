@@ -10,10 +10,9 @@ Este inicio rápido envía un feedback al entorno de desarrollo. Necesitas las c
 ## 1. Obtén un token
 
 ```bash
-export DEEPDOTS_TOKEN=$(curl -s -X POST \
-  "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$DEEPDOTS_AUTH_KEY" \
+export DEEPDOTS_TOKEN=$(curl -s -X POST "https://api-dev.deepdots.com/auth/token" \
   -H "Content-Type: application/json" \
-  -d '{"email": "api-user@yourcompany.com", "password": "your-password", "returnSecureToken": true}' \
+  -d '{"email": "api-user@yourcompany.com", "password": "your-password"}' \
   | jq -r .idToken)
 ```
 

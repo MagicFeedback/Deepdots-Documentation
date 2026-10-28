@@ -58,13 +58,13 @@ print("SDK importeret korrekt")
 
 ## Miljøer
 
-SDK'en forbinder til `https://api.magicfeedback.io` som standard. Du kan pege den mod en anden basis-URL ved at sende `base_url`-argumentet til konstruktøren:
+SDK'en forbinder til produktions-API'et som standard. Send udviklingsmiljøets `base_url` til konstruktøren sammen med loginoplysninger til udvikling for at bruge det:
 
 ```python
 client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
-    base_url="https://api-dev.magicfeedback.io",
+    base_url="https://api-dev.deepdots.com",
 )
 ```
 

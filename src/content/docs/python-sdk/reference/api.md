@@ -13,7 +13,7 @@ from deepdots_sdk import Deepdots
 client = Deepdots(
     user="you@example.com",
     password="your-password",
-    base_url="https://api.magicfeedback.io",  # optional
+    base_url="https://api.deepdots.com",  # optional
 )
 ```
 
@@ -21,9 +21,9 @@ client = Deepdots(
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `user` | string | — | Account email address |
-| `password` | string | — | Account password |
-| `base_url` | string | `"https://api.magicfeedback.io"` | API root URL |
+| `user` | string | — | API user's email address |
+| `password` | string | — | API user's password |
+| `base_url` | string | `"https://api.magicfeedback.io"` | API root URL (production) |
 
 ### Properties
 
@@ -46,6 +46,14 @@ Configure the SDK's internal logger.
 ```python
 import logging
 client.set_logging(logging.DEBUG)
+```
+
+#### `refresh_token()`
+
+Renew the token and update it for every sub-API client. Signed-in tokens last one hour; call it when a request fails with `401` in a long-running process.
+
+```python
+client.refresh_token()
 ```
 
 ---

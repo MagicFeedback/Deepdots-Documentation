@@ -40,6 +40,7 @@ Los errores llegan como JSON con un objeto `error`:
 | `405` | El usuario de API no tiene permiso para este endpoint | No, contacta con Deepdots |
 | `406` | La compañía o el contacto no son tuyos | No |
 | `422` | El cuerpo no cumple el esquema (ver `details`) | No, corrige la petición |
+| `429` | Demasiados inicios de sesión fallidos para esta cuenta (solo `/auth/token`) | Sí, tras una espera |
 | `5xx` | Un problema por nuestra parte | Sí, con una espera creciente |
 
 Si un `5xx` persiste, o ves un error que no puedes explicar, envíanos la hora de la petición, el endpoint y el `external_id` (o el email) afectado.

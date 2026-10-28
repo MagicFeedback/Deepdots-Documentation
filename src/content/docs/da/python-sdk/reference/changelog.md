@@ -7,6 +7,26 @@ Alle udgivne versioner, nyeste først. Datoerne er udgivelsesdatoerne på PyPI.
 
 Se [Installation](/da/python-sdk/getting-started/installation/) for at installere en bestemt version.
 
+## 1.0.24 — ikke udgivet
+
+- **Login går gennem Deepdots API'et** (`POST /auth/token`) i stedet for at kalde Google Identity Platform direkte. Argumentet `ip_key` bruges ikke længere: det ignoreres med en `DeprecationWarning`.
+- `refresh_token()` fornyer et login-token med dets refresh-token (`POST /auth/token/refresh`) og logger kun ind igen, hvis refresh-tokenet afvises.
+- Ny `client.crm` til CRM-objekter: `upsert_objects()` og `get_objects()`.
+
+## 1.0.22 — 2026-09-25
+
+- **Kontakter:** nye `update_fields()`, der fletter brugerdefinerede felter ind i en kontakt og beholder de andre; `upsert()`, der opretter eller opdaterer en kontakt ud fra e-mail; og `upsert_batch()`, der gør det samme for en liste af vilkårlig længde, delt op i requests på 500.
+- **Ændret:** `update_metadata_batch()` fletter nu metadata efter nøgle i stedet for at erstatte dem: nøgler, du ikke sender, bevares. Send `mode="append"` for at tilføje værdier til dem, en nøgle allerede har.
+
+## 1.0.21 — 2026-09-16
+
+- Ny `feedbacks.update_metadata_batch()`: opdater metadata for mange feedbacks i én request, og få hver af dem analyseret igen.
+
+## 1.0.20 — 2026-08-24
+
+- `upload_attachment()` afviser en fil, når feedbacken allerede har `max_attachments` filer (standard 3), eller det samme indhold allerede er vedhæftet. Send `check_duplicate_content=False` for at springe indholdstjekket over.
+- `value` er nu altid en liste også i `metadata`, `metrics` og `profile`, både når du sender en feedback, og når du læser en.
+
 ## 1.0.19 — 2026-08-20
 
 - Distributionsnavne skrives nu med små bogstaver: `deepdots` og `magicfeedback`. Rent kosmetisk — PyPI skelner ikke mellem store og små bogstaver i pakkenavne, så `pip install MagicFeedback` virker fortsat.
