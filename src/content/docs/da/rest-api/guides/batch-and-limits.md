@@ -11,7 +11,7 @@ sidebar:
 |---|---|
 | Kontakter pr. `POST /crm/contacts/upsert/batch` | 500 |
 | Forespørgslens body | 1 MB |
-| Login-tokenets levetid (`/auth/token`) | 1 time; API-nøgler udløber ikke |
+| Tokenets levetid | 1 time |
 
 For `POST /feedbacks/bulk` skal hver forespørgsel holdes under grænsen på 1 MB. Et par hundrede feedbacks pr. forespørgsel er en god størrelse.
 
@@ -19,7 +19,7 @@ For `POST /feedbacks/bulk` skal hver forespørgsel holdes under grænsen på 1 M
 
 - **Feedback:** send altid `external_id`. En gentaget forespørgsel returnerer den feedback, der allerede findes, i stedet for at oprette en ny.
 - **Kontakter:** brug upsert-endpoints. Sender du den samme kontakt to gange, bliver den opdateret i stedet for at blive oprettet som dublet.
-- **Hvornår du prøver igen:** ved netværksfejl, timeouts og `5xx`-svar, med stigende ventetid mellem forsøgene (fx 1 s, 2 s, 4 s). Prøv en `401` igen én gang, efter du har fornyet tokenet (med en API-nøgle betyder en `401`, at nøglen er forkert eller tilbagekaldt: prøv ikke igen).
+- **Hvornår du prøver igen:** ved netværksfejl, timeouts og `5xx`-svar, med stigende ventetid mellem forsøgene (fx 1 s, 2 s, 4 s). Prøv en `401` igen én gang, efter du har fornyet tokenet.
 - **Hvornår du ikke prøver igen:** `400`, `404`, `406` og `422` betyder, at selve forespørgslen er forkert. Ret den, før du sender den igen.
 
 ## Delvise fejl

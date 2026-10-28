@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-All endpoints take and return JSON. All of them except the two `/auth/token` ones need `Authorization: Bearer <token>`, where the token is an API key or a signed-in token (see [Authentication](/rest-api/getting-started/authentication/)).
+All endpoints take and return JSON. All of them except the two `/auth/token` ones need `Authorization: Bearer <token>` (see [Authentication](/rest-api/getting-started/authentication/)).
 
 | Method | Path | What it does |
 |---|---|---|

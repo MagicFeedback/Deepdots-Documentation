@@ -1,31 +1,13 @@
 ---
 title: Godkendelse
-description: Godkend med en API-nøgle, eller log ind med din API-bruger og forny tokenet, før det udløber.
+description: Log ind med din API-bruger, få et bearer-token, og forny det, før det udløber.
 sidebar:
   order: 1
 ---
 
-Hver forespørgsel til Deepdots API har et bearer-token i `Authorization`-headeren. Der er to måder at få et på:
+Hver forespørgsel til Deepdots API har et bearer-token i `Authorization`-headeren. Du får tokenet ved at logge ind med din API-bruger via Deepdots API.
 
-- **En API-nøgle** (anbefalet). Deepdots udsteder den til din integration. Den udløber ikke, så der er intet at forny.
-- **Din API-brugers e-mail og adgangskode.** Du logger ind via API'et og får et token, der gælder i en time, plus et refresh-token til at forny det.
-
-## Mulighed 1: API-nøgle
-
-Send nøglen som bearer-token i hver forespørgsel:
-
-```bash
-curl "https://api.deepdots.com/crm/contacts?filter[limit]=1" \
-  -H "Authorization: Bearer $DEEPDOTS_API_KEY"
-```
-
-Produktionsnøgler starter med `dd_live_`, udviklingsnøgler med `dd_test_`. En nøgle handler som den API-bruger, den er udstedt til, med de samme rettigheder.
-
-En nøgle er gyldig, indtil Deepdots tilbagekalder den. Hvis en nøgle er lækket, eller du ikke længere har brug for den, så bed din kontaktperson hos Deepdots om at tilbagekalde den og udstede en ny.
-
-## Mulighed 2: E-mail og adgangskode
-
-### 1. Log ind
+## 1. Log ind
 
 Send din API-brugers e-mail og adgangskode:
 
@@ -49,7 +31,7 @@ Svaret indeholder tokenet og et refresh-token:
 }
 ```
 
-### 2. Kald API'et
+## 2. Kald API'et
 
 Send `idToken` som bearer-token i hver forespørgsel:
 
@@ -58,7 +40,7 @@ curl "https://api.deepdots.com/crm/contacts?filter[limit]=1" \
   -H "Authorization: Bearer $DEEPDOTS_TOKEN"
 ```
 
-### 3. Forny tokenet
+## 3. Forny tokenet
 
 Et token er gyldigt i **1 time** (`expiresIn`, i sekunder). Før det udløber, så byt refresh-tokenet til et nyt i stedet for at logge ind igen:
 
@@ -76,9 +58,9 @@ Forny et par minutter før timen er gået, eller når API'et svarer `401`, og pr
 
 ## Pas på dine loginoplysninger
 
-- Gem API-nøglen, eller e-mail, adgangskode og refresh-token, i en secret manager, aldrig i kildekoden.
-- Brug en dedikeret API-bruger eller nøgle til hver integration, ikke en persons konto.
-- Udvikling og produktion har hver sine loginoplysninger. En nøgle eller et token fra det ene virker ikke i det andet.
+- Gem e-mail, adgangskode og refresh-token i en secret manager, aldrig i kildekoden.
+- Brug en dedikeret API-bruger til din integration, ikke en persons konto.
+- Udvikling og produktion har hver sin API-bruger. Et token fra det ene virker ikke i det andet.
 
 ## Fejl
 
@@ -88,7 +70,7 @@ Forny et par minutter før timen er gået, eller når API'et svarer `401`, og pr
 | `401` | `/auth/token/refresh` | Refresh-tokenet er ugyldigt eller udløbet | Log ind igen |
 | `403` | `/auth/token`, `/auth/token/refresh` | API-brugeren er deaktiveret | Kontakt Deepdots |
 | `429` | `/auth/token` | For mange mislykkede forsøg for denne konto | Vent, før du prøver igen |
-| `401` | Alle andre endpoints | Token eller API-nøgle mangler, er ugyldig eller udløbet | Forny tokenet, og prøv igen én gang; med en API-nøgle, tjek nøglen |
+| `401` | Alle andre endpoints | Token mangler, er ugyldigt eller udløbet | Forny tokenet, og prøv igen én gang |
 | `403` | Alle andre endpoints | API-brugeren er ikke aktiv | Kontakt Deepdots |
 | `405` | Alle andre endpoints | API-brugeren har ikke adgang til dette endpoint | Kontakt Deepdots |
 

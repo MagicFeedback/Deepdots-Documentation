@@ -1,21 +1,13 @@
 ---
 title: Quickstart
-description: Authenticate, send a feedback and read it back, in three requests.
+description: Get a token, send a feedback and read it back, in three requests.
 sidebar:
   order: 2
 ---
 
 This quickstart sends one feedback to the development environment. You need the credentials and the `integrationId` described in [Authentication](/rest-api/getting-started/authentication/).
 
-## 1. Set your credentials
-
-With a development API key, the key is the token:
-
-```bash
-export DEEPDOTS_TOKEN="dd_test_..."
-```
-
-With an API user instead, sign in to get one:
+## 1. Get a token
 
 ```bash
 export DEEPDOTS_TOKEN=$(curl -s -X POST "https://api-dev.deepdots.com/auth/token" \

@@ -11,17 +11,11 @@ pip install deepdots
 
 ## 2. Opret en klient
 
-Importer `Deepdots` og send den API-nøgle, Deepdots har givet dig. Nøglen sendes med hver request og udløber ikke.
+Importer `Deepdots` og send din API-brugers e-mail og adgangskode. Konstruktøren logger ind med det samme og gemmer tokenet til alle efterfølgende requests.
 
 ```python
 from deepdots_sdk import Deepdots
 
-client = Deepdots(api_key="dd_live_...")
-```
-
-Eller log ind med din API-brugers e-mail og adgangskode. Konstruktøren logger ind med det samme og gemmer tokenet til alle efterfølgende requests:
-
-```python
 client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",

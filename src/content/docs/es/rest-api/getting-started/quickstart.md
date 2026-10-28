@@ -1,21 +1,13 @@
 ---
 title: Inicio rápido
-description: Autentícate, envía un feedback y vuelve a leerlo, en tres peticiones.
+description: Obtén un token, envía un feedback y vuelve a leerlo, en tres peticiones.
 sidebar:
   order: 2
 ---
 
 Este inicio rápido envía un feedback al entorno de desarrollo. Necesitas las credenciales y el `integrationId` descritos en [Autenticación](/es/rest-api/getting-started/authentication/).
 
-## 1. Prepara tus credenciales
-
-Con una API key de desarrollo, la key es el token:
-
-```bash
-export DEEPDOTS_TOKEN="dd_test_..."
-```
-
-Si usas un usuario de API, inicia sesión para obtener uno:
+## 1. Obtén un token
 
 ```bash
 export DEEPDOTS_TOKEN=$(curl -s -X POST "https://api-dev.deepdots.com/auth/token" \

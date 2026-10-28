@@ -34,7 +34,7 @@ Los errores llegan como JSON con un objeto `error`:
 |---|---|---|
 | `200` | Correcto | — |
 | `400` | La petición está mal: un campo que falta o que no existe, un email no válido, una compañía o un producto que no existen | No, corrige la petición |
-| `401` | El token o la API key falta, no es válido o ha caducado | Una vez, después de renovar el token (no con una API key) |
+| `401` | El token falta, no es válido o ha caducado | Una vez, después de renovar el token |
 | `403` | El usuario de API no está activo | No, contacta con Deepdots |
 | `404` | El recurso (feedback, integración) no existe o no es visible para ti | No |
 | `405` | El usuario de API no tiene permiso para este endpoint | No, contacta con Deepdots |

@@ -9,7 +9,6 @@ Se [Installation](/da/python-sdk/getting-started/installation/) for at installer
 
 ## 1.0.24 — ikke udgivet
 
-- **API-nøgler.** Send `api_key="dd_live_..."` til konstruktøren, så sendes nøglen med hver request uden login. Se [Hurtig start](/da/python-sdk/getting-started/quickstart/).
 - **Login går gennem Deepdots API'et** (`POST /auth/token`) i stedet for at kalde Google Identity Platform direkte. Argumentet `ip_key` bruges ikke længere: det ignoreres med en `DeprecationWarning`.
 - `refresh_token()` fornyer et login-token med dets refresh-token (`POST /auth/token/refresh`) og logger kun ind igen, hvis refresh-tokenet afvises.
 - Ny `client.crm` til CRM-objekter: `upsert_objects()` og `get_objects()`.

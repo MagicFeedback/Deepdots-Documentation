@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-Alle endpoints modtager og returnerer JSON. Alle undtagen de to `/auth/token`-endpoints kræver `Authorization: Bearer <token>`, hvor tokenet er en API-nøgle eller et login-token (se [Godkendelse](/da/rest-api/getting-started/authentication/)).
+Alle endpoints modtager og returnerer JSON. Alle undtagen de to `/auth/token`-endpoints kræver `Authorization: Bearer <token>` (se [Godkendelse](/da/rest-api/getting-started/authentication/)).
 
 | Metode | Sti | Hvad den gør |
 |---|---|---|

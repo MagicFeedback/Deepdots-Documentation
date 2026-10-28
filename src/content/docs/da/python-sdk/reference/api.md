@@ -10,9 +10,6 @@ Hoved-indgangspunktet. Importer og instantier én gang; genbrug klienten på tv�
 ```python
 from deepdots_sdk import Deepdots
 
-client = Deepdots(api_key="dd_live_...")
-
-# eller med login som API-bruger:
 client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
@@ -24,8 +21,7 @@ client = Deepdots(
 
 | Parameter | Type | Standard | Beskrivelse |
 |---|---|---|---|
-| `api_key` | string | — | Din Deepdots API-nøgle. Når den angives, sendes den med hver request, og `user`/`password` bruges ikke |
-| `user` | string | — | API-brugerens e-mail, til login uden API-nøgle |
+| `user` | string | — | API-brugerens e-mail |
 | `password` | string | — | API-brugerens adgangskode |
 | `base_url` | string | `"https://api.magicfeedback.io"` | API-rod-URL (produktion) |
 
@@ -54,7 +50,7 @@ client.set_logging(logging.DEBUG)
 
 #### `refresh_token()`
 
-Fornyer tokenet efter login med `user`/`password` og opdaterer det i alle sub-API-klienter. Login-tokens gælder i en time; kald den, når en request fejler med `401` i en proces, der kører længe. Med en API-nøgle gør den ingenting, da nøgler ikke udløber.
+Fornyer tokenet og opdaterer det i alle sub-API-klienter. Login-tokens gælder i en time; kald den, når en request fejler med `401` i en proces, der kører længe.
 
 ```python
 client.refresh_token()

@@ -62,7 +62,8 @@ SDK'en forbinder til produktions-API'et som standard. Send udviklingsmiljøets `
 
 ```python
 client = Deepdots(
-    api_key="dd_test_...",
+    user="dig@eksempel.com",
+    password="din-adgangskode",
     base_url="https://api-dev.deepdots.com",
 )
 ```

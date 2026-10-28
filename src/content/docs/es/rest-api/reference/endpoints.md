@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-Todos los endpoints reciben y devuelven JSON. Todos salvo los dos de `/auth/token` necesitan `Authorization: Bearer <token>`, donde el token es una API key o un token de inicio de sesión (ver [Autenticación](/es/rest-api/getting-started/authentication/)).
+Todos los endpoints reciben y devuelven JSON. Todos salvo los dos de `/auth/token` necesitan `Authorization: Bearer <token>` (ver [Autenticación](/es/rest-api/getting-started/authentication/)).
 
 | Método | Ruta | Qué hace |
 |---|---|---|

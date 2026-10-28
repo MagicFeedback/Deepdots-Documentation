@@ -9,7 +9,6 @@ Para instalar una versión concreta, consulta [Instalación](/es/python-sdk/gett
 
 ## 1.0.24 — sin publicar
 
-- **API keys.** Pasa `api_key="dd_live_..."` al constructor y la key se envía en cada request, sin iniciar sesión. Ver [Inicio rápido](/es/python-sdk/getting-started/quickstart/).
 - **El inicio de sesión pasa por la API de Deepdots** (`POST /auth/token`) en lugar de llamar directamente a Google Identity Platform. El argumento `ip_key` ya no se usa: se ignora, con un `DeprecationWarning`.
 - `refresh_token()` renueva un token de inicio de sesión con su token de refresco (`POST /auth/token/refresh`), y solo vuelve a iniciar sesión si el token de refresco se rechaza.
 - Nuevo `client.crm` para objetos de CRM: `upsert_objects()` y `get_objects()`.

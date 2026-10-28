@@ -62,7 +62,8 @@ The SDK connects to the production API by default. To use the development enviro
 
 ```python
 client = Deepdots(
-    api_key="dd_test_...",
+    user="you@example.com",
+    password="your-password",
     base_url="https://api-dev.deepdots.com",
 )
 ```

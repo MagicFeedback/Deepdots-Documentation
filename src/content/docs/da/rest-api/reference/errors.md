@@ -34,7 +34,7 @@ Fejl returneres som JSON med et `error`-objekt:
 |---|---|---|
 | `200` | Gennemført | — |
 | `400` | Forespørgslen er forkert: et manglende eller ukendt felt, en ugyldig e-mail, en virksomhed eller et produkt, der ikke findes | Nej, ret forespørgslen |
-| `401` | Tokenet eller API-nøglen mangler, er ugyldig eller udløbet | Én gang, efter tokenet er fornyet (ikke med en API-nøgle) |
+| `401` | Tokenet mangler, er ugyldigt eller udløbet | Én gang, efter tokenet er fornyet |
 | `403` | API-brugeren er ikke aktiv | Nej, kontakt Deepdots |
 | `404` | Ressourcen (feedback, integration) findes ikke eller er ikke synlig for dig | Nej |
 | `405` | API-brugeren har ikke adgang til dette endpoint | Nej, kontakt Deepdots |
