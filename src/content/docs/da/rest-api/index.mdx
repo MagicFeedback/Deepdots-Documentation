@@ -1,0 +1,58 @@
+---
+title: REST API
+description: Send feedback og administrer CRM-kontakter i Deepdots direkte over HTTP fra ethvert backend.
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+Med Deepdots REST API kan dit backend sende feedback og holde dine CRM-kontakter i Deepdots opdateret uden at installere et SDK. Hvert kald er en almindelig HTTPS-forespørgsel med en JSON-body og et bearer-token.
+
+## Hvad du kan
+
+- **Send feedback** — én ad gangen eller i bulk, med svar, metrics og metadata.
+- **Administrer kontakter** — opret eller opdater CRM-kontakter ud fra e-mail, med dine egne brugerdefinerede felter.
+- **Knyt feedback til kontakter** — registrer, hvem der gav hver feedback.
+
+Deepdots analyserer al den feedback, du sender: emner, sentiment, KPI'er og alt det andet, du ser i dashboardet.
+
+## Base-URL'er
+
+| Miljø | URL |
+|---|---|
+| Produktion | `https://api.deepdots.com` |
+| Udvikling | `https://api-dev.deepdots.com` |
+
+Brug udviklingsmiljøet, mens du bygger og tester din integration. Det har sine egne data og loginoplysninger.
+
+## Det skal du have fra Deepdots
+
+- En API-bruger (e-mail og adgangskode) til hvert miljø.
+- Den godkendelsesnøgle, der bruges til at logge ind.
+- Dit `companyId` og `integrationId` for hver kilde, du sender feedback fra.
+
+Din kontaktperson hos Deepdots giver dig alt dette, når din integration bliver sat op.
+
+## Start her
+
+<CardGrid>
+  <Card title="Godkendelse" icon="approve-check">
+    Få et bearer-token, og hold det gyldigt.
+
+    <LinkButton href="/da/rest-api/getting-started/authentication/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+  <Card title="Hurtig start" icon="rocket">
+    Send din første feedback i tre trin.
+
+    <LinkButton href="/da/rest-api/getting-started/quickstart/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+  <Card title="Feedback" icon="comment">
+    Svar, metrics, metadata og bulk-afsendelser.
+
+    <LinkButton href="/da/rest-api/guides/feedback/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+  <Card title="Kontakter" icon="list-format">
+    Opret eller opdater kontakter og deres brugerdefinerede felter.
+
+    <LinkButton href="/da/rest-api/guides/contacts/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+</CardGrid>
