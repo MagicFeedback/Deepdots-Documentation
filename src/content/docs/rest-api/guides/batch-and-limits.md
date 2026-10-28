@@ -11,7 +11,7 @@ sidebar:
 |---|---|
 | Contacts per `POST /crm/contacts/upsert/batch` | 500 |
 | Request body | 1 MB |
-| Token lifetime | 1 hour |
+| Signed-in token lifetime (`/auth/token`) | 1 hour; API keys do not expire |
 
 For `POST /feedbacks/bulk`, keep each request under the 1 MB body limit. A few hundred feedbacks per request is a good size.
 
@@ -19,7 +19,7 @@ For `POST /feedbacks/bulk`, keep each request under the 1 MB body limit. A few h
 
 - **Feedback:** always send `external_id`. A retried request returns the feedback that already exists instead of creating a second one.
 - **Contacts:** use the upsert endpoints. Sending the same contact twice updates it instead of creating a duplicate.
-- **When to retry:** on network errors, timeouts and `5xx` responses, with an increasing wait between attempts (for example 1 s, 2 s, 4 s). Retry a `401` once, after refreshing the token.
+- **When to retry:** on network errors, timeouts and `5xx` responses, with an increasing wait between attempts (for example 1 s, 2 s, 4 s). Retry a `401` once, after refreshing the token (with an API key, a `401` means the key is wrong or revoked: don't retry).
 - **When not to retry:** `400`, `404`, `406` and `422` mean the request itself is wrong. Fix it before sending it again.
 
 ## Partial failures

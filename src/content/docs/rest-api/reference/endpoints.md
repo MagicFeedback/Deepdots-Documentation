@@ -5,10 +5,12 @@ sidebar:
   order: 1
 ---
 
-All endpoints take and return JSON, and need `Authorization: Bearer <token>` (see [Authentication](/rest-api/getting-started/authentication/)).
+All endpoints take and return JSON. All of them except the two `/auth/token` ones need `Authorization: Bearer <token>`, where the token is an API key or a signed-in token (see [Authentication](/rest-api/getting-started/authentication/)).
 
 | Method | Path | What it does |
 |---|---|---|
+| `POST` | `/auth/token` | Sign in with an API user's email and password |
+| `POST` | `/auth/token/refresh` | Renew a signed-in token |
 | `POST` | `/feedbacks` | Send one feedback |
 | `POST` | `/feedbacks/bulk` | Send many feedbacks for one company and product |
 | `GET` | `/feedbacks/{id}` | Read one feedback |
@@ -16,6 +18,46 @@ All endpoints take and return JSON, and need `Authorization: Bearer <token>` (se
 | `POST` | `/crm/contacts/upsert/batch` | Create or update up to 500 contacts |
 | `PATCH` | `/crm/contacts/{id}/fields` | Update a contact's custom fields and details |
 | `GET` | `/crm/contacts` | Find contacts |
+
+---
+
+## `POST /auth/token`
+
+Sign in with an API user's email and password. Needs no `Authorization` header.
+
+**Body**
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `email` | string | Yes | |
+| `password` | string | Yes | |
+
+**Response `200`:**
+
+| Field | Type | Notes |
+|---|---|---|
+| `idToken` | string | Send it as `Authorization: Bearer <idToken>` |
+| `refreshToken` | string | For `POST /auth/token/refresh` |
+| `expiresIn` | number | Seconds until `idToken` expires (3600) |
+| `tokenType` | string | Always `Bearer` |
+
+**Errors:** `401` for a wrong email or password, `403` when the user is disabled, `429` after too many failed attempts, `422` when a field is missing.
+
+---
+
+## `POST /auth/token/refresh`
+
+Get a new `idToken` without sending the password again. Needs no `Authorization` header.
+
+**Body**
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `refreshToken` | string | Yes | From the sign-in or the previous refresh |
+
+**Response `200`:** the same fields as `POST /auth/token`, with a new `refreshToken` to use next time.
+
+**Errors:** `401` when the refresh token is invalid or expired (sign in again), `403` when the user is disabled.
 
 ---
 

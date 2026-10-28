@@ -1,19 +1,26 @@
 ---
 title: Hurtig start
-description: Få et token, send en feedback, og læs den igen, i tre forespørgsler.
+description: Godkend, send en feedback, og læs den igen, i tre forespørgsler.
 sidebar:
   order: 2
 ---
 
 Denne hurtige start sender én feedback til udviklingsmiljøet. Du skal bruge de loginoplysninger og det `integrationId`, der er beskrevet i [Godkendelse](/da/rest-api/getting-started/authentication/).
 
-## 1. Få et token
+## 1. Klargør dine loginoplysninger
+
+Med en API-nøgle til udvikling er nøglen selve tokenet:
 
 ```bash
-export DEEPDOTS_TOKEN=$(curl -s -X POST \
-  "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$DEEPDOTS_AUTH_KEY" \
+export DEEPDOTS_TOKEN="dd_test_..."
+```
+
+Med en API-bruger logger du i stedet ind for at få et:
+
+```bash
+export DEEPDOTS_TOKEN=$(curl -s -X POST "https://api-dev.deepdots.com/auth/token" \
   -H "Content-Type: application/json" \
-  -d '{"email": "api-user@yourcompany.com", "password": "your-password", "returnSecureToken": true}' \
+  -d '{"email": "api-user@yourcompany.com", "password": "your-password"}' \
   | jq -r .idToken)
 ```
 

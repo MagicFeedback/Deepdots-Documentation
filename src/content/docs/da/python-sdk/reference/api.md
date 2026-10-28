@@ -10,10 +10,13 @@ Hoved-indgangspunktet. Importer og instantier én gang; genbrug klienten på tv�
 ```python
 from deepdots_sdk import Deepdots
 
+client = Deepdots(api_key="dd_live_...")
+
+# eller med login som API-bruger:
 client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
-    base_url="https://api.magicfeedback.io",  # valgfri
+    base_url="https://api.deepdots.com",  # valgfri
 )
 ```
 
@@ -21,9 +24,10 @@ client = Deepdots(
 
 | Parameter | Type | Standard | Beskrivelse |
 |---|---|---|---|
-| `user` | string | — | Konto-e-mail |
-| `password` | string | — | Kontoadgangskode |
-| `base_url` | string | `"https://api.magicfeedback.io"` | API-rod-URL |
+| `api_key` | string | — | Din Deepdots API-nøgle. Når den angives, sendes den med hver request, og `user`/`password` bruges ikke |
+| `user` | string | — | API-brugerens e-mail, til login uden API-nøgle |
+| `password` | string | — | API-brugerens adgangskode |
+| `base_url` | string | `"https://api.magicfeedback.io"` | API-rod-URL (produktion) |
 
 ### Egenskaber
 
@@ -46,6 +50,14 @@ Konfigurer SDK'ens interne logger.
 ```python
 import logging
 client.set_logging(logging.DEBUG)
+```
+
+#### `refresh_token()`
+
+Fornyer tokenet efter login med `user`/`password` og opdaterer det i alle sub-API-klienter. Login-tokens gælder i en time; kald den, når en request fejler med `401` i en proces, der kører længe. Med en API-nøgle gør den ingenting, da nøgler ikke udløber.
+
+```python
+client.refresh_token()
 ```
 
 ---

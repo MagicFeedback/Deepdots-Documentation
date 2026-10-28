@@ -10,10 +10,13 @@ El punto de entrada principal. Importa e instancia una vez; reutiliza el cliente
 ```python
 from deepdots_sdk import Deepdots
 
+client = Deepdots(api_key="dd_live_...")
+
+# o, iniciando sesión con un usuario de API:
 client = Deepdots(
     user="tu@ejemplo.com",
     password="tu-contraseña",
-    base_url="https://api.magicfeedback.io",  # opcional
+    base_url="https://api.deepdots.com",  # opcional
 )
 ```
 
@@ -21,9 +24,10 @@ client = Deepdots(
 
 | Parámetro | Tipo | Por defecto | Descripción |
 |---|---|---|---|
-| `user` | string | — | Correo de la cuenta |
-| `password` | string | — | Contraseña de la cuenta |
-| `base_url` | string | `"https://api.magicfeedback.io"` | URL raíz de la API |
+| `api_key` | string | — | Tu API key de Deepdots. Si la pasas, se envía en cada request y no se usan `user`/`password` |
+| `user` | string | — | Email del usuario de API, para iniciar sesión sin API key |
+| `password` | string | — | Contraseña del usuario de API |
+| `base_url` | string | `"https://api.magicfeedback.io"` | URL raíz de la API (producción) |
 
 ### Propiedades
 
@@ -46,6 +50,14 @@ Configura el logger interno del SDK.
 ```python
 import logging
 client.set_logging(logging.DEBUG)
+```
+
+#### `refresh_token()`
+
+Renueva el token tras iniciar sesión con `user`/`password` y lo actualiza en todos los clientes de sub-API. Los tokens de inicio de sesión duran una hora; llámalo cuando una request falle con `401` en un proceso de larga duración. Con una API key no hace nada, porque las keys no caducan.
+
+```python
+client.refresh_token()
 ```
 
 ---

@@ -1,23 +1,40 @@
 ---
 title: Godkendelse
-description: Log ind med din API-bruger, få et bearer-token, og forny det, før det udløber.
+description: Godkend med en API-nøgle, eller log ind med din API-bruger og forny tokenet, før det udløber.
 sidebar:
   order: 1
 ---
 
-Hver forespørgsel til Deepdots API har et bearer-token i `Authorization`-headeren. Du får tokenet ved at logge ind med din API-bruger via Google Identity Platform, på samme måde som Deepdots SDK'erne gør.
+Hver forespørgsel til Deepdots API har et bearer-token i `Authorization`-headeren. Der er to måder at få et på:
 
-## 1. Log ind
+- **En API-nøgle** (anbefalet). Deepdots udsteder den til din integration. Den udløber ikke, så der er intet at forny.
+- **Din API-brugers e-mail og adgangskode.** Du logger ind via API'et og får et token, der gælder i en time, plus et refresh-token til at forny det.
 
-Send din API-brugers e-mail og adgangskode sammen med den godkendelsesnøgle, Deepdots har givet dig:
+## Mulighed 1: API-nøgle
+
+Send nøglen som bearer-token i hver forespørgsel:
 
 ```bash
-curl -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$DEEPDOTS_AUTH_KEY" \
+curl "https://api.deepdots.com/crm/contacts?filter[limit]=1" \
+  -H "Authorization: Bearer $DEEPDOTS_API_KEY"
+```
+
+Produktionsnøgler starter med `dd_live_`, udviklingsnøgler med `dd_test_`. En nøgle handler som den API-bruger, den er udstedt til, med de samme rettigheder.
+
+En nøgle er gyldig, indtil Deepdots tilbagekalder den. Hvis en nøgle er lækket, eller du ikke længere har brug for den, så bed din kontaktperson hos Deepdots om at tilbagekalde den og udstede en ny.
+
+## Mulighed 2: E-mail og adgangskode
+
+### 1. Log ind
+
+Send din API-brugers e-mail og adgangskode:
+
+```bash
+curl -X POST "https://api.deepdots.com/auth/token" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "api-user@yourcompany.com",
-    "password": "your-password",
-    "returnSecureToken": true
+    "password": "your-password"
   }'
 ```
 
@@ -27,11 +44,12 @@ Svaret indeholder tokenet og et refresh-token:
 {
   "idToken": "eyJhbGciOiJSUzI1NiIs...",
   "refreshToken": "AMf-vBx...",
-  "expiresIn": "3600"
+  "expiresIn": 3600,
+  "tokenType": "Bearer"
 }
 ```
 
-## 2. Kald API'et
+### 2. Kald API'et
 
 Send `idToken` som bearer-token i hver forespørgsel:
 
@@ -40,36 +58,39 @@ curl "https://api.deepdots.com/crm/contacts?filter[limit]=1" \
   -H "Authorization: Bearer $DEEPDOTS_TOKEN"
 ```
 
-## 3. Forny tokenet
+### 3. Forny tokenet
 
 Et token er gyldigt i **1 time** (`expiresIn`, i sekunder). Før det udløber, så byt refresh-tokenet til et nyt i stedet for at logge ind igen:
 
 ```bash
-curl -X POST "https://securetoken.googleapis.com/v1/token?key=$DEEPDOTS_AUTH_KEY" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=refresh_token&refresh_token=$DEEPDOTS_REFRESH_TOKEN"
+curl -X POST "https://api.deepdots.com/auth/token/refresh" \
+  -H "Content-Type: application/json" \
+  -d "{\"refreshToken\": \"$DEEPDOTS_REFRESH_TOKEN\"}"
 ```
 
-Svaret har det nye token i `id_token` (og et nyt `refresh_token`).
+Svaret har samme form som login: et nyt `idToken` og et nyt `refreshToken`. Brug det nye refresh-token næste gang.
 
 :::tip
-Forny et par minutter før timen er gået, eller når API'et svarer `401`, og prøv derefter forespørgslen igen én gang med det nye token.
+Forny et par minutter før timen er gået, eller når API'et svarer `401`, og prøv derefter forespørgslen igen én gang med det nye token. Hvis selve fornyelsen svarer `401`, så log ind igen.
 :::
 
 ## Pas på dine loginoplysninger
 
-- Gem e-mail, adgangskode og refresh-token i en secret manager, aldrig i kildekoden.
-- Brug en dedikeret API-bruger til din integration, ikke en persons konto.
-- Udvikling og produktion har hver sin API-bruger. Et token fra det ene virker ikke i det andet.
+- Gem API-nøglen, eller e-mail, adgangskode og refresh-token, i en secret manager, aldrig i kildekoden.
+- Brug en dedikeret API-bruger eller nøgle til hver integration, ikke en persons konto.
+- Udvikling og produktion har hver sine loginoplysninger. En nøgle eller et token fra det ene virker ikke i det andet.
 
 ## Fejl
 
-| Status | Betydning | Hvad du gør |
-|---|---|---|
-| `400` fra Identity Platform | Forkert e-mail, adgangskode eller nøgle | Tjek loginoplysningerne |
-| `401` fra API'et | Token mangler, er ugyldigt eller udløbet | Forny tokenet, og prøv igen én gang |
-| `403` fra API'et | API-brugeren er ikke aktiv | Kontakt Deepdots |
-| `405` fra API'et | API-brugeren har ikke adgang til dette endpoint | Kontakt Deepdots |
+| Status | Hvor | Betydning | Hvad du gør |
+|---|---|---|---|
+| `401` | `/auth/token` | Forkert e-mail eller adgangskode | Tjek loginoplysningerne |
+| `401` | `/auth/token/refresh` | Refresh-tokenet er ugyldigt eller udløbet | Log ind igen |
+| `403` | `/auth/token`, `/auth/token/refresh` | API-brugeren er deaktiveret | Kontakt Deepdots |
+| `429` | `/auth/token` | For mange mislykkede forsøg for denne konto | Vent, før du prøver igen |
+| `401` | Alle andre endpoints | Token eller API-nøgle mangler, er ugyldig eller udløbet | Forny tokenet, og prøv igen én gang; med en API-nøgle, tjek nøglen |
+| `403` | Alle andre endpoints | API-brugeren er ikke aktiv | Kontakt Deepdots |
+| `405` | Alle andre endpoints | API-brugeren har ikke adgang til dette endpoint | Kontakt Deepdots |
 
 ## Næste skridt
 

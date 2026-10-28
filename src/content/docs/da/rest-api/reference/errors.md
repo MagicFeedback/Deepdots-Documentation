@@ -34,12 +34,13 @@ Fejl returneres som JSON med et `error`-objekt:
 |---|---|---|
 | `200` | Gennemført | — |
 | `400` | Forespørgslen er forkert: et manglende eller ukendt felt, en ugyldig e-mail, en virksomhed eller et produkt, der ikke findes | Nej, ret forespørgslen |
-| `401` | Tokenet mangler, er ugyldigt eller udløbet | Én gang, efter tokenet er fornyet |
+| `401` | Tokenet eller API-nøglen mangler, er ugyldig eller udløbet | Én gang, efter tokenet er fornyet (ikke med en API-nøgle) |
 | `403` | API-brugeren er ikke aktiv | Nej, kontakt Deepdots |
 | `404` | Ressourcen (feedback, integration) findes ikke eller er ikke synlig for dig | Nej |
 | `405` | API-brugeren har ikke adgang til dette endpoint | Nej, kontakt Deepdots |
 | `406` | Virksomheden eller kontakten er ikke din | Nej |
 | `422` | Body'en passer ikke til skemaet (se `details`) | Nej, ret forespørgslen |
+| `429` | For mange mislykkede login for denne konto (kun `/auth/token`) | Ja, efter en pause |
 | `5xx` | Et problem hos os | Ja, med stigende ventetid |
 
 Hvis en `5xx` bliver ved, eller du ser en fejl, du ikke kan forklare, så send os tidspunktet for forespørgslen, endpointet og det berørte `external_id` (eller e-mail).

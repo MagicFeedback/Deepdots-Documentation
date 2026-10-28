@@ -11,11 +11,17 @@ pip install deepdots
 
 ## 2. Create a client
 
-Import `Deepdots` and pass your account credentials. The constructor authenticates immediately and stores the bearer token for all subsequent requests.
+Import `Deepdots` and pass the API key Deepdots gave you. The key is sent on every request; it does not expire.
 
 ```python
 from deepdots_sdk import Deepdots
 
+client = Deepdots(api_key="dd_live_...")
+```
+
+Or sign in with your API user's email and password. The constructor signs in immediately and stores the token for all subsequent requests:
+
+```python
 client = Deepdots(
     user="you@example.com",
     password="your-password",

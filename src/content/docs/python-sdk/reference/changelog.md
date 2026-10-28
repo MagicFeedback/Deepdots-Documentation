@@ -7,6 +7,27 @@ Every published release, newest first. Dates are the PyPI publication dates.
 
 To install a specific version, see [Installation](/python-sdk/getting-started/installation/).
 
+## 1.0.24 — unreleased
+
+- **API keys.** Pass `api_key="dd_live_..."` to the constructor and the key is sent on every request, with no sign-in. See [Quickstart](/python-sdk/getting-started/quickstart/).
+- **Sign-in goes through the Deepdots API** (`POST /auth/token`) instead of calling Google Identity Platform directly. The `ip_key` argument is no longer used: it is ignored, with a `DeprecationWarning`.
+- `refresh_token()` renews a signed-in token with its refresh token (`POST /auth/token/refresh`), signing in again only if the refresh token was rejected.
+- New `client.crm` for CRM objects: `upsert_objects()` and `get_objects()`.
+
+## 1.0.22 — 2026-09-25
+
+- **Contacts:** new `update_fields()`, which merges custom fields into a contact and keeps the others; `upsert()`, which creates or updates a contact matched by email; and `upsert_batch()`, which does the same for a list of any length, split into requests of 500.
+- **Changed:** `update_metadata_batch()` now merges metadata by key instead of replacing it: keys you don't send are kept. Pass `mode="append"` to add values to the ones a key already holds.
+
+## 1.0.21 — 2026-09-16
+
+- New `feedbacks.update_metadata_batch()`: update the metadata of many feedbacks in one request, and have each one analysed again.
+
+## 1.0.20 — 2026-08-24
+
+- `upload_attachment()` refuses a file when the feedback already holds `max_attachments` files (default 3) or the same content is already attached. Pass `check_duplicate_content=False` to skip the content check.
+- `value` is now always a list in `metadata`, `metrics` and `profile` too, both when you send a feedback and when you read one.
+
 ## 1.0.19 — 2026-08-20
 
 - Distribution names are now written in lowercase: `deepdots` and `magicfeedback`. Cosmetic only — PyPI treats package names case-insensitively, so `pip install MagicFeedback` keeps working.

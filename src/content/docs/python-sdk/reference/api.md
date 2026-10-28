@@ -10,10 +10,13 @@ The main entry point. Import and instantiate once; reuse the client across your 
 ```python
 from deepdots_sdk import Deepdots
 
+client = Deepdots(api_key="dd_live_...")
+
+# or, signing in with an API user:
 client = Deepdots(
     user="you@example.com",
     password="your-password",
-    base_url="https://api.magicfeedback.io",  # optional
+    base_url="https://api.deepdots.com",  # optional
 )
 ```
 
@@ -21,9 +24,10 @@ client = Deepdots(
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `user` | string | — | Account email address |
-| `password` | string | — | Account password |
-| `base_url` | string | `"https://api.magicfeedback.io"` | API root URL |
+| `api_key` | string | — | Your Deepdots API key. When given, it is sent on every request and `user`/`password` are not used |
+| `user` | string | — | API user's email address, to sign in without an API key |
+| `password` | string | — | API user's password |
+| `base_url` | string | `"https://api.magicfeedback.io"` | API root URL (production) |
 
 ### Properties
 
@@ -46,6 +50,14 @@ Configure the SDK's internal logger.
 ```python
 import logging
 client.set_logging(logging.DEBUG)
+```
+
+#### `refresh_token()`
+
+Renew the token after signing in with `user`/`password`, and update it for every sub-API client. Signed-in tokens last one hour; call it when a request fails with `401` in a long-running process. With an API key it does nothing, since keys do not expire.
+
+```python
+client.refresh_token()
 ```
 
 ---
