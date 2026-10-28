@@ -9,11 +9,13 @@ project; one "topic" (product) per SDK via `starlight-sidebar-topics`.
 - `npm run preview` — preview the built site.
 
 ## Products (topics)
-| Topic         | Directory                        | Source repo                                   |
-|---------------|----------------------------------|-----------------------------------------------|
-| Popup Web     | `src/content/docs/popup-web/`    | `github.com/MagicFeedback/deepdots-popup-sdk` |
-| Popup Native  | `src/content/docs/popup-native/` | KMP SDK (Android + iOS)                       |
-| Surveys       | `src/content/docs/surveys/`      | `github.com/MagicFeedback/magicfeedback-sdk`  |
+| Topic         | Directory                        | Source repo                                                  |
+|---------------|----------------------------------|--------------------------------------------------------------|
+| Popup Web     | `src/content/docs/popup-web/`    | `github.com/MagicFeedback/deepdots-popup-sdk`                |
+| Popup Native  | `src/content/docs/popup-native/` | `github.com/MagicFeedback/deepdots-popup-mobile-native-sdk`  |
+| Surveys       | `src/content/docs/surveys/`      | `github.com/MagicFeedback/magicfeedback-sdk`                 |
+| Python SDK    | `src/content/docs/python-sdk/`   | `github.com/MagicFeedback/magicfeedback_python_sdk`          |
+| REST API      | `src/content/docs/rest-api/`     | `github.com/MagicFeedback/MagicFeedback_API`                 |
 
 Each product has exactly three sections: `getting-started/`, `guides/`, `reference/`.
 
@@ -26,6 +28,7 @@ Each product has exactly three sections: `getting-started/`, `guides/`, `referen
   `da` uses `/da/popup-web/...`. Always include the topic segment.
 
 ## Adding a new SDK
+> Team workflow (cases, prompts, PR checklist): `CONTRIBUTING.md`.
 > Reusable prompt to document a new product in this same style: `.claude/prompts/new-product.md`.
 
 1. Create `src/content/docs/<new-topic>/{getting-started,guides,reference}/` with an `index.md`.
