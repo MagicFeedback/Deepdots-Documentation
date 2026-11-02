@@ -1,0 +1,93 @@
+---
+title: Installation
+description: Tilføj deepdots_popups-betaen til en Flutter-app, og opsæt Android og iOS.
+sidebar:
+  order: 1
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+`deepdots_popups` `0.1.0-beta.1` er en beta. Den er endnu ikke på pub.dev: den installeres fra git, låst til et release-tag.
+</Aside>
+
+## Krav
+
+| | |
+|---|---|
+| Dart / Flutter | Dart 3.13.5 eller nyere (Flutter 3.47 eller nyere). Testet med Flutter 3.47.6. |
+| Android | minSdk 24, compileSdk 36 |
+| iOS | 13.0 eller nyere |
+| Native SDK | `0.7.6`, hentes ind af pluginet (Maven Central på Android; Swift Package Manager eller CocoaPods på iOS) |
+
+Hvis din app er på en ældre Flutter-version, så sig det til din Deepdots-kontakt.
+
+## 1. Få adgang til betaen
+
+Pluginets repository er privat under betaen. Bed din Deepdots-kontakt eller Deepdots-support om adgang, og brug de git-credentials, du allerede bruger til private afhængigheder (en SSH-nøgle eller en credential helper). Skriv aldrig et token eller en adgangskode i `pubspec.yaml`.
+
+## 2. Tilføj afhængigheden
+
+Lås afhængigheden til release-tagget:
+
+```yaml
+# pubspec.yaml
+dependencies:
+  deepdots_popups:
+    git:
+      url: https://github.com/MagicFeedback/deepdots-popup-flutter-sdk.git
+      ref: v0.1.0-beta.1
+```
+
+```bash
+flutter pub get
+```
+
+Lås altid `ref` til et tag. For at opdatere skal du ændre tagget og køre `flutter pub get` igen.
+
+## 3. Opsæt Android
+
+I de fleste apps er der intet at tilføje:
+
+- Det native SDK kommer fra Maven Central. `mavenCentral()` skal være blandt dine repositories, som det er i et standard-Flutter-projekt.
+- Pluginet erklærer `INTERNET`-tilladelsen, som Flutter kun tilføjer til debug- og profile-builds. Uden den kunne et release-build ikke nå Deepdots. Du behøver ikke selv tilføje den.
+- Enhver `Activity` virker, inklusive standard-`FlutterActivity`.
+- Din app skal have `minSdk` 24 eller højere.
+
+## 4. Opsæt iOS
+
+Flutter bygger iOS-plugins med Swift Package Manager, når det er slået til, og ellers med CocoaPods. Begge virker.
+
+Det native SDK leveres uden et `x86_64`-simulator-slice, så Intel-simulatorarkitekturen skal udelukkes. Uden denne indstilling virker `flutter run` på en Apple Silicon-simulator stadig, men `flutter build ios --simulator` fejler ved linkning.
+
+<Tabs>
+  <TabItem label="Swift Package Manager">
+    Tilføj denne linje i slutningen af både `ios/Flutter/Debug.xcconfig` og `ios/Flutter/Release.xcconfig`:
+
+    ```text
+    EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386 x86_64
+    ```
+  </TabItem>
+  <TabItem label="CocoaPods">
+    Tilføj dette til `post_install`-blokken i `ios/Podfile`:
+
+    ```ruby
+    installer.aggregate_targets.each do |aggregate|
+      aggregate.user_project.native_targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386 x86_64'
+        end
+      end
+      aggregate.user_project.save
+    end
+    ```
+
+    `pod install` downloader det native SDK's XCFramework og tjekker dets sha256.
+  </TabItem>
+</Tabs>
+
+Dit iOS-deployment target skal være 13.0 eller nyere.
+
+## Næste skridt
+
+[Quickstart](/da/popup-flutter/getting-started/quickstart/): initialisér pluginet, og vis din første popup.

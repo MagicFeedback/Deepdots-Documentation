@@ -1,0 +1,63 @@
+---
+title: Deepdots Popups til Flutter
+description: Flutter-plugin (beta), der viser Deepdots-popups og surveys i Android- og iOS-apps, oven på det native Deepdots Popup SDK.
+---
+
+import { Aside, Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+`deepdots_popups` er i beta (`0.1.0-beta.1`). API'et kan stadig ændre sig før 1.0, og pakken er endnu ikke på pub.dev: adgang til betaen gives af Deepdots. Se [Installation](/da/popup-flutter/getting-started/installation/).
+</Aside>
+
+`deepdots_popups` er et Flutter-plugin, der viser Deepdots-popups og surveys i din Android- og iOS-app. Det pakker det native Deepdots Popup SDK ind: targeting, triggers, sessioner, analytics og survey-UI'et kører alle native, og pluginet eksponerer dem til Dart og kobler Flutters navigation og app-livscyklus på for dig.
+
+## Hvad det gør
+
+- Popups konfigureres i Deepdots og leveres til appen i runtime: der kræves ingen release for at lancere eller ændre en kampagne.
+- Triggers efter skærm, tid på skærmen, scroll, exit, custom event og klik.
+- Segmentering efter skærm, sprog og bruger, med cooldowns håndteret af Deepdots.
+- Surveyen renderes i en native popup, oven på dit Flutter-UI.
+- En Dart-stream af popup-events (`popup_shown`, `popup_clicked`, `survey_completed`) til din egen analytics eller dit eget UI.
+- Adfærdsanalyse (skærme, sessioner, engagement, custom events) sendt til dit Deepdots-workspace.
+
+## Hvad pluginet gør for dig
+
+- **Navigation:** tilføj `DeepdotsNavigatorObserver` til din app, så rapporteres hver navngiven route til SDK'et.
+- **Livscyklus:** pluginet åbner og lukker sessioner, når appen går i foreground eller background. Der er intet at kalde.
+- **Scroll:** pak en skærm ind i `DeepdotsScrollListener`, så virker scroll-triggers.
+
+## Pakkedetaljer
+
+| | |
+|---|---|
+| Pakke | `deepdots_popups` |
+| Version | `0.1.0-beta.1` |
+| Native SDK | `0.7.6` |
+| Platforme | Android (minSdk 24), iOS 13.0+ |
+| Dart / Flutter | Dart 3.13.5 eller nyere (Flutter 3.47 eller nyere) |
+| Import | `package:deepdots_popups/deepdots_popups.dart` |
+
+## Start her
+
+<CardGrid>
+  <Card title="Installation" icon="download">
+    Tilføj afhængigheden, og opsæt Android og iOS.
+
+    <LinkButton href="/da/popup-flutter/getting-started/installation/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+  <Card title="Quickstart" icon="rocket">
+    Initialisér pluginet, og vis din første popup.
+
+    <LinkButton href="/da/popup-flutter/getting-started/quickstart/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+  <Card title="Navigation" icon="right-caret">
+    Rapportér skærme med `DeepdotsNavigatorObserver` eller `setPath`.
+
+    <LinkButton href="/da/popup-flutter/guides/navigation/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+  <Card title="API-reference" icon="open-book">
+    Alle pluginets metoder, parametre og typer.
+
+    <LinkButton href="/da/popup-flutter/reference/api-reference/" icon="right-arrow">Læs</LinkButton>
+  </Card>
+</CardGrid>

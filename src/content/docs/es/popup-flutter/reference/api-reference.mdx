@@ -1,0 +1,137 @@
+---
+title: Referencia de la API
+description: Todas las clases, métodos y tipos públicos del plugin de Flutter deepdots_popups.
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+Esta referencia cubre `deepdots_popups` `0.1.0-beta.1`. La API aún puede cambiar antes de la 1.0.
+</Aside>
+
+```dart
+import 'package:deepdots_popups/deepdots_popups.dart';
+```
+
+Todos los métodos son estáticos en `DeepdotsPopups` y devuelven un `Future`.
+
+## `DeepdotsPopups`
+
+### Configuración
+
+| Método | Descripción |
+|---|---|
+| `init({required String publicKey, ...})` | Inicializa el SDK nativo y la gestión del ciclo de vida. Idempotente. Opciones en [Quickstart](/es/popup-flutter/getting-started/quickstart/#opciones-de-init). |
+| `setLanguage(String? language)` | Idioma para la segmentación, la encuesta y los textos del popup, desde el siguiente popup. `null` = idioma del dispositivo. Se puede llamar antes de `init()`. |
+| `setTrackingEnabled(bool enabled)` | Activa o desactiva la analítica y el tracking de contacto. |
+
+### Navegación y triggers
+
+| Método | Descripción |
+|---|---|
+| `setPath(String path)` | Pantalla actual. `DeepdotsNavigatorObserver` lo llama por ti. Antes de `init()`, se guarda y se envía cuando `init()` termina. |
+| `triggerEvent(String name)` | Dispara los popups con un trigger de evento con ese nombre. |
+| `triggerClick(String targetId)` | Dispara los popups con un trigger de click sobre ese target. |
+| `onScroll(int percentage)` | Porcentaje de scroll (0–100) de la pantalla actual. `DeepdotsScrollListener` lo llama por ti. No hace nada antes de `init()`. |
+| `onExit()` | Inicia la cuenta atrás de salida antes de navegar. No hace falta con `DeepdotsNavigatorObserver`. No hace nada antes de `init()`. |
+
+### Visualización
+
+Estos métodos necesitan una pantalla visible y fallan con `PlatformException(no_context)` antes del primer frame de la app.
+
+| Método | Descripción |
+|---|---|
+| `show(String surveyId, String productId, [Map<String, Object?>? data])` | Muestra el popup de la encuesta, omitiendo los triggers y la segmentación. `data` vuelve en el `extra` de `popup_shown`. `productId` hoy no se usa. |
+| `showByPopupId(String popupId)` | Muestra ese popup, omitiendo los triggers y la segmentación. |
+| `triggerSurvey(String surveyId, [String? popupId])` | Muestra el popup de la encuesta solo si pasa la segmentación y el cooldown. |
+| `close()` | Cierra el popup abierto. |
+| `markSurveyAnswered(String surveyId)` | Marca la encuesta como respondida. El SDK ya lo hace cuando se completa la encuesta. |
+
+### Usuarios y atributos
+
+| Método | Descripción |
+|---|---|
+| `setUserId([String? userId])` | Login, logout o cambio de cuenta. Sin argumento, vuelve al id anónimo. Cierra la sesión actual y abre una nueva. |
+| `getUserId()` → `String?` | Id del usuario actual, el tuyo o el anónimo. `null` mientras el tracking está desactivado. |
+| `setUserAttributes(Map<String, Object?> attributes)` | Dimensiones de analytics, enviadas con cada lote. Solo en memoria. |
+| `setContactAttributes(Map<String, Object?> attributes)` → `bool` | Guarda atributos en el contacto del usuario. Necesita `userId`. `true` si se enviaron. |
+| `setMetric(String key, Object? value)` | Valor medible, reenviado con cada lote. |
+
+### Sesiones
+
+| Método | Descripción |
+|---|---|
+| `endSession()` | Cierra la sesión actual. |
+| `getSessionId()` → `String?` | Id que Deepdots dio a la sesión de analytics actual. `null` hasta que llega o mientras el tracking está desactivado. |
+| `getFeedbackSessionId()` → `String?` | Id del feedback en el que se convertirá la sesión abierta. `null` hasta que se acepta el primer lote, después de que se cierre la sesión o sin analytics. |
+
+### Analytics
+
+| Método | Descripción |
+|---|---|
+| `track(String name, [Map<String, Object?>? params])` | Evento personalizado. |
+| `trackSearch(String query, int resultsCount, [params])` | Búsqueda y su número de resultados. |
+| `trackFindabilityFriction(String frictionTopic, [params])` | Dificultad para encontrar algo. |
+| `trackFunnelStep(String funnel, String step, String taskId, [params])` | Paso de un funnel. |
+| `trackMeaningfulInteraction(String interactionType, [params])` | Interacción significativa. |
+| `trackMessage({required stage, required id, required title, required channel, campaign, value, currency, params})` | Etapa de un mensaje push o in-app. |
+| `enterMiniService(String name, [String? entryPointType])` | Entrada en un flujo acotado. |
+| `exitMiniService(String name)` | Salida de ese flujo, con su duración. |
+| `reportError(Object error, {StackTrace? stackTrace, String severity = 'error', bool handled = true, Map<String, Object?>? context})` | Error de la app. |
+| `flushAnalytics()` | Envía ahora el lote pendiente. |
+
+Consulta [Analytics](/es/popup-flutter/guides/analytics/).
+
+### Streams
+
+| Getter | Tipo | Descripción |
+|---|---|---|
+| `events` | `Stream<DeepdotsEvent>` | `popup_shown`, `popup_clicked` y `survey_completed`. Broadcast. |
+| `feedbackSessions` | `Stream<DeepdotsFeedbackSession>` | Apertura y cierre de cada sesión de analytics. Necesita analytics. Broadcast. |
+
+## `DeepdotsNavigatorObserver`
+
+`NavigatorObserver` que llama a `setPath()` con el nombre de cada ruta de página en push, replace y pop. Las rutas sin nombre, los diálogos y los bottom sheets se ignoran.
+
+```dart
+MaterialApp(navigatorObservers: [DeepdotsNavigatorObserver()]);
+```
+
+## `DeepdotsScrollListener`
+
+Widget que reporta con `onScroll()` el porcentaje de scroll de su scrollable vertical principal.
+
+```dart
+DeepdotsScrollListener(child: ListView(children: items));
+```
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `child` | `Widget` | El contenido con scroll. Obligatorio. |
+
+## `DeepdotsEvent`
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `type` | `String` | `popup_shown`, `popup_clicked` o `survey_completed`. |
+| `popupId` | `String` | Id del popup, o vacío. |
+| `surveyId` | `String` | Id de la encuesta, o vacío. |
+| `productId` | `String` | Id del producto, o vacío. |
+| `extra` | `Map<String, Object?>` | Datos extra del evento. Vacío si no hay. |
+| `timestamp` | `DateTime?` | Cuándo emitió el evento el SDK nativo. |
+
+## `DeepdotsFeedbackSession`
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `sessionId` | `String` | Id del feedback en el que se convierte la sesión. |
+| `closed` | `bool` | `false` cuando se acepta el primer lote de la sesión; `true` cuando se acepta su lote de cierre. |
+
+## `DeepdotsEnvironment`
+
+| Valor | Backend |
+|---|---|
+| `production` (por defecto) | `https://api.deepdots.com` |
+| `development` | `https://api-dev.deepdots.com` |

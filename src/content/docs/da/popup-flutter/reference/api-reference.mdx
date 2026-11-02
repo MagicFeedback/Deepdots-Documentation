@@ -1,0 +1,137 @@
+---
+title: API-reference
+description: Alle offentlige klasser, metoder og typer i Flutter-pluginet deepdots_popups.
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+Denne reference dækker `deepdots_popups` `0.1.0-beta.1`. API'et kan stadig ændre sig før 1.0.
+</Aside>
+
+```dart
+import 'package:deepdots_popups/deepdots_popups.dart';
+```
+
+Alle metoder er statiske på `DeepdotsPopups` og returnerer en `Future`.
+
+## `DeepdotsPopups`
+
+### Opsætning
+
+| Metode | Beskrivelse |
+|---|---|
+| `init({required String publicKey, ...})` | Initialiserer det native SDK og livscyklushåndteringen. Idempotent. Indstillinger i [Quickstart](/da/popup-flutter/getting-started/quickstart/#init-indstillinger). |
+| `setLanguage(String? language)` | Sprog for targeting, surveyen og popuppens tekster, fra næste popup. `null` = enhedens sprog. Kan kaldes før `init()`. |
+| `setTrackingEnabled(bool enabled)` | Slår analytics- og kontakt-tracking til eller fra. |
+
+### Navigation og triggers
+
+| Metode | Beskrivelse |
+|---|---|
+| `setPath(String path)` | Aktuel skærm. Kaldes for dig af `DeepdotsNavigatorObserver`. Før `init()` gemmes den og sendes, når `init()` er færdig. |
+| `triggerEvent(String name)` | Udløser popups med en event-trigger med det navn. |
+| `triggerClick(String targetId)` | Udløser popups med en klik-trigger på det target. |
+| `onScroll(int percentage)` | Scroll-procent (0–100) for den aktuelle skærm. Kaldes for dig af `DeepdotsScrollListener`. Gør ingenting før `init()`. |
+| `onExit()` | Starter exit-nedtællingen før navigering. Ikke nødvendig med `DeepdotsNavigatorObserver`. Gør ingenting før `init()`. |
+
+### Visning
+
+Disse metoder kræver en synlig skærm og fejler med `PlatformException(no_context)` før appens første frame.
+
+| Metode | Beskrivelse |
+|---|---|
+| `show(String surveyId, String productId, [Map<String, Object?>? data])` | Viser surveyens popup og springer triggers og segmentering over. `data` kommer tilbage i `extra` på `popup_shown`. `productId` bruges ikke i dag. |
+| `showByPopupId(String popupId)` | Viser den popup og springer triggers og segmentering over. |
+| `triggerSurvey(String surveyId, [String? popupId])` | Viser kun surveyens popup, hvis den består segmentering og cooldown. |
+| `close()` | Lukker den åbne popup. |
+| `markSurveyAnswered(String surveyId)` | Markerer surveyen som besvaret. SDK'et gør det allerede, når surveyen gennemføres. |
+
+### Brugere og attributter
+
+| Metode | Beskrivelse |
+|---|---|
+| `setUserId([String? userId])` | Login, logout eller kontoskift. Uden argument: tilbage til det anonyme id. Lukker den aktuelle session og åbner en ny. |
+| `getUserId()` → `String?` | Aktuelt bruger-id, dit eller det anonyme. `null`, mens tracking er slået fra. |
+| `setUserAttributes(Map<String, Object?> attributes)` | Analytics-dimensioner, sendt med hvert batch. Kun i hukommelsen. |
+| `setContactAttributes(Map<String, Object?> attributes)` → `bool` | Gemmer attributter på brugerens kontakt. Kræver `userId`. `true`, hvis de blev sendt. |
+| `setMetric(String key, Object? value)` | Målbar værdi, gensendt med hvert batch. |
+
+### Sessioner
+
+| Metode | Beskrivelse |
+|---|---|
+| `endSession()` | Lukker den aktuelle session. |
+| `getSessionId()` → `String?` | Det id, Deepdots gav den aktuelle analytics-session. `null`, indtil det ankommer, eller mens tracking er slået fra. |
+| `getFeedbackSessionId()` → `String?` | Id'et på den feedback, den åbne session bliver til. `null`, indtil det første batch er accepteret, efter sessionen er lukket, eller uden analytics. |
+
+### Analytics
+
+| Metode | Beskrivelse |
+|---|---|
+| `track(String name, [Map<String, Object?>? params])` | Custom event. |
+| `trackSearch(String query, int resultsCount, [params])` | Søgning og dens antal resultater. |
+| `trackFindabilityFriction(String frictionTopic, [params])` | Besvær med at finde noget. |
+| `trackFunnelStep(String funnel, String step, String taskId, [params])` | Funnel-trin. |
+| `trackMeaningfulInteraction(String interactionType, [params])` | Meningsfuld interaktion. |
+| `trackMessage({required stage, required id, required title, required channel, campaign, value, currency, params})` | Trin for en push- eller in-app-besked. |
+| `enterMiniService(String name, [String? entryPointType])` | Indgang til et afgrænset flow. |
+| `exitMiniService(String name)` | Udgang fra det flow, med dets varighed. |
+| `reportError(Object error, {StackTrace? stackTrace, String severity = 'error', bool handled = true, Map<String, Object?>? context})` | App-fejl. |
+| `flushAnalytics()` | Sender det ventende batch nu. |
+
+Se [Analytics](/da/popup-flutter/guides/analytics/).
+
+### Streams
+
+| Getter | Type | Beskrivelse |
+|---|---|---|
+| `events` | `Stream<DeepdotsEvent>` | `popup_shown`, `popup_clicked` og `survey_completed`. Broadcast. |
+| `feedbackSessions` | `Stream<DeepdotsFeedbackSession>` | Åbning og lukning af hver analytics-session. Kræver analytics. Broadcast. |
+
+## `DeepdotsNavigatorObserver`
+
+`NavigatorObserver`, der kalder `setPath()` med navnet på hver page route ved push, replace og pop. Routes uden navn, dialoger og bottom sheets ignoreres.
+
+```dart
+MaterialApp(navigatorObservers: [DeepdotsNavigatorObserver()]);
+```
+
+## `DeepdotsScrollListener`
+
+Widget, der rapporterer scroll-procenten for sin primære lodrette scrollable med `onScroll()`.
+
+```dart
+DeepdotsScrollListener(child: ListView(children: items));
+```
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `child` | `Widget` | Det scrollbare indhold. Påkrævet. |
+
+## `DeepdotsEvent`
+
+| Felt | Type | Beskrivelse |
+|---|---|---|
+| `type` | `String` | `popup_shown`, `popup_clicked` eller `survey_completed`. |
+| `popupId` | `String` | Popup-id, eller tom. |
+| `surveyId` | `String` | Survey-id, eller tom. |
+| `productId` | `String` | Produkt-id, eller tom. |
+| `extra` | `Map<String, Object?>` | Eventets ekstra data. Tom, hvis der ikke er nogen. |
+| `timestamp` | `DateTime?` | Hvornår det native SDK udsendte eventet. |
+
+## `DeepdotsFeedbackSession`
+
+| Felt | Type | Beskrivelse |
+|---|---|---|
+| `sessionId` | `String` | Id'et på den feedback, sessionen bliver til. |
+| `closed` | `bool` | `false`, når sessionens første batch accepteres; `true`, når dens afsluttende batch accepteres. |
+
+## `DeepdotsEnvironment`
+
+| Værdi | Backend |
+|---|---|
+| `production` (standard) | `https://api.deepdots.com` |
+| `development` | `https://api-dev.deepdots.com` |

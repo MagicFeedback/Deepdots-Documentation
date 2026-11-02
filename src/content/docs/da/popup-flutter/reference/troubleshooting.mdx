@@ -1,0 +1,44 @@
+---
+title: Troubleshooting
+description: Almindelige problemer ved integration af Flutter-pluginet deepdots_popups, og hvordan du løser dem.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+Denne side beskriver `deepdots_popups` `0.1.0-beta.1`. Hvis du støder på et problem, der ikke står her, så sig det til din Deepdots-kontakt.
+</Aside>
+
+## Ingen popup vises
+
+- Tjek, at `publicKey` hører til det miljø, du har valgt: en testkontos nøgle med `DeepdotsEnvironment.development`, en produktionsnøgle med standarden.
+- Tjek, at popuppen er aktiv i Deepdots og har targeting på den aktuelle skærm eller det aktuelle event. Slå `debug: true` til, og kig efter `[DeepdotsPopups]`-linjer i Logcat eller Xcode-konsollen.
+- Tjek, at dine skærme når frem til SDK'et: routes skal have et navn, for at `DeepdotsNavigatorObserver` kan rapportere dem. Se [Navigation](/da/popup-flutter/guides/navigation/).
+- En popup, der allerede er vist til en bruger, vises normalt ikke igen til samme bruger. For at teste den igen skal du bruge et nyt `userId`.
+
+## Ingen popups i et Android-release-build
+
+Pluginet erklærer `INTERNET`-tilladelsen, som Flutter kun tilføjer til debug- og profile-builds. Hvis din app fjerner tilladelser fra flettede manifester (fx med `tools:node="remove"`), så sørg for, at `android.permission.INTERNET` bevares.
+
+## iOS: `Undefined symbol: _OBJC_CLASS_$_DSDK…` eller `Module 'deepdots_popups' not found`
+
+Indstillingen `EXCLUDED_ARCHS` mangler. Tilføj den som beskrevet i [Installation](/da/popup-flutter/getting-started/installation/#4-opsæt-ios), for Swift Package Manager eller for CocoaPods.
+
+## `PlatformException(no_context)`
+
+`show`, `showByPopupId`, `triggerSurvey` eller `close` blev kaldt, før appen havde en synlig skærm. Kald dem efter den første frame, fx fra en knap eller med `WidgetsBinding.instance.addPostFrameCallback`.
+
+## `flutter pub get` kan ikke hente pakken
+
+Repositoriet er privat under betaen. Tjek, at din Deepdots-kontakt har givet din GitHub-konto adgang, og at git kan nå private repositories fra din maskine og fra CI (en SSH-nøgle eller en credential helper).
+
+## Fejl i Dart SDK-versionen
+
+Pluginet kræver Dart 3.13.5 eller nyere (Flutter 3.47 eller nyere). Hvis din app er på en ældre Flutter-version, så sig det til din Deepdots-kontakt.
+
+## Kendte begrænsninger i betaen
+
+- Installeres kun fra git; endnu ikke på pub.dev.
+- `setLanguage()` ændrer ikke det sprog, der rapporteres i analytics: det sættes én gang, i `init()`.

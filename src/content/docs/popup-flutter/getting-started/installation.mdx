@@ -1,0 +1,93 @@
+---
+title: Installation
+description: Add the deepdots_popups beta to a Flutter app and set up Android and iOS.
+sidebar:
+  order: 1
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+`deepdots_popups` `0.1.0-beta.1` is a beta. It is not on pub.dev yet: it is installed from git, pinned to a release tag.
+</Aside>
+
+## Requirements
+
+| | |
+|---|---|
+| Dart / Flutter | Dart 3.13.5 or later (Flutter 3.47 or later). Tested with Flutter 3.47.6. |
+| Android | minSdk 24, compileSdk 36 |
+| iOS | 13.0 or later |
+| Native SDK | `0.7.6`, pulled in by the plugin (Maven Central on Android; Swift Package Manager or CocoaPods on iOS) |
+
+If your app is on an older Flutter version, tell your Deepdots contact.
+
+## 1. Get access to the beta
+
+The plugin's repository is private during the beta. Ask your Deepdots contact or Deepdots support for access, and use the git credentials you already use for private dependencies (an SSH key or a credential helper). Never write a token or a password in `pubspec.yaml`.
+
+## 2. Add the dependency
+
+Pin the dependency to the release tag:
+
+```yaml
+# pubspec.yaml
+dependencies:
+  deepdots_popups:
+    git:
+      url: https://github.com/MagicFeedback/deepdots-popup-flutter-sdk.git
+      ref: v0.1.0-beta.1
+```
+
+```bash
+flutter pub get
+```
+
+Always pin `ref` to a tag. To update, change the tag and run `flutter pub get` again.
+
+## 3. Set up Android
+
+Nothing to add in most apps:
+
+- The native SDK comes from Maven Central. `mavenCentral()` must be in your repositories, as it is in a default Flutter project.
+- The plugin declares the `INTERNET` permission, which Flutter only adds to debug and profile builds. Without it a release build could not reach Deepdots. You do not need to add it yourself.
+- Any `Activity` works, including the default `FlutterActivity`.
+- Your app needs `minSdk` 24 or higher.
+
+## 4. Set up iOS
+
+Flutter builds iOS plugins with Swift Package Manager when it is enabled, and with CocoaPods otherwise. Both work.
+
+The native SDK ships no `x86_64` simulator slice, so the Intel simulator architecture must be excluded. Without this setting `flutter run` on an Apple Silicon simulator still works, but `flutter build ios --simulator` fails to link.
+
+<Tabs>
+  <TabItem label="Swift Package Manager">
+    Add this line at the end of both `ios/Flutter/Debug.xcconfig` and `ios/Flutter/Release.xcconfig`:
+
+    ```text
+    EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386 x86_64
+    ```
+  </TabItem>
+  <TabItem label="CocoaPods">
+    Add this to the `post_install` block of `ios/Podfile`:
+
+    ```ruby
+    installer.aggregate_targets.each do |aggregate|
+      aggregate.user_project.native_targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386 x86_64'
+        end
+      end
+      aggregate.user_project.save
+    end
+    ```
+
+    `pod install` downloads the native SDK's XCFramework and checks its sha256.
+  </TabItem>
+</Tabs>
+
+Your iOS deployment target must be 13.0 or later.
+
+## Next step
+
+[Quickstart](/popup-flutter/getting-started/quickstart/): initialize the plugin and show your first popup.

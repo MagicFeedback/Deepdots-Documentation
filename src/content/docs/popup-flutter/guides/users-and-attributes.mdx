@@ -1,0 +1,90 @@
+---
+title: Users and attributes
+description: Identify the user, change language and send user and contact attributes from Flutter.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+This page describes `deepdots_popups` `0.1.0-beta.1`. The API may still change before 1.0.
+</Aside>
+
+## Identify the user
+
+Pass your id for the user in `init()` if you already know it, or set it later with `setUserId()`:
+
+```dart
+await DeepdotsPopups.setUserId('USER_ID'); // after login
+await DeepdotsPopups.setUserId();          // after logout: back to the anonymous id
+```
+
+Without a `userId` the SDK generates an anonymous id on first launch and keeps it across launches. A user change closes the previous user's session and opens a new one, so two users never share a timeline.
+
+```dart
+final userId = await DeepdotsPopups.getUserId(); // the current id, yours or the anonymous one
+```
+
+`getUserId()` returns `null` while tracking is off.
+
+Use a stable, non-personal id (your internal user id), not an email or a phone number.
+
+<Aside type="caution">
+User attributes and metrics are discarded on a user change: they belonged to the previous user. Set them again after `setUserId()`.
+</Aside>
+
+## Language
+
+The language decides which popups are shown (popups segmented by language match by prefix: `en-US` matches `en`), the language the survey is requested in, and the popup's texts.
+
+```dart
+await DeepdotsPopups.setLanguage('da');  // applies from the next popup
+await DeepdotsPopups.setLanguage(null);  // back to the device language
+```
+
+`setLanguage()` can be called before `init()`. A non-null `language` in `init()` replaces it.
+
+## User attributes (analytics)
+
+`setUserAttributes` adds dimensions to break analytics down by. They are sent with every analytics batch and add up across calls:
+
+```dart
+await DeepdotsPopups.setUserAttributes({
+  'plan': 'pro',
+  'registration_status': 'registered',
+});
+```
+
+They are held in memory only: set them again after every app start.
+
+## Contact attributes (segmentation)
+
+`setContactAttributes` stores attributes on the user's contact in Deepdots, where they can be used to segment popups. It needs a `userId`:
+
+```dart
+final sent = await DeepdotsPopups.setContactAttributes({
+  'plan': 'premium',
+  'preferred_language': 'en',
+});
+```
+
+It returns `true` when the attributes were sent, and `false` when they had not changed, there is no `userId`, or tracking is off. To send them at startup, pass `contactAttributes` together with `userId` to `init()`.
+
+## Survey metadata
+
+`metadata` in `init()` is sent with every survey answer, for example to know which plan a user was on when they answered:
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: 'YOUR_PUBLIC_KEY',
+  userId: 'USER_ID',
+  metadata: {'plan': 'pro', 'app_flavor': 'store'},
+);
+```
+
+Entries with a `null` value are dropped. If you pass `userId`, it wins over a `userId` key in `metadata`.
+
+## Supported values
+
+Attribute, metric and parameter values can be `String`, `num`, `bool` or `null`. The native SDK turns attributes and metrics into text. Nested maps and lists arrive as text, formatted differently on Android and iOS, so flatten them before sending.

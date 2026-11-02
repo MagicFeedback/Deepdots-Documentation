@@ -1,0 +1,23 @@
+---
+title: Changelog
+description: Versiones publicadas del plugin de Flutter deepdots_popups.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+`deepdots_popups` está en beta. Las versiones se instalan desde git por tag; consulta [Instalación](/es/popup-flutter/getting-started/installation/).
+</Aside>
+
+Todas las versiones, de más reciente a más antigua.
+
+## 0.1.0-beta.1
+
+Primera beta. Instálala con `ref: v0.1.0-beta.1`.
+
+- Construida sobre el SDK nativo de Deepdots `0.7.6`: Android desde Maven Central (`com.deepdots.sdk:shared-android`), iOS a través de Swift Package Manager o CocoaPods (mismo XCFramework, con comprobación de sha256).
+- API de Dart sobre el SDK nativo: `init`, navegación (`DeepdotsNavigatorObserver`, `setPath`), triggers (`triggerEvent`, `triggerClick`, `triggerSurvey`, scroll con `DeepdotsScrollListener`, salida), `show`, `showByPopupId` y `close` manuales, idioma, atributos de usuario y de contacto, analytics, y los streams `events` y `feedbackSessions`.
+- Ciclo de vida de la app (foreground y background) gestionado por el plugin.
+- El plugin declara el permiso `INTERNET` en Android, para que los builds de release lleguen a Deepdots.

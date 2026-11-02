@@ -58,6 +58,16 @@ export default defineConfig({
             ],
           },
           {
+            label: { en: 'Popup Flutter (beta)', es: 'Popup Flutter (beta)', da: 'Popup Flutter (beta)' },
+            link: '/popup-flutter/',
+            icon: 'phone',
+            items: [
+              { label: 'Getting Started', autogenerate: { directory: 'popup-flutter/getting-started' } },
+              { label: 'Guides', autogenerate: { directory: 'popup-flutter/guides' } },
+              { label: 'Reference', autogenerate: { directory: 'popup-flutter/reference' } },
+            ],
+          },
+          {
             label: { en: 'Surveys SDK', es: 'SDK de Surveys', da: 'Surveys SDK' },
             link: '/surveys/',
             icon: 'comment',

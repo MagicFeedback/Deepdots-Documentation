@@ -1,0 +1,96 @@
+---
+title: Livscyklus og sessioner
+description: Sådan håndterer deepdots_popups app-livscyklussen, sessioner, samtykke og feedback-session-id'er.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+Denne side beskriver `deepdots_popups` `0.1.0-beta.1`. API'et kan stadig ændre sig før 1.0.
+</Aside>
+
+## App-livscyklus
+
+Pluginet forbinder selv SDK'et til app-livscyklussen efter `init()`. Der er intet at kalde:
+
+- **Appen skjules** (den går i background): SDK'et lukker sessionen.
+- **Appen vises igen**: SDK'et åbner en ny session.
+
+Forbigående tilstande, som et indgående opkald eller app-switcheren på iOS, lukker ikke sessionen, så ét besøg ikke deles i to.
+
+## Sessioner
+
+En session er ét sammenhængende besøg. Den åbnes ved `init()`, når appen vender tilbage til foreground, når tracking slås til, og efter et brugerskift. Den lukkes, når:
+
+| Årsag | Hvornår |
+|---|---|
+| `background` | Appen går i background. |
+| `user_change` | `setUserId()` skiftede bruger. |
+| `tracking_disabled` | `setTrackingEnabled(false)`. |
+| `manual` | `endSession()`. |
+
+Luk selv en session i slutningen af et selvstændigt flow, eller ved logout, hvis du ikke kalder `setUserId()`:
+
+```dart
+await DeepdotsPopups.endSession();
+```
+
+Det næste sporede event åbner en ny session.
+
+<Aside type="note">
+Hvis appen bliver dræbt eller crasher, kommer der intet callback på nogen platform, og den session lukkes aldrig fra appen.
+</Aside>
+
+## Samtykke
+
+```dart
+await DeepdotsPopups.setTrackingEnabled(false); // lukker sessionen og stopper afsendelsen
+await DeepdotsPopups.setTrackingEnabled(true);  // genoptager og åbner en ny session
+```
+
+Start med `trackingEnabled: false` i `init()`, hvis du har brug for samtykke, før noget sendes.
+
+## Feedback-session-id
+
+Med analytics konfigureret (`analyticsPublicKey` og `analyticsIntegration` i `init()`) bliver hver analytics-session til én feedback i Deepdots. Brug dens id til at koble det besøg til dine egne poster, fx en ordre eller en supportsag.
+
+### `getFeedbackSessionId()`
+
+Returnerer id'et på den feedback, den åbne session bliver til:
+
+```dart
+final feedbackSessionId = await DeepdotsPopups.getFeedbackSessionId();
+```
+
+Den returnerer `null`:
+
+- indtil Deepdots accepterer sessionens første analytics-batch,
+- efter sessionen er lukket,
+- uden analytics konfigureret.
+
+### `feedbackSessions`
+
+For at følge hver session, inklusive den, der lige er lukket, skal du lytte på `feedbackSessions`. Den udsender en `DeepdotsFeedbackSession`, når Deepdots accepterer en sessions første batch (`closed: false`), og når den accepterer dens afsluttende batch (`closed: true`):
+
+```dart
+DeepdotsPopups.feedbackSessions.listen((session) {
+  if (session.closed) {
+    debugPrint('session ${session.sessionId} closed');
+  } else {
+    debugPrint('session ${session.sessionId} open');
+  }
+});
+```
+
+- **Gruppér efter `sessionId`, ikke efter rækkefølge.** Den næste sessions `open` kan ankomme før den forriges `closed`.
+- Hvis appen dør, før sessionen lukkes, ankommer dens `closed` aldrig.
+
+### `getSessionId()`
+
+Returnerer det id, Deepdots gav den aktuelle analytics-session, eller `null`, indtil det ankommer, eller mens tracking er slået fra. Det er ikke feedback-id'et: brug `getFeedbackSessionId()` eller `feedbackSessions` til at koble et besøg til dets feedback.
+
+```dart
+final sessionId = await DeepdotsPopups.getSessionId();
+```

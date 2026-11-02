@@ -13,6 +13,7 @@ project; one "topic" (product) per SDK via `starlight-sidebar-topics`.
 |---------------|----------------------------------|--------------------------------------------------------------|
 | Popup Web     | `src/content/docs/popup-web/`    | `github.com/MagicFeedback/deepdots-popup-sdk`                |
 | Popup Native  | `src/content/docs/popup-native/` | `github.com/MagicFeedback/deepdots-popup-mobile-native-sdk`  |
+| Popup Flutter | `src/content/docs/popup-flutter/` | `github.com/MagicFeedback/deepdots-popup-flutter-sdk` (private during the beta) |
 | Surveys       | `src/content/docs/surveys/`      | `github.com/MagicFeedback/magicfeedback-sdk`                 |
 | Python SDK    | `src/content/docs/python-sdk/`   | `github.com/MagicFeedback/magicfeedback_python_sdk`          |
 | REST API      | `src/content/docs/rest-api/`     | `github.com/MagicFeedback/MagicFeedback_API`                 |

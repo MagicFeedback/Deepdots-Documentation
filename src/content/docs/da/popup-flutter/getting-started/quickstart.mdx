@@ -1,0 +1,110 @@
+---
+title: Quickstart
+description: Initialisér deepdots_popups, rapportér navigation, og vis din første popup.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+Denne side beskriver `deepdots_popups` `0.1.0-beta.1`. API'et kan stadig ændre sig før 1.0.
+</Aside>
+
+Popups konfigureres i Deepdots og hentes i runtime. For at se en i din app skal du kun have en gyldig `publicKey`, pluginet initialiseret og dine skærme rapporteret til SDK'et.
+
+## 1. Initialisér pluginet
+
+Kald `DeepdotsPopups.init()` én gang, før `runApp()`, og tilføj `DeepdotsNavigatorObserver` til din app:
+
+```dart
+import 'package:deepdots_popups/deepdots_popups.dart';
+import 'package:flutter/material.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DeepdotsPopups.init(
+    publicKey: 'YOUR_PUBLIC_KEY', // fra dit Deepdots-workspace
+    userId: 'USER_ID',            // valgfrit: kan sættes senere med setUserId()
+    language: 'en',               // valgfrit: standard er enhedens sprog
+  );
+  runApp(MaterialApp(
+    // Rapporterer hver navngiven route til SDK'et: skærm-targeting, tid på skærmen og exit-triggers.
+    navigatorObservers: [DeepdotsNavigatorObserver()],
+    initialRoute: '/home',
+    routes: {
+      '/home': (_) => const HomeScreen(),
+      '/checkout': (_) => const CheckoutScreen(),
+    },
+  ));
+}
+```
+
+`init()` er idempotent: et andet kald gør ingenting. App-livscyklussen (foreground og background) håndteres af pluginet; der er intet andet at koble på.
+
+## 2. Trigger en popup
+
+Popups med en **event**-trigger vises, når du rapporterer det event:
+
+```dart
+await DeepdotsPopups.triggerEvent('purchase_completed');
+```
+
+Popups med en skærm- eller tid-på-skærmen-trigger vises af sig selv, efterhånden som brugeren navigerer. Se [Events og triggers](/da/popup-flutter/guides/events/) for alle trigger-typer.
+
+## 3. Lyt efter popup-events (valgfrit)
+
+```dart
+DeepdotsPopups.events.listen((event) {
+  // event.type: popup_shown, popup_clicked, survey_completed
+  debugPrint('${event.type} popup=${event.popupId} survey=${event.surveyId}');
+});
+```
+
+## Produktion og udvikling
+
+`init()` peger som standard på produktion (`https://api.deepdots.com`). For at prøve popups, der er sat op i en Deepdots-testkonto, skal du sende den kontos `publicKey` med `environment: DeepdotsEnvironment.development` (`https://api-dev.deepdots.com`) og `debug: true` for at se SDK'ets log (`[DeepdotsPopups]`-linjer i Logcat eller Xcode-konsollen):
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: 'YOUR_TEST_PUBLIC_KEY',
+  environment: DeepdotsEnvironment.development,
+  debug: true,
+);
+```
+
+`debug` styrer kun loggen; den ændrer ikke backend. Send ingen af de to indstillinger med i et release-build.
+
+## Samtykke
+
+Hvis du har brug for brugerens samtykke før tracking, så kald enten `init()`, efter brugeren har accepteret, eller initialisér med tracking slået fra, og slå det til senere:
+
+```dart
+await DeepdotsPopups.init(publicKey: 'YOUR_PUBLIC_KEY', trackingEnabled: false);
+// Når brugeren accepterer:
+await DeepdotsPopups.setTrackingEnabled(true);
+```
+
+## Init-indstillinger
+
+| Parameter | Type | Standard | Beskrivelse |
+|---|---|---|---|
+| `publicKey` | `String` | påkrævet | Public key for dit Deepdots-workspace. |
+| `environment` | `DeepdotsEnvironment` | `production` | `production` eller `development`. |
+| `userId` | `String?` | `null` | Dit id for brugeren. Uden det bruger SDK'et et anonymt id. |
+| `language` | `String?` | enhedens sprog | Sprog for targeting, surveyen og popuppens tekster. |
+| `debug` | `bool` | `false` | SDK-log i Logcat / Xcode-konsollen. |
+| `trackingEnabled` | `bool` | `true` | `false` starter med analytics- og kontakt-tracking slået fra. |
+| `analyticsPublicKey` | `String?` | `null` | Public key for din analytics-integration. Se [Analytics](/da/popup-flutter/guides/analytics/). |
+| `analyticsIntegration` | `String?` | `null` | Id for din analytics-integration. Kræves sammen med `analyticsPublicKey`. |
+| `contactAttributes` | `Map<String, Object?>?` | `null` | Kontaktattributter, der sendes ved opstart. Kræver `userId`. |
+| `geolocation` | `bool` | `true` | `false` kalder aldrig IP-geolokationstjenesterne (land og by i analytics). |
+| `renderChrome` | `bool?` | `null` (til) | `false` renderer surveyen uden scrim og kort. `null` bruger SDK'ets standard, som er til. |
+| `showProgressBar` | `bool?` | `null` | Tvinger progress-baren til eller fra. `null` følger surveyens konfiguration. |
+| `metadata` | `Map<String, Object?>?` | `null` | Sendes med hvert survey-svar. `null`-værdier droppes; `userId` har forrang over en `userId`-nøgle her. |
+
+## Næste skridt
+
+- [Navigation](/da/popup-flutter/guides/navigation/): routers uden navngivne routes, dialoger, `setPath`.
+- [Brugere og attributter](/da/popup-flutter/guides/users-and-attributes/): login, logout og segmentering.
+- [Troubleshooting](/da/popup-flutter/reference/troubleshooting/): ingen popup vises, link-fejl på iOS.

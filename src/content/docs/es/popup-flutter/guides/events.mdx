@@ -1,0 +1,113 @@
+---
+title: Eventos y triggers
+description: Dispara popups desde Dart, muéstralos manualmente y escucha los eventos del popup.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Beta">
+Esta página describe `deepdots_popups` `0.1.0-beta.1`. La API aún puede cambiar antes de la 1.0.
+</Aside>
+
+Cada popup se configura en Deepdots con un trigger. El SDK lo evalúa, comprueba la segmentación y el cooldown del popup, y muestra el popup cuando todo coincide.
+
+| Trigger | Qué lo dispara |
+|---|---|
+| Pantalla / tiempo en pantalla | El path actual. Consulta [Navegación](/es/popup-flutter/guides/navigation/). |
+| Scroll | `DeepdotsScrollListener` u `onScroll()`. Consulta [Navegación](/es/popup-flutter/guides/navigation/#triggers-de-scroll). |
+| Salida | Abandonar una pantalla. Consulta [Navegación](/es/popup-flutter/guides/navigation/#triggers-de-salida). |
+| Evento | `triggerEvent(name)` |
+| Click | `triggerClick(targetId)` |
+
+## Eventos personalizados
+
+Los popups con un trigger de **evento** aparecen cuando reportas un evento con el mismo nombre:
+
+```dart
+await DeepdotsPopups.triggerEvent('purchase_completed');
+```
+
+## Clicks
+
+Los popups con un trigger de **click** aparecen cuando reportas un click sobre el target configurado en Deepdots:
+
+```dart
+ElevatedButton(
+  onPressed: () => DeepdotsPopups.triggerClick('help-button'),
+  child: const Text('Help'),
+);
+```
+
+## Mostrar un popup desde código
+
+| Método | Segmentación y cooldown |
+|---|---|
+| `triggerSurvey(surveyId, [popupId])` | Se respetan: el popup solo aparece si hubiera aparecido a través de su trigger. |
+| `show(surveyId, productId, [data])` | Se omiten. |
+| `showByPopupId(popupId)` | Se omiten. |
+
+```dart
+// Solo si el usuario es elegible:
+await DeepdotsPopups.triggerSurvey('SURVEY_ID');
+
+// Siempre, por ejemplo desde un botón "Give feedback":
+await DeepdotsPopups.show('SURVEY_ID', 'PRODUCT_ID', {'source': 'settings'});
+await DeepdotsPopups.showByPopupId('POPUP_ID');
+
+// Cierra el popup abierto:
+await DeepdotsPopups.close();
+```
+
+- En `triggerSurvey`, pasa `popupId` cuando varios popups usan la misma encuesta.
+- En `show`, el SDK busca el popup por `surveyId`. `productId` se transmite pero hoy no se usa. `data` vuelve en el `extra` del evento `popup_shown`.
+
+<Aside type="caution">
+`show`, `showByPopupId`, `triggerSurvey` y `close` necesitan una pantalla visible: la `Activity` de Android o el root view controller de iOS. Si se llaman antes del primer frame de la app, fallan con `PlatformException(no_context)`.
+</Aside>
+
+## Eventos del popup
+
+`DeepdotsPopups.events` es un broadcast stream de `DeepdotsEvent`:
+
+```dart
+final subscription = DeepdotsPopups.events.listen((event) {
+  switch (event.type) {
+    case 'popup_shown':
+      debugPrint('shown ${event.popupId}');
+    case 'popup_clicked':
+      debugPrint('clicked ${event.popupId}: ${event.extra['action']}');
+    case 'survey_completed':
+      debugPrint('completed ${event.surveyId}');
+  }
+});
+
+// Cuando ya no lo necesites:
+await subscription.cancel();
+```
+
+| `type` | Cuándo |
+|---|---|
+| `popup_shown` | El popup está en pantalla. |
+| `popup_clicked` | El usuario actuó sobre el popup. `extra['action']` indica qué acción. |
+| `survey_completed` | El usuario terminó la encuesta. |
+
+Campos de `DeepdotsEvent`:
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `type` | `String` | Nombre del evento (tabla de arriba). |
+| `popupId` | `String` | Id del popup. Vacío si el evento no lo incluye. |
+| `surveyId` | `String` | Id de la encuesta. Vacío si el evento no lo incluye. |
+| `productId` | `String` | Id del producto. Vacío si el evento no lo incluye. |
+| `extra` | `Map<String, Object?>` | Datos extra, como `action` en `popup_clicked` o el `data` de `show()` en `popup_shown`. |
+| `timestamp` | `DateTime?` | Cuándo emitió el evento el SDK nativo. |
+
+## Marcar una encuesta como respondida
+
+El SDK marca una encuesta como respondida por sí solo cuando el usuario la completa, así que normalmente no lo necesitas. Para marcarla tú:
+
+```dart
+await DeepdotsPopups.markSurveyAnswered('SURVEY_ID');
+```
