@@ -42,3 +42,4 @@ Pluginet kræver Dart 3.13.5 eller nyere (Flutter 3.47 eller nyere). Hvis din ap
 
 - Installeres kun fra git; endnu ikke på pub.dev.
 - `setLanguage()` ændrer ikke det sprog, der rapporteres i analytics: det sættes én gang, i `init()`.
+- iOS: en popup, der udløses i det første øjeblik efter opstart, kan blive talt som vist uden at blive vist. Udløs events efter første frame, for eksempel med `WidgetsBinding.instance.addPostFrameCallback`.

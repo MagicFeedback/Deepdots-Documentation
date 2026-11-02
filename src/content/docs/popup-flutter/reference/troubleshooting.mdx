@@ -42,3 +42,4 @@ The plugin needs Dart 3.13.5 or later (Flutter 3.47 or later). If your app is on
 
 - Installed from git only; not on pub.dev yet.
 - `setLanguage()` does not change the language reported in analytics: it is set once, in `init()`.
+- iOS: a popup triggered in the first instant after launch can be counted as shown without appearing. Trigger events after the first frame, for example with `WidgetsBinding.instance.addPostFrameCallback`.
