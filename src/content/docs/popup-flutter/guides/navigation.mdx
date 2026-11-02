@@ -3,13 +3,13 @@ title: Navigation
 description: Report the current screen to Deepdots with DeepdotsNavigatorObserver or setPath.
 sidebar:
   order: 1
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
-
-import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="caution" title="Beta">
-This page describes `deepdots_popups` `0.1.0-beta.1`. The API may still change before 1.0.
-</Aside>
 
 The SDK needs to know which screen the user is on. The current path drives:
 

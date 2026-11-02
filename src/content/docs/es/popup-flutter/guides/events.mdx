@@ -3,13 +3,15 @@ title: Eventos y triggers
 description: Dispara popups desde Dart, muéstralos manualmente y escucha los eventos del popup.
 sidebar:
   order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
 
 import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="caution" title="Beta">
-Esta página describe `deepdots_popups` `0.1.0-beta.1`. La API aún puede cambiar antes de la 1.0.
-</Aside>
 
 Cada popup se configura en Deepdots con un trigger. El SDK lo evalúa, comprueba la segmentación y el cooldown del popup, y muestra el popup cuando todo coincide.
 

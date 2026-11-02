@@ -1,12 +1,18 @@
 ---
 title: Deepdots Popups til Flutter
-description: Flutter-plugin (beta), der viser Deepdots-popups og surveys i Android- og iOS-apps, oven på det native Deepdots Popup SDK.
+description: Flutter-plugin (tidlig adgang), der viser Deepdots-popups og surveys i Android- og iOS-apps, oven på det native Deepdots Popup SDK.
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
 
 import { Aside, Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Beta">
-`deepdots_popups` er i beta (`0.1.0-beta.1`). API'et kan stadig ændre sig før 1.0, og pakken er endnu ikke på pub.dev: adgang til betaen gives af Deepdots. Se [Installation](/da/popup-flutter/getting-started/installation/).
+<Aside type="note" title="Tidlig adgang">
+`deepdots_popups` er i tidlig adgang (`0.1.0-beta.1`). API'et kan stadig ændre sig før 1.0, og pakken er endnu ikke på pub.dev: adgang gives af Deepdots. Se [Installation](/da/popup-flutter/getting-started/installation/).
 </Aside>
 
 `deepdots_popups` er et Flutter-plugin, der viser Deepdots-popups og surveys i din Android- og iOS-app. Det pakker det native Deepdots Popup SDK ind: targeting, triggers, sessioner, analytics og survey-UI'et kører alle native, og pluginet eksponerer dem til Dart og kobler Flutters navigation og app-livscyklus på for dig.

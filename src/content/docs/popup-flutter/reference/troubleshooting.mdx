@@ -3,13 +3,13 @@ title: Troubleshooting
 description: Common problems when integrating the deepdots_popups Flutter plugin, and how to fix them.
 sidebar:
   order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
-
-import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="caution" title="Beta">
-This page describes `deepdots_popups` `0.1.0-beta.1`. If you hit a problem that is not listed here, tell your Deepdots contact.
-</Aside>
 
 ## No popup appears
 
@@ -32,13 +32,13 @@ The `EXCLUDED_ARCHS` setting is missing. Add it as described in [Installation](/
 
 ## `flutter pub get` cannot fetch the package
 
-The repository is private during the beta. Check that your Deepdots contact gave your GitHub account access, and that git can reach private repositories from your machine and from CI (an SSH key or a credential helper).
+The repository is private during early access. Check that your Deepdots contact gave your GitHub account access, and that git can reach private repositories from your machine and from CI (an SSH key or a credential helper).
 
 ## Dart SDK version error
 
 The plugin needs Dart 3.13.5 or later (Flutter 3.47 or later). If your app is on an older Flutter version, tell your Deepdots contact.
 
-## Known limitations of the beta
+## Known limitations
 
 - Installed from git only; not on pub.dev yet.
 - `setLanguage()` does not change the language reported in analytics: it is set once, in `init()`.

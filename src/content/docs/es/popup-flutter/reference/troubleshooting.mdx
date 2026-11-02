@@ -3,13 +3,13 @@ title: Troubleshooting
 description: Problemas comunes al integrar el plugin de Flutter deepdots_popups y cómo solucionarlos.
 sidebar:
   order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
-
-import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="caution" title="Beta">
-Esta página describe `deepdots_popups` `0.1.0-beta.1`. Si te encuentras con un problema que no aparece aquí, díselo a tu contacto de Deepdots.
-</Aside>
 
 ## No aparece ningún popup
 
@@ -32,13 +32,13 @@ Se llamó a `show`, `showByPopupId`, `triggerSurvey` o `close` antes de que la a
 
 ## `flutter pub get` no puede descargar el paquete
 
-El repositorio es privado durante la beta. Comprueba que tu contacto de Deepdots dio acceso a tu cuenta de GitHub, y que git puede llegar a repositorios privados desde tu máquina y desde CI (una clave SSH o un credential helper).
+El repositorio es privado durante el acceso anticipado. Comprueba que tu contacto de Deepdots dio acceso a tu cuenta de GitHub, y que git puede llegar a repositorios privados desde tu máquina y desde CI (una clave SSH o un credential helper).
 
 ## Error de versión del SDK de Dart
 
 El plugin necesita Dart 3.13.5 o posterior (Flutter 3.47 o posterior). Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
 
-## Limitaciones conocidas de la beta
+## Limitaciones conocidas
 
 - Solo se instala desde git; todavía no está en pub.dev.
 - `setLanguage()` no cambia el idioma reportado en la analítica: se fija una sola vez, en `init()`.

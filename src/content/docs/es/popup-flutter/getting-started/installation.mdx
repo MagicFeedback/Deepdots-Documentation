@@ -1,14 +1,20 @@
 ---
 title: Instalación
-description: Añade la beta de deepdots_popups a una app Flutter y configura Android e iOS.
+description: Añade deepdots_popups a una app Flutter y configura Android e iOS.
 sidebar:
   order: 1
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Beta">
-`deepdots_popups` `0.1.0-beta.1` es una beta. Todavía no está en pub.dev: se instala desde git, fijado a un tag de release.
+<Aside type="note" title="Acceso anticipado">
+`deepdots_popups` `0.1.0-beta.1` está en acceso anticipado. Todavía no está en pub.dev: se instala desde git, fijado a un tag de release.
 </Aside>
 
 ## Requisitos
@@ -22,9 +28,9 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
 
-## 1. Consigue acceso a la beta
+## 1. Consigue acceso
 
-El repositorio del plugin es privado durante la beta. Pide acceso a tu contacto de Deepdots o al soporte de Deepdots, y usa las credenciales de git que ya usas para dependencias privadas (una clave SSH o un credential helper). Nunca escribas un token ni una contraseña en `pubspec.yaml`.
+El repositorio del plugin es privado durante el acceso anticipado. Pide acceso a tu contacto de Deepdots o al soporte de Deepdots, y usa las credenciales de git que ya usas para dependencias privadas (una clave SSH o un credential helper). Nunca escribas un token ni una contraseña en `pubspec.yaml`.
 
 ## 2. Añade la dependencia
 

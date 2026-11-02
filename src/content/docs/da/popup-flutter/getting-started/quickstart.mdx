@@ -3,13 +3,13 @@ title: Quickstart
 description: Initialisér deepdots_popups, rapportér navigation, og vis din første popup.
 sidebar:
   order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
 ---
-
-import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="caution" title="Beta">
-Denne side beskriver `deepdots_popups` `0.1.0-beta.1`. API'et kan stadig ændre sig før 1.0.
-</Aside>
 
 Popups konfigureres i Deepdots og hentes i runtime. For at se en i din app skal du kun have en gyldig `publicKey`, pluginet initialiseret og dine skærme rapporteret til SDK'et.
 
