@@ -11,20 +11,20 @@ Para instalar una versión concreta, consulta [Instalación](/es/python-sdk/gett
 
 - **El inicio de sesión pasa por la API de Deepdots** (`POST /auth/token`) en lugar de llamar directamente a Google Identity Platform. El argumento `ip_key` ya no se usa: se ignora, con un `DeprecationWarning`.
 - `refresh_token()` renueva un token de inicio de sesión con su token de refresco (`POST /auth/token/refresh`), y solo vuelve a iniciar sesión si el token de refresco se rechaza.
-- Nuevo `client.crm` para objetos de CRM: `upsert_objects()` y `get_objects()`.
+- Nuevo `client.crm` para objetos de CRM: `upsert_objects()` y `get_objects()`. Cada request de `client.crm` se reenvía cuando falla de forma temporal (502, 503, 504, un error de conexión o un timeout), y el cliente vuelve a iniciar sesión una vez si el token ha caducado. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
 
 ## 1.0.22 — 2026-09-25
 
-- **Contactos:** nuevos `update_fields()`, que fusiona campos personalizados en un contacto y conserva los demás; `upsert()`, que crea o actualiza un contacto identificado por su email; y `upsert_batch()`, que hace lo mismo con una lista de cualquier tamaño, dividida en requests de 500.
+- **Contactos:** nuevos `update_fields()`, que fusiona campos personalizados en un contacto y conserva los demás; `upsert()`, que crea o actualiza un contacto identificado por su email; y `upsert_batch()`, que hace lo mismo con una lista de cualquier tamaño, dividida en requests de 500. Ver [Contactos](/es/python-sdk/guides/contacts/#crear-o-actualizar-por-email).
 - **Cambio:** `update_metadata_batch()` ahora fusiona los metadatos por clave en lugar de reemplazarlos: las claves que no envías se conservan. Pasa `mode="append"` para añadir valores a los que ya tiene una clave.
 
 ## 1.0.21 — 2026-09-16
 
-- Nuevo `feedbacks.update_metadata_batch()`: actualiza los metadatos de muchos feedbacks en una sola request, y cada uno se vuelve a analizar.
+- Nuevo `feedbacks.update_metadata_batch()`: actualiza los metadatos de muchos feedbacks en una sola request, y cada uno se vuelve a analizar. Ver [Actualizar métricas y metadatos](/es/python-sdk/guides/feedback/#actualizar-métricas-y-metadatos).
 
 ## 1.0.20 — 2026-08-24
 
-- `upload_attachment()` rechaza un fichero cuando el feedback ya tiene `max_attachments` ficheros (3 por defecto) o cuando el mismo contenido ya está adjunto. Pasa `check_duplicate_content=False` para saltarte la comprobación de contenido.
+- `upload_attachment()` rechaza un fichero cuando el feedback ya tiene `max_attachments` ficheros (3 por defecto) o cuando el mismo contenido ya está adjunto. Pasa `check_duplicate_content=False` para saltarte la comprobación de contenido. Ver [Adjuntar un archivo](/es/python-sdk/guides/feedback/#adjuntar-un-archivo).
 - `value` ahora es siempre una lista también en `metadata`, `metrics` y `profile`, tanto al enviar un feedback como al leerlo.
 
 ## 1.0.19 — 2026-08-20

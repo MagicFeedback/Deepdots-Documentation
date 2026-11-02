@@ -11,20 +11,20 @@ Se [Installation](/da/python-sdk/getting-started/installation/) for at installer
 
 - **Login går gennem Deepdots API'et** (`POST /auth/token`) i stedet for at kalde Google Identity Platform direkte. Argumentet `ip_key` bruges ikke længere: det ignoreres med en `DeprecationWarning`.
 - `refresh_token()` fornyer et login-token med dets refresh-token (`POST /auth/token/refresh`) og logger kun ind igen, hvis refresh-tokenet afvises.
-- Ny `client.crm` til CRM-objekter: `upsert_objects()` og `get_objects()`.
+- Ny `client.crm` til CRM-objekter: `upsert_objects()` og `get_objects()`. Hver `client.crm`-request sendes igen, når den fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout), og klienten logger ind igen én gang, når tokenet er udløbet. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
 
 ## 1.0.22 — 2026-09-25
 
-- **Kontakter:** nye `update_fields()`, der fletter brugerdefinerede felter ind i en kontakt og beholder de andre; `upsert()`, der opretter eller opdaterer en kontakt ud fra e-mail; og `upsert_batch()`, der gør det samme for en liste af vilkårlig længde, delt op i requests på 500.
+- **Kontakter:** nye `update_fields()`, der fletter brugerdefinerede felter ind i en kontakt og beholder de andre; `upsert()`, der opretter eller opdaterer en kontakt ud fra e-mail; og `upsert_batch()`, der gør det samme for en liste af vilkårlig længde, delt op i requests på 500. Se [Kontakter](/da/python-sdk/guides/contacts/#opret-eller-opdater-ud-fra-e-mail).
 - **Ændret:** `update_metadata_batch()` fletter nu metadata efter nøgle i stedet for at erstatte dem: nøgler, du ikke sender, bevares. Send `mode="append"` for at tilføje værdier til dem, en nøgle allerede har.
 
 ## 1.0.21 — 2026-09-16
 
-- Ny `feedbacks.update_metadata_batch()`: opdater metadata for mange feedbacks i én request, og få hver af dem analyseret igen.
+- Ny `feedbacks.update_metadata_batch()`: opdater metadata for mange feedbacks i én request, og få hver af dem analyseret igen. Se [Opdater metrics og metadata](/da/python-sdk/guides/feedback/#opdater-metrics-og-metadata).
 
 ## 1.0.20 — 2026-08-24
 
-- `upload_attachment()` afviser en fil, når feedbacken allerede har `max_attachments` filer (standard 3), eller det samme indhold allerede er vedhæftet. Send `check_duplicate_content=False` for at springe indholdstjekket over.
+- `upload_attachment()` afviser en fil, når feedbacken allerede har `max_attachments` filer (standard 3), eller det samme indhold allerede er vedhæftet. Send `check_duplicate_content=False` for at springe indholdstjekket over. Se [Upload en fil-vedhæftning](/da/python-sdk/guides/feedback/#upload-en-fil-vedhæftning).
 - `value` er nu altid en liste også i `metadata`, `metrics` og `profile`, både når du sender en feedback, og når du læser en.
 
 ## 1.0.19 — 2026-08-20

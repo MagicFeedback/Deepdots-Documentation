@@ -19,8 +19,11 @@ from deepdots_sdk import Deepdots
 client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
+    auth_source="identity",
 )
 ```
+
+`auth_source="identity"` logger ind med din e-mail og adgangskode. Uden den leder klienten først efter et token cachet i Deepdots' egen Google Cloud, hvilket kun virker inde i Deepdots' infrastruktur, og falder derefter tilbage til det samme login.
 
 ## 3. Dit første kald
 
