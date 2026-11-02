@@ -13,7 +13,7 @@ from deepdots_sdk import Deepdots
 client = Deepdots(
     user="tu@ejemplo.com",
     password="tu-contraseña",
-    base_url="https://api.magicfeedback.io",  # opcional
+    base_url="https://api.deepdots.com",  # opcional
 )
 ```
 
@@ -21,12 +21,12 @@ client = Deepdots(
 
 | Parámetro | Tipo | Por defecto | Descripción |
 |---|---|---|---|
-| `user` | string | — | Correo de la cuenta |
-| `password` | string | — | Contraseña de la cuenta |
-| `base_url` | string | `"https://api.magicfeedback.io"` | URL raíz de la API |
-| `auth_source` | string | `"datastore"` | De dónde sale el token. Pasa `"identity"` para iniciar sesión con `user` y `password`, que es lo que necesitas fuera del propio Google Cloud de Deepdots. El valor por defecto busca primero un token cacheado en el Google Cloud Datastore de Deepdots e inicia sesión con `user` y `password` cuando no lo hay |
+| `user` | string | — | Email del usuario de API |
+| `password` | string | — | Contraseña del usuario de API |
+| `base_url` | string | `"https://api.magicfeedback.io"` | URL raíz de la API (producción) |
+| `auth_source` | string | `"datastore"` | De dónde sale el token. Pasa `"identity"` para iniciar sesión con `user` y `password` a través de la API (`POST /auth/token`), que es lo que necesitas fuera del propio Google Cloud de Deepdots. El valor por defecto busca primero un token cacheado en el Google Cloud Datastore de Deepdots e inicia sesión con `user` y `password` cuando no lo hay |
 
-El constructor inicia sesión de inmediato. Un token dura aproximadamente una hora.
+El constructor inicia sesión de inmediato. Los tokens de inicio de sesión duran una hora.
 
 ### Propiedades
 
@@ -39,7 +39,7 @@ El constructor inicia sesión de inmediato. Un token dura aproximadamente una ho
 | `metrics` | `MetricsAPI` | Recuperación de métricas |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Preguntas para una integración |
 | `reports` | `ReportsAPI` | Endpoints de reportes |
-| `crm` | `CrmAPI` | Objetos CRM y conectores (SDK 1.0.23) |
+| `crm` | `CrmAPI` | Objetos CRM y conectores (SDK 1.0.24) |
 | `companies` | `CompaniesAPI` | Listado de empresas |
 | `requests` | `RequestsAPI` | Solicitudes de investigación |
 | `signals` | `SignalsAPI` | Signals |
@@ -57,7 +57,11 @@ client.set_logging(logging.DEBUG)
 
 #### `refresh_token()`
 
-Obtiene un token nuevo (con el mismo `auth_source`) y actualiza todas las sub-APIs sin recrearlas. Llámalo en un proceso de larga duración cuando los requests empiecen a fallar con 401. `client.crm` lo hace por sí solo.
+Renueva el token y lo actualiza en todos los clientes de sub-API. Con `auth_source="identity"` usa el token de refresco del último inicio de sesión (`POST /auth/token/refresh`) y solo vuelve a iniciar sesión si se rechaza; con el `auth_source` por defecto obtiene el token de nuevo igual que el constructor. Llámalo cuando una request falle con `401` en un proceso de larga duración. `client.crm` lo hace por sí solo.
+
+```python
+client.refresh_token()
+```
 
 ---
 
@@ -160,7 +164,7 @@ Retorna el objeto de contacto eliminado.
 
 ## CrmAPI
 
-Acceso via `client.crm`. SDK 1.0.23. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
+Acceso via `client.crm`. SDK 1.0.24. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
 
 Cada método envía 500 registros por request, reenvía hasta 3 veces un request que falla de forma temporal (502, 503, 504, un error de conexión o un timeout de 300 segundos) y vuelve a iniciar sesión una vez si el token ha caducado. Si un request sigue fallando, lanza una `requests.RequestException`. Los métodos de escritura retornan totales de todos los requests, y el `index` de cada entrada de `failed` indica su posición en la lista que pasaste.
 

@@ -11,7 +11,7 @@ Besides [contacts](/python-sdk/guides/contacts/), your CRM can hold any other re
 
 An object can belong to a contact (`contactKey`) and to another object (`parentType` + `parentKey`). For example, a ticket belongs to a fan and to a match. When a survey link names an object, every answer given through that link gets that object's information. See [Link survey answers to objects](#link-survey-answers-to-objects).
 
-Available from SDK 1.0.23, as `client.crm`.
+Available from SDK 1.0.24, as `client.crm`.
 
 ## Store objects
 

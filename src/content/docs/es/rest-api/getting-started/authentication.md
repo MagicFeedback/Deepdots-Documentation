@@ -5,19 +5,18 @@ sidebar:
   order: 1
 ---
 
-Cada petición a la API de Deepdots lleva un token bearer en la cabecera `Authorization`. El token se obtiene iniciando sesión con tu usuario de API a través de Google Identity Platform, igual que hacen los SDK de Deepdots.
+Cada petición a la API de Deepdots lleva un token bearer en la cabecera `Authorization`. El token se obtiene iniciando sesión con tu usuario de API a través de la API de Deepdots.
 
 ## 1. Inicia sesión
 
-Envía el email y la contraseña de tu usuario de API, junto con la clave de autenticación que te dio Deepdots:
+Envía el email y la contraseña de tu usuario de API:
 
 ```bash
-curl -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$DEEPDOTS_AUTH_KEY" \
+curl -X POST "https://api.deepdots.com/auth/token" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "api-user@yourcompany.com",
-    "password": "your-password",
-    "returnSecureToken": true
+    "password": "your-password"
   }'
 ```
 
@@ -27,7 +26,8 @@ La respuesta contiene el token y un token de refresco:
 {
   "idToken": "eyJhbGciOiJSUzI1NiIs...",
   "refreshToken": "AMf-vBx...",
-  "expiresIn": "3600"
+  "expiresIn": 3600,
+  "tokenType": "Bearer"
 }
 ```
 
@@ -45,15 +45,15 @@ curl "https://api.deepdots.com/crm/contacts?filter[limit]=1" \
 Un token es válido durante **1 hora** (`expiresIn`, en segundos). Antes de que caduque, cambia el token de refresco por uno nuevo en lugar de volver a iniciar sesión:
 
 ```bash
-curl -X POST "https://securetoken.googleapis.com/v1/token?key=$DEEPDOTS_AUTH_KEY" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=refresh_token&refresh_token=$DEEPDOTS_REFRESH_TOKEN"
+curl -X POST "https://api.deepdots.com/auth/token/refresh" \
+  -H "Content-Type: application/json" \
+  -d "{\"refreshToken\": \"$DEEPDOTS_REFRESH_TOKEN\"}"
 ```
 
-La respuesta trae el token nuevo en `id_token` (y un `refresh_token` nuevo).
+La respuesta tiene la misma forma que el inicio de sesión: un `idToken` nuevo y un `refreshToken` nuevo. Usa el token de refresco nuevo la próxima vez.
 
 :::tip
-Renueva unos minutos antes de que pase la hora, o cuando la API responda `401`, y reintenta la petición una vez con el token nuevo.
+Renueva unos minutos antes de que pase la hora, o cuando la API responda `401`, y reintenta la petición una vez con el token nuevo. Si la propia renovación responde `401`, vuelve a iniciar sesión.
 :::
 
 ## Protege tus credenciales
@@ -64,12 +64,15 @@ Renueva unos minutos antes de que pase la hora, o cuando la API responda `401`, 
 
 ## Errores
 
-| Estado | Significado | Qué hacer |
-|---|---|---|
-| `400` de Identity Platform | Email, contraseña o clave incorrectos | Revisa las credenciales |
-| `401` de la API | Token ausente, no válido o caducado | Renueva el token y reintenta una vez |
-| `403` de la API | El usuario de API no está activo | Contacta con Deepdots |
-| `405` de la API | El usuario de API no tiene permiso para este endpoint | Contacta con Deepdots |
+| Estado | Dónde | Significado | Qué hacer |
+|---|---|---|---|
+| `401` | `/auth/token` | Email o contraseña incorrectos | Revisa las credenciales |
+| `401` | `/auth/token/refresh` | El token de refresco no es válido o ha caducado | Vuelve a iniciar sesión |
+| `403` | `/auth/token`, `/auth/token/refresh` | El usuario de API está deshabilitado | Contacta con Deepdots |
+| `429` | `/auth/token` | Demasiados intentos fallidos para esta cuenta | Espera antes de volver a intentarlo |
+| `401` | Cualquier otro endpoint | Token ausente, no válido o caducado | Renueva el token y reintenta una vez |
+| `403` | Cualquier otro endpoint | El usuario de API no está activo | Contacta con Deepdots |
+| `405` | Cualquier otro endpoint | El usuario de API no tiene permiso para este endpoint | Contacta con Deepdots |
 
 ## Siguientes pasos
 

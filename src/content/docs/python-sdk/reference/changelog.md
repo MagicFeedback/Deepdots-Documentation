@@ -7,25 +7,25 @@ Every published release, newest first. Dates are the PyPI publication dates.
 
 To install a specific version, see [Installation](/python-sdk/getting-started/installation/).
 
-## 1.0.23 — 2026-10-20
+## 1.0.24 — unreleased
 
-- **New `client.crm`** for CRM objects such as tickets, matches and memberships: `upsert_objects()` and `get_objects()`, plus two connectors that take a client's records as they are, `sync_fck_users()` (FCK users to contacts) and `ingest_roboticket()` (Roboticket ticket and membership lines). Lists of any length are sent in batches of 500. See [CRM objects](/python-sdk/guides/crm-objects/).
-- Every `client.crm` request is resent when it fails temporarily (502, 503, 504, a connection error or a timeout), and logs in again once when the token has expired.
+- **Sign-in goes through the Deepdots API** (`POST /auth/token`) instead of calling Google Identity Platform directly. The `ip_key` argument is no longer used: it is ignored, with a `DeprecationWarning`.
+- `refresh_token()` renews a signed-in token with its refresh token (`POST /auth/token/refresh`), signing in again only if the refresh token was rejected.
+- New `client.crm` for CRM objects: `upsert_objects()` and `get_objects()`. Every `client.crm` request is resent when it fails temporarily (502, 503, 504, a connection error or a timeout), and signs in again once when the token has expired. See [CRM objects](/python-sdk/guides/crm-objects/).
 
 ## 1.0.22 — 2026-09-25
 
-- `contacts.upsert()` and `contacts.upsert_batch()` create a contact or update the one with the same email, one at a time or in batches of any size. See [Contacts](/python-sdk/guides/contacts/#create-or-update-by-email).
-- `contacts.update_fields()` adds or changes custom fields without removing the others.
-- `feedbacks.update_metadata_batch()` takes `mode="append"` to add values to a metadata key instead of replacing them.
+- **Contacts:** new `update_fields()`, which merges custom fields into a contact and keeps the others; `upsert()`, which creates or updates a contact matched by email; and `upsert_batch()`, which does the same for a list of any length, split into requests of 500. See [Contacts](/python-sdk/guides/contacts/#create-or-update-by-email).
+- **Changed:** `update_metadata_batch()` now merges metadata by key instead of replacing it: keys you don't send are kept. Pass `mode="append"` to add values to the ones a key already holds.
 
 ## 1.0.21 — 2026-09-16
 
-- `feedbacks.update_metadata_batch()` adds or overwrites metadata on many feedbacks in one request, and each of them is analysed again. See [Update metrics and metadata](/python-sdk/guides/feedback/#update-metrics-and-metadata).
+- New `feedbacks.update_metadata_batch()`: update the metadata of many feedbacks in one request, and have each one analysed again. See [Update metrics and metadata](/python-sdk/guides/feedback/#update-metrics-and-metadata).
 
 ## 1.0.20 — 2026-08-24
 
-- Every `value` in `answers`, `metrics`, `metadata` and `profile` is a list, in what you send and also in what `get()` and `get_id()` return.
-- `upload_attachment()` refuses a file when the feedback already has 3 attachments (`max_attachments`) or already holds a file with the same content (`check_duplicate_content`). See [Upload a file attachment](/python-sdk/guides/feedback/#upload-a-file-attachment).
+- `upload_attachment()` refuses a file when the feedback already holds `max_attachments` files (default 3) or the same content is already attached. Pass `check_duplicate_content=False` to skip the content check. See [Upload a file attachment](/python-sdk/guides/feedback/#upload-a-file-attachment).
+- `value` is now always a list in `metadata`, `metrics` and `profile` too, both when you send a feedback and when you read one.
 
 ## 1.0.19 — 2026-08-20
 

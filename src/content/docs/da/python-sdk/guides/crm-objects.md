@@ -11,7 +11,7 @@ Ud over [kontakter](/da/python-sdk/guides/contacts/) kan dit CRM rumme alle andr
 
 Et objekt kan høre til en kontakt (`contactKey`) og til et andet objekt (`parentType` + `parentKey`). En billet hører for eksempel til en fan og til en kamp. Når et surveylink angiver et objekt, får alle svar givet via det link objektets oplysninger. Se [Knyt surveysvar til objekter](#knyt-surveysvar-til-objekter).
 
-Tilgængelig fra SDK 1.0.23 som `client.crm`.
+Tilgængelig fra SDK 1.0.24 som `client.crm`.
 
 ## Gem objekter
 

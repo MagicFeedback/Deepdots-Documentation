@@ -11,7 +11,7 @@ Además de los [contactos](/es/python-sdk/guides/contacts/), tu CRM puede conten
 
 Un objeto puede pertenecer a un contacto (`contactKey`) y a otro objeto (`parentType` + `parentKey`). Por ejemplo, un ticket pertenece a un aficionado y a un partido. Cuando un enlace de encuesta indica un objeto, cada respuesta dada a través de ese enlace recibe la información de ese objeto. Ver [Vincular respuestas de encuesta a objetos](#vincular-respuestas-de-encuesta-a-objetos).
 
-Disponible a partir del SDK 1.0.23, como `client.crm`.
+Disponible a partir del SDK 1.0.24, como `client.crm`.
 
 ## Guardar objetos
 

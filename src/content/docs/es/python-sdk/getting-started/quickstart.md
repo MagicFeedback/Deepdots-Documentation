@@ -11,7 +11,7 @@ pip install deepdots
 
 ## 2. Crear un cliente
 
-Importa `Deepdots` y pasa las credenciales de tu cuenta. El constructor se autentica de inmediato y almacena el bearer token para todas las requests posteriores.
+Importa `Deepdots` y pasa el email y la contraseña de tu usuario de API. El constructor inicia sesión de inmediato y almacena el token para todas las requests posteriores.
 
 ```python
 from deepdots_sdk import Deepdots

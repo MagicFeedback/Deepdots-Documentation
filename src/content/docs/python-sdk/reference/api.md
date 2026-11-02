@@ -13,7 +13,7 @@ from deepdots_sdk import Deepdots
 client = Deepdots(
     user="you@example.com",
     password="your-password",
-    base_url="https://api.magicfeedback.io",  # optional
+    base_url="https://api.deepdots.com",  # optional
 )
 ```
 
@@ -21,12 +21,12 @@ client = Deepdots(
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `user` | string | — | Account email address |
-| `password` | string | — | Account password |
-| `base_url` | string | `"https://api.magicfeedback.io"` | API root URL |
-| `auth_source` | string | `"datastore"` | Where the token comes from. Pass `"identity"` to log in with `user` and `password`, which is what you want outside Deepdots' own Google Cloud. The default first looks for a token cached in Deepdots' Google Cloud Datastore and logs in with `user` and `password` when there is none |
+| `user` | string | — | API user's email address |
+| `password` | string | — | API user's password |
+| `base_url` | string | `"https://api.magicfeedback.io"` | API root URL (production) |
+| `auth_source` | string | `"datastore"` | Where the token comes from. Pass `"identity"` to sign in with `user` and `password` through the API (`POST /auth/token`), which is what you want outside Deepdots' own Google Cloud. The default first looks for a token cached in Deepdots' Google Cloud Datastore and signs in with `user` and `password` when there is none |
 
-The constructor logs in straight away. A token lasts about an hour.
+The constructor signs in straight away. A signed-in token lasts one hour.
 
 ### Properties
 
@@ -39,7 +39,7 @@ The constructor logs in straight away. A token lasts about an hour.
 | `metrics` | `MetricsAPI` | Metrics retrieval |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Questions for an integration |
 | `reports` | `ReportsAPI` | Reporting endpoints |
-| `crm` | `CrmAPI` | CRM objects and connectors (SDK 1.0.23) |
+| `crm` | `CrmAPI` | CRM objects and connectors (SDK 1.0.24) |
 | `companies` | `CompaniesAPI` | Company listing |
 | `requests` | `RequestsAPI` | Research requests |
 | `signals` | `SignalsAPI` | Signals |
@@ -57,7 +57,11 @@ client.set_logging(logging.DEBUG)
 
 #### `refresh_token()`
 
-Gets a new token (with the same `auth_source`) and updates every sub-API in place. Call it in a long-running process when requests start failing with 401. `client.crm` does this by itself.
+Renew the token and update it for every sub-API client. With `auth_source="identity"` it uses the refresh token of the last sign-in (`POST /auth/token/refresh`) and signs in again only if it was rejected; with the default `auth_source` it gets the token again the same way the constructor did. Call it when a request fails with `401` in a long-running process. `client.crm` does this by itself.
+
+```python
+client.refresh_token()
+```
 
 ---
 
@@ -195,7 +199,7 @@ Returns the deleted contact object.
 
 ## CrmAPI
 
-Access via `client.crm`. SDK 1.0.23. See [CRM objects](/python-sdk/guides/crm-objects/).
+Access via `client.crm`. SDK 1.0.24. See [CRM objects](/python-sdk/guides/crm-objects/).
 
 Every method sends 500 records per request, resends a request that fails temporarily (502, 503, 504, a connection error or a 300-second timeout) up to 3 times, and logs in again once when the token has expired. When a request still fails, it raises a `requests.RequestException`. Write methods return totals over all requests, and each `failed` entry's `index` points into the list you passed.
 

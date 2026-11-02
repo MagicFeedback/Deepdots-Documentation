@@ -5,10 +5,12 @@ sidebar:
   order: 1
 ---
 
-Alle endpoints modtager og returnerer JSON og kræver `Authorization: Bearer <token>` (se [Godkendelse](/da/rest-api/getting-started/authentication/)).
+Alle endpoints modtager og returnerer JSON. Alle undtagen de to `/auth/token`-endpoints kræver `Authorization: Bearer <token>` (se [Godkendelse](/da/rest-api/getting-started/authentication/)).
 
 | Metode | Sti | Hvad den gør |
 |---|---|---|
+| `POST` | `/auth/token` | Logger ind med en API-brugers e-mail og adgangskode |
+| `POST` | `/auth/token/refresh` | Fornyer et login-token |
 | `POST` | `/feedbacks` | Sender én feedback |
 | `POST` | `/feedbacks/bulk` | Sender mange feedbacks for én virksomhed og ét produkt |
 | `GET` | `/feedbacks/{id}` | Læser én feedback |
@@ -16,6 +18,46 @@ Alle endpoints modtager og returnerer JSON og kræver `Authorization: Bearer <to
 | `POST` | `/crm/contacts/upsert/batch` | Opretter eller opdaterer op til 500 kontakter |
 | `PATCH` | `/crm/contacts/{id}/fields` | Opdaterer en kontakts brugerdefinerede felter og oplysninger |
 | `GET` | `/crm/contacts` | Finder kontakter |
+
+---
+
+## `POST /auth/token`
+
+Logger ind med en API-brugers e-mail og adgangskode. Kræver ingen `Authorization`-header.
+
+**Body**
+
+| Felt | Type | Påkrævet | Noter |
+|---|---|---|---|
+| `email` | string | Ja | |
+| `password` | string | Ja | |
+
+**Svar `200`:**
+
+| Felt | Type | Noter |
+|---|---|---|
+| `idToken` | string | Send det som `Authorization: Bearer <idToken>` |
+| `refreshToken` | string | Til `POST /auth/token/refresh` |
+| `expiresIn` | number | Sekunder, til `idToken` udløber (3600) |
+| `tokenType` | string | Altid `Bearer` |
+
+**Fejl:** `401` ved forkert e-mail eller adgangskode, `403`, når brugeren er deaktiveret, `429` efter for mange mislykkede forsøg, `422`, når et felt mangler.
+
+---
+
+## `POST /auth/token/refresh`
+
+Får et nyt `idToken` uden at sende adgangskoden igen. Kræver ingen `Authorization`-header.
+
+**Body**
+
+| Felt | Type | Påkrævet | Noter |
+|---|---|---|---|
+| `refreshToken` | string | Ja | Fra login eller den forrige fornyelse |
+
+**Svar `200`:** de samme felter som `POST /auth/token`, med et nyt `refreshToken` til næste gang.
+
+**Fejl:** `401`, når refresh-tokenet er ugyldigt eller udløbet (log ind igen), `403`, når brugeren er deaktiveret.
 
 ---
 

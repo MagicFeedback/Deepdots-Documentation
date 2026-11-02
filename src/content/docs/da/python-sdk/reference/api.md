@@ -13,7 +13,7 @@ from deepdots_sdk import Deepdots
 client = Deepdots(
     user="dig@eksempel.com",
     password="din-adgangskode",
-    base_url="https://api.magicfeedback.io",  # valgfri
+    base_url="https://api.deepdots.com",  # valgfri
 )
 ```
 
@@ -21,12 +21,12 @@ client = Deepdots(
 
 | Parameter | Type | Standard | Beskrivelse |
 |---|---|---|---|
-| `user` | string | — | Konto-e-mail |
-| `password` | string | — | Kontoadgangskode |
-| `base_url` | string | `"https://api.magicfeedback.io"` | API-rod-URL |
-| `auth_source` | string | `"datastore"` | Hvor tokenet kommer fra. Send `"identity"` for at logge ind med `user` og `password`, hvilket er det du skal bruge uden for Deepdots' egen Google Cloud. Standarden leder først efter et token cachet i Deepdots' Google Cloud Datastore og logger ind med `user` og `password`, når der ikke er noget |
+| `user` | string | — | API-brugerens e-mail |
+| `password` | string | — | API-brugerens adgangskode |
+| `base_url` | string | `"https://api.magicfeedback.io"` | API-rod-URL (produktion) |
+| `auth_source` | string | `"datastore"` | Hvor tokenet kommer fra. Send `"identity"` for at logge ind med `user` og `password` gennem API'et (`POST /auth/token`), hvilket er det du skal bruge uden for Deepdots' egen Google Cloud. Standarden leder først efter et token cachet i Deepdots' Google Cloud Datastore og logger ind med `user` og `password`, når der ikke er noget |
 
-Konstruktøren logger ind med det samme. Et token holder cirka en time.
+Konstruktøren logger ind med det samme. Login-tokens gælder i en time.
 
 ### Egenskaber
 
@@ -39,7 +39,7 @@ Konstruktøren logger ind med det samme. Et token holder cirka en time.
 | `metrics` | `MetricsAPI` | Metrics-hentning |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Spørgsmål for en integration |
 | `reports` | `ReportsAPI` | Rapporterings-endpoints |
-| `crm` | `CrmAPI` | CRM-objekter og connectors (SDK 1.0.23) |
+| `crm` | `CrmAPI` | CRM-objekter og connectors (SDK 1.0.24) |
 | `companies` | `CompaniesAPI` | Virksomhedslisting |
 | `requests` | `RequestsAPI` | Research-requests |
 | `signals` | `SignalsAPI` | Signals |
@@ -57,7 +57,11 @@ client.set_logging(logging.DEBUG)
 
 #### `refresh_token()`
 
-Henter et nyt token (med samme `auth_source`) og opdaterer alle sub-API'er på stedet. Kald den i en langvarig proces, når requests begynder at fejle med 401. `client.crm` gør det selv.
+Fornyer tokenet og opdaterer det i alle sub-API-klienter. Med `auth_source="identity"` bruger den refresh-tokenet fra det seneste login (`POST /auth/token/refresh`) og logger kun ind igen, hvis det afvises; med standard-`auth_source` henter den tokenet igen på samme måde som konstruktøren. Kald den, når en request fejler med `401` i en proces, der kører længe. `client.crm` gør det selv.
+
+```python
+client.refresh_token()
+```
 
 ---
 
@@ -160,7 +164,7 @@ Returnerer det slettede kontaktobjekt.
 
 ## CrmAPI
 
-Adgang via `client.crm`. SDK 1.0.23. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
+Adgang via `client.crm`. SDK 1.0.24. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
 
 Alle metoder sender 500 poster per request, sender en request der fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout efter 300 sekunder) igen op til 3 gange og logger ind igen én gang, når tokenet er udløbet. Fejler en request stadig, kastes en `requests.RequestException`. Skrivemetoder returnerer totaler over alle requests, og hver `failed`-posts `index` peger ind i den liste du sendte.
 
