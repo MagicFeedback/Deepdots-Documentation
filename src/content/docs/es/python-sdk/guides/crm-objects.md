@@ -21,7 +21,7 @@ result = client.crm.upsert_objects("match", [
         "externalId": "8449",
         "startsAt": "2026-10-18T16:00:00Z",
         "sourceUpdatedAt": "2026-10-07T00:00:00Z",
-        "data": {"name": "F.C. København - AGF", "venue": "Parken"},
+        "data": {"name": "Northside - Riverside", "venue": "City Arena"},
     },
 ])
 print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
@@ -92,34 +92,6 @@ try:
 except requests.RequestException as e:
     print("No enviado, inténtalo de nuevo:", e)
 ```
-
-## Conectores
-
-Un conector recibe los registros de otro sistema exactamente como los genera ese sistema, y los convierte en contactos y objetos en Deepdots. No tienes que transformar nada. Los conectores se configuran para los sistemas de un cliente concreto, así que pregunta a tu contacto de Deepdots si quieres uno para los tuyos.
-
-### Usuarios de FCK
-
-```python
-result = client.crm.sync_fck_users(users)
-# {"count": 1, "created": 1, "updated": 0, "failed": []}
-```
-
-Cada objeto de usuario de FCK se convierte en un contacto.
-- **Coincidencia:** los usuarios se identifican primero por `roboticket_id` y después por email, así que la primera carga y los cambios posteriores son la misma llamada. Cada usuario necesita un email.
-- **Gana la última versión:** nunca envíes una exportación más antigua después de cambios más recientes.
-- **Fallos:** cada entrada de `failed` tiene el `index` del usuario, su `id` de FCK y el `error`.
-
-### Roboticket
-
-```python
-result = client.crm.ingest_roboticket(lines)
-# {"count": 2, "applied": 2, "ignored": 0, "failed": []}
-```
-
-- **Qué actualiza una línea:** cada línea actualiza su ticket o membresía y el partido o producto al que pertenece.
-- **Devoluciones y transferencias:** se gestionan ambas. Un ticket cancelado sigue cancelado, y una línea más antigua nunca sobrescribe una más reciente.
-- **`AccessToken`:** el campo se descarta y nunca se guarda.
-- **`ignored`:** cuenta las líneas que no son ni una venta ni una devolución. Solo se conservan en el log.
 
 ## Vincular respuestas de encuesta a objetos
 

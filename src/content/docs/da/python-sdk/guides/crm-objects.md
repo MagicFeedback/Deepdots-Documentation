@@ -21,7 +21,7 @@ result = client.crm.upsert_objects("match", [
         "externalId": "8449",
         "startsAt": "2026-10-18T16:00:00Z",
         "sourceUpdatedAt": "2026-10-07T00:00:00Z",
-        "data": {"name": "F.C. København - AGF", "venue": "Parken"},
+        "data": {"name": "Northside - Riverside", "venue": "City Arena"},
     },
 ])
 print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
@@ -92,34 +92,6 @@ try:
 except requests.RequestException as e:
     print("Ikke sendt, prøv igen:", e)
 ```
-
-## Connectors
-
-En connector tager et andet systems poster præcis som det system leverer dem og mapper dem til kontakter og objekter hos os. Du behøver ikke at omforme noget. Connectors sættes op til en bestemt kundes systemer, så spørg din kontaktperson hos Deepdots, hvis du gerne vil have en til dine.
-
-### FCK-brugere
-
-```python
-result = client.crm.sync_fck_users(users)
-# {"count": 1, "created": 1, "updated": 0, "failed": []}
-```
-
-Hvert FCK-brugerobjekt bliver til en kontakt.
-- **Matching:** brugere matches først på `roboticket_id` og derefter på e-mail, så den første indlæsning og senere ændringer er det samme kald. Hver bruger skal have en e-mail.
-- **Den sidste version vinder:** send aldrig en ældre eksport efter nyere ændringer.
-- **Fejl:** hver `failed`-post har brugerens `index`, deres FCK-`id` og `error`.
-
-### Roboticket
-
-```python
-result = client.crm.ingest_roboticket(lines)
-# {"count": 2, "applied": 2, "ignored": 0, "failed": []}
-```
-
-- **Hvad en linje opdaterer:** hver linje opdaterer sin billet eller sit medlemskab og den kamp eller det produkt, den hører til.
-- **Returneringer og overdragelser:** begge håndteres. En annulleret billet forbliver annulleret, og en ældre linje overskriver aldrig en nyere.
-- **`AccessToken`:** feltet fjernes og gemmes aldrig.
-- **`ignored`:** tæller linjer, der hverken er et salg eller en returnering. De gemmes kun i loggen.
 
 ## Knyt surveysvar til objekter
 

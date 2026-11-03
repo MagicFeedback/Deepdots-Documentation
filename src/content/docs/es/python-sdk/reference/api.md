@@ -39,7 +39,7 @@ El constructor inicia sesión de inmediato. Los tokens de inicio de sesión dura
 | `metrics` | `MetricsAPI` | Recuperación de métricas |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Preguntas para una integración |
 | `reports` | `ReportsAPI` | Endpoints de reportes |
-| `crm` | `CrmAPI` | Objetos CRM y conectores (SDK 1.0.24) |
+| `crm` | `CrmAPI` | Objetos CRM (SDK 1.0.24) |
 | `companies` | `CompaniesAPI` | Listado de empresas |
 | `requests` | `RequestsAPI` | Solicitudes de investigación |
 | `signals` | `SignalsAPI` | Signals |
@@ -182,14 +182,6 @@ Retorna `{"count", "created", "updated", "failed"}`; una entrada de `failed` es 
 ### `get_objects(object_type, company_id=None, external_id=None, status=None, parent_type=None, parent_key=None, contact_key=None, limit=None, after=None)`
 
 Retorna una lista de objetos de un tipo, ordenados por `externalId`. Los filtros buscan coincidencias exactas. `limit` es 100 por defecto (como máximo 1000); pasa el último `externalId` que recibiste como `after` para obtener la página siguiente.
-
-### `sync_fck_users(users, company_id=None, chunk_size=500)`
-
-Crea o actualiza contactos a partir de objetos de usuario de FCK, enviados tal cual. Retorna `{"count", "created", "updated", "failed"}`; una entrada de `failed` es `{"index", "id", "error"}`.
-
-### `ingest_roboticket(lines, company_id=None, chunk_size=500)`
-
-Guarda líneas de tickets y membresías de Roboticket, enviadas tal cual. Retorna `{"count", "applied", "ignored", "failed"}`; una entrada de `failed` es `{"index", "id", "error"}`.
 
 ---
 

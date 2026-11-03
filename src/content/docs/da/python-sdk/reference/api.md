@@ -39,7 +39,7 @@ Konstruktøren logger ind med det samme. Login-tokens gælder i en time.
 | `metrics` | `MetricsAPI` | Metrics-hentning |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Spørgsmål for en integration |
 | `reports` | `ReportsAPI` | Rapporterings-endpoints |
-| `crm` | `CrmAPI` | CRM-objekter og connectors (SDK 1.0.24) |
+| `crm` | `CrmAPI` | CRM-objekter (SDK 1.0.24) |
 | `companies` | `CompaniesAPI` | Virksomhedslisting |
 | `requests` | `RequestsAPI` | Research-requests |
 | `signals` | `SignalsAPI` | Signals |
@@ -182,14 +182,6 @@ Returnerer `{"count", "created", "updated", "failed"}`; en `failed`-post er `{"i
 ### `get_objects(object_type, company_id=None, external_id=None, status=None, parent_type=None, parent_key=None, contact_key=None, limit=None, after=None)`
 
 Returnerer en liste af objekter af én type, sorteret efter `externalId`. Filtrene matcher præcist. `limit` er som standard 100 (højst 1000); send det sidste `externalId` du modtog, som `after` for at få næste side.
-
-### `sync_fck_users(users, company_id=None, chunk_size=500)`
-
-Opretter eller opdaterer kontakter ud fra FCK-brugerobjekter, sendt som de er. Returnerer `{"count", "created", "updated", "failed"}`; en `failed`-post er `{"index", "id", "error"}`.
-
-### `ingest_roboticket(lines, company_id=None, chunk_size=500)`
-
-Gemmer Roboticket-linjer for billetter og medlemskaber, sendt som de er. Returnerer `{"count", "applied", "ignored", "failed"}`; en `failed`-post er `{"index", "id", "error"}`.
 
 ---
 

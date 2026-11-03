@@ -39,7 +39,7 @@ The constructor signs in straight away. A signed-in token lasts one hour.
 | `metrics` | `MetricsAPI` | Metrics retrieval |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Questions for an integration |
 | `reports` | `ReportsAPI` | Reporting endpoints |
-| `crm` | `CrmAPI` | CRM objects and connectors (SDK 1.0.24) |
+| `crm` | `CrmAPI` | CRM objects (SDK 1.0.24) |
 | `companies` | `CompaniesAPI` | Company listing |
 | `requests` | `RequestsAPI` | Research requests |
 | `signals` | `SignalsAPI` | Signals |
@@ -217,14 +217,6 @@ Returns `{"count", "created", "updated", "failed"}`; a `failed` entry is `{"inde
 ### `get_objects(object_type, company_id=None, external_id=None, status=None, parent_type=None, parent_key=None, contact_key=None, limit=None, after=None)`
 
 Returns a list of objects of one type, ordered by `externalId`. Filters match exactly. `limit` defaults to 100 (at most 1000); pass the last `externalId` you received as `after` for the next page.
-
-### `sync_fck_users(users, company_id=None, chunk_size=500)`
-
-Creates or updates contacts from FCK user objects, sent as they are. Returns `{"count", "created", "updated", "failed"}`; a `failed` entry is `{"index", "id", "error"}`.
-
-### `ingest_roboticket(lines, company_id=None, chunk_size=500)`
-
-Stores Roboticket ticket and membership lines, sent as they are. Returns `{"count", "applied", "ignored", "failed"}`; a `failed` entry is `{"index", "id", "error"}`.
 
 ---
 
