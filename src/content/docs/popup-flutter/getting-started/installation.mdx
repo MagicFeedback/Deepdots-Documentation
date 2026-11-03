@@ -14,19 +14,19 @@ head:
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="note" title="Early access">
-`deepdots_popups` `0.1.0-beta.1` is in early access. It is not on pub.dev yet: it is installed from git, pinned to a release tag.
+`deepdots_popups` `0.1.0-beta.2` is in early access. It is not on pub.dev yet: it is installed from git, pinned to a release tag.
 </Aside>
 
 ## Requirements
 
 | | |
 |---|---|
-| Dart / Flutter | Dart 3.13.5 or later (Flutter 3.47 or later). Tested with Flutter 3.47.6. |
-| Android | minSdk 24, compileSdk 36 |
-| iOS | 13.0 or later |
+| Flutter | 3.24 or later (Dart 3.5). Builds are checked on every stable release from 3.24 to 3.47. |
+| Android | minSdk 24, compileSdk 36. Android Gradle plugin 8.9.1, Gradle 8.11.1 and Kotlin 2.1 or later. |
+| iOS | 13.0 or later. Swift Package Manager needs Flutter 3.41 or later; CocoaPods works on all supported versions. |
 | Native SDK | `0.7.6`, pulled in by the plugin (Maven Central on Android; Swift Package Manager or CocoaPods on iOS) |
 
-If your app is on an older Flutter version, tell your Deepdots contact.
+Apps created with an older Flutter template may need a few changes: see [Android](#3-set-up-android) and [iOS](#4-set-up-ios) below. If your app is on a Flutter version older than 3.24, tell your Deepdots contact.
 
 ## 1. Get access
 
@@ -42,7 +42,7 @@ dependencies:
   deepdots_popups:
     git:
       url: https://github.com/MagicFeedback/deepdots-popup-flutter-sdk.git
-      ref: v0.1.0-beta.1
+      ref: v0.1.0-beta.2
 ```
 
 ```bash
@@ -53,16 +53,45 @@ Always pin `ref` to a tag. To update, change the tag and run `flutter pub get` a
 
 ## 3. Set up Android
 
-Nothing to add in most apps:
+Apps created with Flutter 3.35 or later need nothing else:
 
 - The native SDK comes from Maven Central. `mavenCentral()` must be in your repositories, as it is in a default Flutter project.
 - The plugin declares the `INTERNET` permission, which Flutter only adds to debug and profile builds. Without it a release build could not reach Deepdots. You do not need to add it yourself.
 - Any `Activity` works, including the default `FlutterActivity`.
-- Your app needs `minSdk` 24 or higher.
+
+### Apps created with Flutter 3.24 to 3.32
+
+Their template uses an older Android toolchain than the libraries of the native SDK need. Raise it:
+
+In `android/settings.gradle` or `android/settings.gradle.kts`:
+
+```kotlin
+id("com.android.application") version "8.9.1" apply false       // or later
+id("org.jetbrains.kotlin.android") version "2.1.21" apply false  // 2.1 or later
+```
+
+In `android/gradle/wrapper/gradle-wrapper.properties`, Gradle 8.11.1 or later:
+
+```properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-all.zip
+```
+
+In `android/app/build.gradle` or `android/app/build.gradle.kts`, inside `android { ... }`:
+
+```kotlin
+compileSdk = 36
+defaultConfig {
+    minSdk = 24
+}
+```
+
+Without these changes the build stops with a message that names the missing version, such as "requires Android Gradle plugin 8.9.1 or higher" or "compiled with an incompatible version of Kotlin".
 
 ## 4. Set up iOS
 
-Flutter builds iOS plugins with Swift Package Manager when it is enabled, and with CocoaPods otherwise. Both work.
+Your app must target iOS 13.0 or later. Apps created with Flutter 3.32 or earlier target 12.0: raise **Minimum Deployments** to 13.0 in Xcode (Runner target, General tab) and, with CocoaPods, set `platform :ios, '13.0'` at the top of `ios/Podfile`.
+
+Flutter builds iOS plugins with Swift Package Manager when it is enabled, and with CocoaPods otherwise. Both work, but Swift Package Manager needs Flutter 3.41 or later. On an older Flutter with Swift Package Manager enabled, the build fails with "The folder FlutterFramework doesn't exist": turn it off with `flutter config --no-enable-swift-package-manager` and the app uses CocoaPods.
 
 The native SDK ships no `x86_64` simulator slice, so the Intel simulator architecture must be excluded. Without this setting `flutter run` on an Apple Silicon simulator still works, but `flutter build ios --simulator` fails to link.
 
@@ -92,7 +121,6 @@ The native SDK ships no `x86_64` simulator slice, so the Intel simulator archite
   </TabItem>
 </Tabs>
 
-Your iOS deployment target must be 13.0 or later.
 
 ## Next step
 

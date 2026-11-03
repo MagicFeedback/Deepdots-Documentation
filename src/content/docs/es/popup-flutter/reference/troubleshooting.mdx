@@ -36,10 +36,19 @@ El repositorio es privado durante el acceso anticipado. Comprueba que tu contact
 
 ## Error de versión del SDK de Dart
 
-El plugin necesita Dart 3.13.5 o posterior (Flutter 3.47 o posterior). Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
+El plugin necesita Flutter 3.24 o posterior (Dart 3.5). Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
+
+## Android: "requires Android Gradle plugin 8.9.1 or higher" o "incompatible version of Kotlin"
+
+Tu app se creó con Flutter 3.32 o anterior y su toolchain de Android es más antigua de lo que necesita el SDK nativo. Sube el Android Gradle plugin, Gradle, Kotlin y `compileSdk` como se indica en [Instalación](/es/popup-flutter/getting-started/installation/#apps-creadas-con-flutter-324-a-332).
+
+## iOS: "The folder FlutterFramework doesn't exist"
+
+Swift Package Manager está activado en una versión de Flutter anterior a la 3.41. Desactívalo con `flutter config --no-enable-swift-package-manager`; la app compilará entonces con CocoaPods.
 
 ## Limitaciones conocidas
 
 - Solo se instala desde git; todavía no está en pub.dev.
+- Las apps creadas con Flutter 3.24 a 3.32 necesitan los cambios de toolchain de Android de [Instalación](/es/popup-flutter/getting-started/installation/#apps-creadas-con-flutter-324-a-332).
 - `setLanguage()` no cambia el idioma reportado en la analítica: se fija una sola vez, en `init()`.
 - iOS: un popup lanzado en el primer instante tras arrancar la app puede contarse como mostrado sin llegar a aparecer. Lanza los eventos después del primer frame, por ejemplo con `WidgetsBinding.instance.addPostFrameCallback`.

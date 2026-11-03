@@ -36,10 +36,19 @@ Repositoriet er privat under den tidlige adgang. Tjek, at din Deepdots-kontakt h
 
 ## Fejl i Dart SDK-versionen
 
-Pluginet kræver Dart 3.13.5 eller nyere (Flutter 3.47 eller nyere). Hvis din app er på en ældre Flutter-version, så sig det til din Deepdots-kontakt.
+Pluginet kræver Flutter 3.24 eller nyere (Dart 3.5). Hvis din app er på en ældre Flutter-version, så sig det til din Deepdots-kontakt.
+
+## Android: "requires Android Gradle plugin 8.9.1 or higher" eller "incompatible version of Kotlin"
+
+Din app er oprettet med Flutter 3.32 eller ældre, og dens Android-toolchain er ældre, end det native SDK kræver. Opgradér Android Gradle plugin, Gradle, Kotlin og `compileSdk` som vist i [Installation](/da/popup-flutter/getting-started/installation/#apps-oprettet-med-flutter-324-til-332).
+
+## iOS: "The folder FlutterFramework doesn't exist"
+
+Swift Package Manager er slået til på en Flutter-version ældre end 3.41. Slå det fra med `flutter config --no-enable-swift-package-manager`; appen bygger så med CocoaPods.
 
 ## Kendte begrænsninger
 
 - Installeres kun fra git; endnu ikke på pub.dev.
+- Apps oprettet med Flutter 3.24 til 3.32 skal have Android-toolchain-ændringerne fra [Installation](/da/popup-flutter/getting-started/installation/#apps-oprettet-med-flutter-324-til-332).
 - `setLanguage()` ændrer ikke det sprog, der rapporteres i analytics: det sættes én gang, i `init()`.
 - iOS: en popup, der udløses i det første øjeblik efter opstart, kan blive talt som vist uden at blive vist. Udløs events efter første frame, for eksempel med `WidgetsBinding.instance.addPostFrameCallback`.
