@@ -1,0 +1,69 @@
+---
+title: Deepdots Popups para Flutter
+description: Plugin de Flutter (acceso anticipado) que muestra popups y encuestas de Deepdots en apps Android e iOS, sobre el SDK nativo de popups de Deepdots.
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+import { Aside, Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Acceso anticipado">
+`deepdots_popups` está en acceso anticipado (`0.1.0-beta.1`). La API aún puede cambiar antes de la 1.0, y el paquete todavía no está en pub.dev: Deepdots concede el acceso. Consulta [Instalación](/es/popup-flutter/getting-started/installation/).
+</Aside>
+
+`deepdots_popups` es un plugin de Flutter que muestra popups y encuestas de Deepdots en tu app Android e iOS. Envuelve el SDK nativo Deepdots Popup SDK: la segmentación, los triggers, las sesiones, la analítica y la UI de la encuesta se ejecutan de forma nativa, y el plugin los expone a Dart y cablea por ti la navegación y el ciclo de vida de la app de Flutter.
+
+## Qué hace
+
+- Los popups se configuran en Deepdots y se entregan a la app en tiempo de ejecución: no hace falta una release para lanzar o cambiar una campaña.
+- Triggers por pantalla, tiempo en pantalla, scroll, salida, evento personalizado y click.
+- Segmentación por pantalla, idioma y usuario, con cooldowns gestionados por Deepdots.
+- La encuesta se renderiza dentro de un popup nativo, por encima de tu UI de Flutter.
+- Un stream de Dart con los eventos del popup (`popup_shown`, `popup_clicked`, `survey_completed`) para tu propia analítica o UI.
+- Analítica de comportamiento (pantallas, sesiones, engagement, eventos personalizados) enviada a tu workspace de Deepdots.
+
+## Qué hace el plugin por ti
+
+- **Navegación:** añade `DeepdotsNavigatorObserver` a tu app y cada ruta con nombre se reporta al SDK.
+- **Ciclo de vida:** el plugin abre y cierra las sesiones cuando la app pasa a foreground o a background. No hay nada que llamar.
+- **Scroll:** envuelve una pantalla en `DeepdotsScrollListener` y los triggers de scroll funcionan.
+
+## Detalles del paquete
+
+| | |
+|---|---|
+| Paquete | `deepdots_popups` |
+| Versión | `0.1.0-beta.1` |
+| SDK nativo | `0.7.6` |
+| Plataformas | Android (minSdk 24), iOS 13.0+ |
+| Dart / Flutter | Dart 3.13.5 o posterior (Flutter 3.47 o posterior) |
+| Import | `package:deepdots_popups/deepdots_popups.dart` |
+
+## Empieza aquí
+
+<CardGrid>
+  <Card title="Instalación" icon="download">
+    Añade la dependencia y configura Android e iOS.
+
+    <LinkButton href="/es/popup-flutter/getting-started/installation/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+  <Card title="Quickstart" icon="rocket">
+    Inicializa el plugin y muestra tu primer popup.
+
+    <LinkButton href="/es/popup-flutter/getting-started/quickstart/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+  <Card title="Navegación" icon="right-caret">
+    Reporta las pantallas con `DeepdotsNavigatorObserver` o `setPath`.
+
+    <LinkButton href="/es/popup-flutter/guides/navigation/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+  <Card title="Referencia de la API" icon="open-book">
+    Todos los métodos, parámetros y tipos del plugin.
+
+    <LinkButton href="/es/popup-flutter/reference/api-reference/" icon="right-arrow">Leer</LinkButton>
+  </Card>
+</CardGrid>

@@ -6,11 +6,14 @@
 // Source: https://github.com/trueberryless-org/starlight-sidebar-topics-dropdown
 import { Badge, Icon } from "@astrojs/starlight/components";
 import type { ComponentProps } from "astro/types";
+import { isUnlistedPath } from "../unlisted.mjs";
 
 const { topics } = Astro.locals.starlightSidebarTopics;
 // On pages outside any topic (e.g. the splash landing the sidebar isn't shown anyway),
 // fall back to the first topic so the button never dereferences `undefined`.
 const currentTopic = topics.find((topic) => topic.isCurrent) ?? topics[0];
+// Unlisted topics only show up in the menu while you are in them.
+const menuTopics = topics.filter((topic) => topic.isCurrent || !isUnlistedPath(topic.link));
 ---
 
 {
@@ -57,7 +60,7 @@ const currentTopic = topics.find((topic) => topic.isCurrent) ?? topics[0];
         class="starlight-sidebar-topics-dropdown-menu"
         hidden
       >
-        {topics.map((topic) => (
+        {menuTopics.map((topic) => (
           <a
             href={topic.link}
             class:list={{

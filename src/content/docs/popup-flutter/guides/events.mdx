@@ -1,0 +1,115 @@
+---
+title: Events and triggers
+description: Trigger popups from Dart, show them manually and listen to popup events.
+sidebar:
+  order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Each popup is configured in Deepdots with a trigger. The SDK evaluates it, checks the popup's segmentation and cooldown, and shows the popup when everything matches.
+
+| Trigger | What fires it |
+|---|---|
+| Screen / time on screen | The current path. See [Navigation](/popup-flutter/guides/navigation/). |
+| Scroll | `DeepdotsScrollListener` or `onScroll()`. See [Navigation](/popup-flutter/guides/navigation/#scroll-triggers). |
+| Exit | Leaving a screen. See [Navigation](/popup-flutter/guides/navigation/#exit-triggers). |
+| Event | `triggerEvent(name)` |
+| Click | `triggerClick(targetId)` |
+
+## Custom events
+
+Popups with an **event** trigger appear when you report an event with the same name:
+
+```dart
+await DeepdotsPopups.triggerEvent('purchase_completed');
+```
+
+## Clicks
+
+Popups with a **click** trigger appear when you report a click on the target configured in Deepdots:
+
+```dart
+ElevatedButton(
+  onPressed: () => DeepdotsPopups.triggerClick('help-button'),
+  child: const Text('Help'),
+);
+```
+
+## Show a popup from code
+
+| Method | Segmentation and cooldown |
+|---|---|
+| `triggerSurvey(surveyId, [popupId])` | Respected: the popup appears only if it would have appeared through its trigger. |
+| `show(surveyId, productId, [data])` | Skipped. |
+| `showByPopupId(popupId)` | Skipped. |
+
+```dart
+// Only if the user is eligible:
+await DeepdotsPopups.triggerSurvey('SURVEY_ID');
+
+// Always, for example from a "Give feedback" button:
+await DeepdotsPopups.show('SURVEY_ID', 'PRODUCT_ID', {'source': 'settings'});
+await DeepdotsPopups.showByPopupId('POPUP_ID');
+
+// Close the open popup:
+await DeepdotsPopups.close();
+```
+
+- In `triggerSurvey`, pass `popupId` when several popups use the same survey.
+- In `show`, the SDK looks up the popup by `surveyId`. `productId` is passed on but not used today. `data` comes back in the `extra` of the `popup_shown` event.
+
+<Aside type="caution">
+`show`, `showByPopupId`, `triggerSurvey` and `close` need a visible screen: the Android `Activity` or the iOS root view controller. Called before the app's first frame, they fail with `PlatformException(no_context)`.
+</Aside>
+
+## Popup events
+
+`DeepdotsPopups.events` is a broadcast stream of `DeepdotsEvent`:
+
+```dart
+final subscription = DeepdotsPopups.events.listen((event) {
+  switch (event.type) {
+    case 'popup_shown':
+      debugPrint('shown ${event.popupId}');
+    case 'popup_clicked':
+      debugPrint('clicked ${event.popupId}: ${event.extra['action']}');
+    case 'survey_completed':
+      debugPrint('completed ${event.surveyId}');
+  }
+});
+
+// When you no longer need it:
+await subscription.cancel();
+```
+
+| `type` | When |
+|---|---|
+| `popup_shown` | The popup is on screen. |
+| `popup_clicked` | The user acted on the popup. `extra['action']` says which action. |
+| `survey_completed` | The user finished the survey. |
+
+`DeepdotsEvent` fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | `String` | Event name (table above). |
+| `popupId` | `String` | Popup id. Empty if the event does not carry it. |
+| `surveyId` | `String` | Survey id. Empty if the event does not carry it. |
+| `productId` | `String` | Product id. Empty if the event does not carry it. |
+| `extra` | `Map<String, Object?>` | Extra data, such as `action` in `popup_clicked` or the `data` of `show()` in `popup_shown`. |
+| `timestamp` | `DateTime?` | When the native SDK emitted the event. |
+
+## Mark a survey as answered
+
+The SDK marks a survey as answered on its own when the user completes it, so you normally do not need this. To mark it yourself:
+
+```dart
+await DeepdotsPopups.markSurveyAnswered('SURVEY_ID');
+```

@@ -1,0 +1,116 @@
+---
+title: Analytics
+description: Send behavioral analytics, custom events, metrics and errors from a Flutter app to Deepdots.
+sidebar:
+  order: 5
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+The native SDK includes an analytics layer that records screens, sessions, engagement time and your own events, and sends them to an analytics integration in your Deepdots workspace.
+
+## Setup
+
+Pass the public key and the id of your analytics integration to `init()`. Both are needed:
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: 'YOUR_PUBLIC_KEY',
+  analyticsPublicKey: 'YOUR_ANALYTICS_PUBLIC_KEY',
+  analyticsIntegration: 'YOUR_INTEGRATION_ID',
+);
+```
+
+Without them the SDK runs in **dry-run mode**: with `debug: true` it prints each analytics batch to the log, but sends nothing. That is useful to check the data during development.
+
+## What is recorded automatically
+
+With the plugin initialized and tracking on:
+
+| Data | Source |
+|---|---|
+| Screen views and time per screen | `DeepdotsNavigatorObserver` or `setPath()` ([Navigation](/popup-flutter/guides/navigation/)) |
+| Sessions and engagement time | The app lifecycle, handled by the plugin ([Lifecycle and sessions](/popup-flutter/guides/lifecycle-and-sessions/)) |
+| Persistent anonymous user id | Generated on first launch |
+| Device type, OS version, device model, app version | The platform |
+| Language | `language` in `init()`, or the device language |
+
+## Custom events
+
+```dart
+await DeepdotsPopups.track('add_to_cart', {'product_id': 'p-123', 'value': 49.9});
+```
+
+Use lowercase snake_case names. Parameter values can be `String`, `num`, `bool` or `null`.
+
+## Specialized events
+
+| Method | Records |
+|---|---|
+| `trackSearch(query, resultsCount, [params])` | A search and its number of results. `has_results` is derived from the count. |
+| `trackFindabilityFriction(frictionTopic, [params])` | The user struggled to find something, grouped by topic. |
+| `trackFunnelStep(funnel, step, taskId, [params])` | A step of a funnel. Steps with the same `taskId` are correlated for conversion, drop-off and time. |
+| `trackMeaningfulInteraction(interactionType, [params])` | A moment where the user got real value, such as `get_help` or `contact_support`. An empty type is discarded. |
+| `trackMessage(stage:, id:, title:, channel:, ...)` | A stage of one of your notifications (`delivered`, `clicked`, `converted`), on `push` or `in_app`. |
+| `enterMiniService(name, [entryPointType])` / `exitMiniService(name)` | Entry and exit of a bounded flow, such as checkout. Surveys shown in between are tagged with it. |
+
+```dart
+await DeepdotsPopups.trackSearch('running shoes', 0);
+await DeepdotsPopups.trackFunnelStep('onboarding', 'account_created', 'TASK_ID');
+await DeepdotsPopups.trackMessage(
+  stage: 'delivered',
+  id: 'MESSAGE_ID',
+  title: 'Summer sale',
+  channel: 'push',
+  campaign: 'summer_sale',
+);
+```
+
+For `trackMessage`, use the same `id` for every stage of one message, one channel per `id`, and one call per stage. The SDK discards calls that break these rules and logs a warning.
+
+## Metrics
+
+`setMetric` records a measurable value, such as cart value. It is re-sent with every batch and the same key overwrites the previous value. A `null` value is ignored.
+
+```dart
+await DeepdotsPopups.setMetric('cart_value', 49.99);
+```
+
+Metrics are held in memory only and are discarded on a user change.
+
+## Errors
+
+Report app errors with `reportError`. They appear as `deepdots_app_crash` events. To capture Flutter errors, call it from `FlutterError.onError` and `PlatformDispatcher.instance.onError`:
+
+```dart
+FlutterError.onError = (details) {
+  FlutterError.presentError(details);
+  DeepdotsPopups.reportError(details.exception, stackTrace: details.stack, handled: false);
+};
+PlatformDispatcher.instance.onError = (error, stack) {
+  DeepdotsPopups.reportError(error, stackTrace: stack, severity: 'fatal', handled: false);
+  return true;
+};
+```
+
+| Parameter | Default | Description |
+|---|---|---|
+| `severity` | `'error'` | `'fatal'` marks the error as fatal. |
+| `handled` | `true` | Whether your code caught the error. |
+| `context` | `null` | Extra key/value pairs, such as the screen. The Dart error type is added as `dart_error_type`. |
+
+## Sending now
+
+The SDK sends batches on its own (periodically, by size, and when the app goes to the background). To send what is pending right away:
+
+```dart
+await DeepdotsPopups.flushAnalytics();
+```
+
+If the network fails, the batch is queued again.
+
+All analytics methods do nothing while tracking is off.

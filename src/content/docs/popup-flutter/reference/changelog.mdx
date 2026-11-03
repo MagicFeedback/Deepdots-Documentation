@@ -1,0 +1,23 @@
+---
+title: Changelog
+description: Released versions of the deepdots_popups Flutter plugin.
+sidebar:
+  order: 3
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+Every release, newest first.
+
+## 0.1.0-beta.1
+
+First beta. Install it with `ref: v0.1.0-beta.1`.
+
+- Built on the native Deepdots SDK `0.7.6`: Android from Maven Central (`com.deepdots.sdk:shared-android`), iOS through Swift Package Manager or CocoaPods (same XCFramework, with a sha256 check).
+- Dart API over the native SDK: `init`, navigation (`DeepdotsNavigatorObserver`, `setPath`), triggers (`triggerEvent`, `triggerClick`, `triggerSurvey`, scroll with `DeepdotsScrollListener`, exit), manual `show`, `showByPopupId` and `close`, language, user and contact attributes, analytics, and the `events` and `feedbackSessions` streams.
+- App lifecycle (foreground and background) handled by the plugin.
+- The plugin declares the `INTERNET` permission on Android, so release builds reach Deepdots.

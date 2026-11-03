@@ -1,0 +1,115 @@
+---
+title: Events og triggers
+description: Trigger popups fra Dart, vis dem manuelt, og lyt efter popup-events.
+sidebar:
+  order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Hver popup konfigureres i Deepdots med en trigger. SDK'et evaluerer den, tjekker popuppens segmentering og cooldown og viser popuppen, når alt matcher.
+
+| Trigger | Hvad udløser den |
+|---|---|
+| Skærm / tid på skærmen | Den aktuelle path. Se [Navigation](/da/popup-flutter/guides/navigation/). |
+| Scroll | `DeepdotsScrollListener` eller `onScroll()`. Se [Navigation](/da/popup-flutter/guides/navigation/#scroll-triggers). |
+| Exit | At forlade en skærm. Se [Navigation](/da/popup-flutter/guides/navigation/#exit-triggers). |
+| Event | `triggerEvent(name)` |
+| Klik | `triggerClick(targetId)` |
+
+## Custom events
+
+Popups med en **event**-trigger vises, når du rapporterer et event med samme navn:
+
+```dart
+await DeepdotsPopups.triggerEvent('purchase_completed');
+```
+
+## Klik
+
+Popups med en **klik**-trigger vises, når du rapporterer et klik på det target, der er konfigureret i Deepdots:
+
+```dart
+ElevatedButton(
+  onPressed: () => DeepdotsPopups.triggerClick('help-button'),
+  child: const Text('Help'),
+);
+```
+
+## Vis en popup fra kode
+
+| Metode | Segmentering og cooldown |
+|---|---|
+| `triggerSurvey(surveyId, [popupId])` | Respekteres: popuppen vises kun, hvis den ville være blevet vist via sin trigger. |
+| `show(surveyId, productId, [data])` | Springes over. |
+| `showByPopupId(popupId)` | Springes over. |
+
+```dart
+// Kun hvis brugeren er kvalificeret:
+await DeepdotsPopups.triggerSurvey('SURVEY_ID');
+
+// Altid, fx fra en "Giv feedback"-knap:
+await DeepdotsPopups.show('SURVEY_ID', 'PRODUCT_ID', {'source': 'settings'});
+await DeepdotsPopups.showByPopupId('POPUP_ID');
+
+// Luk den åbne popup:
+await DeepdotsPopups.close();
+```
+
+- I `triggerSurvey` skal du sende `popupId`, når flere popups bruger samme survey.
+- I `show` slår SDK'et popuppen op ud fra `surveyId`. `productId` sendes videre, men bruges ikke i dag. `data` kommer tilbage i `extra` på `popup_shown`-eventet.
+
+<Aside type="caution">
+`show`, `showByPopupId`, `triggerSurvey` og `close` kræver en synlig skærm: Android-`Activity`'en eller iOS-root view controlleren. Kaldes de før appens første frame, fejler de med `PlatformException(no_context)`.
+</Aside>
+
+## Popup-events
+
+`DeepdotsPopups.events` er en broadcast-stream af `DeepdotsEvent`:
+
+```dart
+final subscription = DeepdotsPopups.events.listen((event) {
+  switch (event.type) {
+    case 'popup_shown':
+      debugPrint('shown ${event.popupId}');
+    case 'popup_clicked':
+      debugPrint('clicked ${event.popupId}: ${event.extra['action']}');
+    case 'survey_completed':
+      debugPrint('completed ${event.surveyId}');
+  }
+});
+
+// Når du ikke længere har brug for den:
+await subscription.cancel();
+```
+
+| `type` | Hvornår |
+|---|---|
+| `popup_shown` | Popuppen er på skærmen. |
+| `popup_clicked` | Brugeren handlede på popuppen. `extra['action']` angiver hvilken handling. |
+| `survey_completed` | Brugeren gennemførte surveyen. |
+
+`DeepdotsEvent`-felter:
+
+| Felt | Type | Beskrivelse |
+|---|---|---|
+| `type` | `String` | Eventnavn (tabellen ovenfor). |
+| `popupId` | `String` | Popup-id. Tom, hvis eventet ikke indeholder det. |
+| `surveyId` | `String` | Survey-id. Tom, hvis eventet ikke indeholder det. |
+| `productId` | `String` | Produkt-id. Tom, hvis eventet ikke indeholder det. |
+| `extra` | `Map<String, Object?>` | Ekstra data, fx `action` i `popup_clicked` eller `data` fra `show()` i `popup_shown`. |
+| `timestamp` | `DateTime?` | Hvornår det native SDK udsendte eventet. |
+
+## Markér en survey som besvaret
+
+SDK'et markerer selv en survey som besvaret, når brugeren gennemfører den, så det har du normalt ikke brug for. For selv at markere den:
+
+```dart
+await DeepdotsPopups.markSurveyAnswered('SURVEY_ID');
+```

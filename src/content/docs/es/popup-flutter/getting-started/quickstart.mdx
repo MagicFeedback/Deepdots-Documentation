@@ -1,0 +1,110 @@
+---
+title: Quickstart
+description: Inicializa deepdots_popups, reporta la navegación y muestra tu primer popup.
+sidebar:
+  order: 2
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+Los popups se configuran en Deepdots y se descargan en tiempo de ejecución. Para ver uno en tu app solo necesitas un `publicKey` válido, el plugin inicializado y tus pantallas reportadas al SDK.
+
+## 1. Inicializa el plugin
+
+Llama a `DeepdotsPopups.init()` una sola vez, antes de `runApp()`, y añade `DeepdotsNavigatorObserver` a tu app:
+
+```dart
+import 'package:deepdots_popups/deepdots_popups.dart';
+import 'package:flutter/material.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DeepdotsPopups.init(
+    publicKey: 'YOUR_PUBLIC_KEY', // de tu workspace de Deepdots
+    userId: 'USER_ID',            // opcional: se puede fijar más tarde con setUserId()
+    language: 'en',               // opcional: por defecto, el idioma del dispositivo
+  );
+  runApp(MaterialApp(
+    // Reporta cada ruta con nombre al SDK: segmentación por pantalla, tiempo en pantalla y triggers de salida.
+    navigatorObservers: [DeepdotsNavigatorObserver()],
+    initialRoute: '/home',
+    routes: {
+      '/home': (_) => const HomeScreen(),
+      '/checkout': (_) => const CheckoutScreen(),
+    },
+  ));
+}
+```
+
+`init()` es idempotente: una segunda llamada no hace nada. El ciclo de vida de la app (foreground y background) lo gestiona el plugin; no hay nada más que cablear.
+
+## 2. Dispara un popup
+
+Los popups con un trigger de **evento** aparecen cuando reportas ese evento:
+
+```dart
+await DeepdotsPopups.triggerEvent('purchase_completed');
+```
+
+Los popups con un trigger de pantalla o de tiempo en pantalla aparecen solos a medida que el usuario navega. Consulta [Eventos y triggers](/es/popup-flutter/guides/events/) para ver todos los tipos de trigger.
+
+## 3. Escucha los eventos del popup (opcional)
+
+```dart
+DeepdotsPopups.events.listen((event) {
+  // event.type: popup_shown, popup_clicked, survey_completed
+  debugPrint('${event.type} popup=${event.popupId} survey=${event.surveyId}');
+});
+```
+
+## Producción y desarrollo
+
+`init()` apunta a producción (`https://api.deepdots.com`) por defecto. Para probar popups configurados en una cuenta de pruebas de Deepdots, pasa el `publicKey` de esa cuenta con `environment: DeepdotsEnvironment.development` (`https://api-dev.deepdots.com`), y `debug: true` para ver el log del SDK (líneas `[DeepdotsPopups]` en Logcat o en la consola de Xcode):
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: 'YOUR_TEST_PUBLIC_KEY',
+  environment: DeepdotsEnvironment.development,
+  debug: true,
+);
+```
+
+`debug` solo controla el log; no cambia el backend. No publiques ninguno de los dos ajustes en un build de release.
+
+## Consentimiento
+
+Si necesitas el consentimiento del usuario antes del tracking, llama a `init()` después de que lo acepte, o inicializa con el tracking desactivado y actívalo más tarde:
+
+```dart
+await DeepdotsPopups.init(publicKey: 'YOUR_PUBLIC_KEY', trackingEnabled: false);
+// Cuando el usuario acepta:
+await DeepdotsPopups.setTrackingEnabled(true);
+```
+
+## Opciones de init
+
+| Parámetro | Tipo | Por defecto | Descripción |
+|---|---|---|---|
+| `publicKey` | `String` | obligatorio | Clave pública de tu workspace de Deepdots. |
+| `environment` | `DeepdotsEnvironment` | `production` | `production` o `development`. |
+| `userId` | `String?` | `null` | Tu id para el usuario. Sin él, el SDK usa un id anónimo. |
+| `language` | `String?` | idioma del dispositivo | Idioma para la segmentación, la encuesta y los textos del popup. |
+| `debug` | `bool` | `false` | Log del SDK en Logcat / la consola de Xcode. |
+| `trackingEnabled` | `bool` | `true` | `false` arranca con la analítica y el tracking de contacto desactivados. |
+| `analyticsPublicKey` | `String?` | `null` | Clave pública de tu integración de analytics. Consulta [Analytics](/es/popup-flutter/guides/analytics/). |
+| `analyticsIntegration` | `String?` | `null` | Id de tu integración de analytics. Necesario junto con `analyticsPublicKey`. |
+| `contactAttributes` | `Map<String, Object?>?` | `null` | Atributos de contacto enviados en el arranque. Necesita `userId`. |
+| `geolocation` | `bool` | `true` | `false` nunca llama a los servicios de geolocalización por IP (país y ciudad en la analítica). |
+| `renderChrome` | `bool?` | `null` (activado) | `false` renderiza la encuesta sin el scrim ni la tarjeta. `null` usa el valor por defecto del SDK, que es activado. |
+| `showProgressBar` | `bool?` | `null` | Fuerza la barra de progreso activada o desactivada. `null` sigue la configuración de la encuesta. |
+| `metadata` | `Map<String, Object?>?` | `null` | Se envía con cada respuesta de encuesta. Los valores `null` se descartan; `userId` tiene prioridad sobre una clave `userId` aquí. |
+
+## Siguientes pasos
+
+- [Navegación](/es/popup-flutter/guides/navigation/): routers sin rutas con nombre, diálogos, `setPath`.
+- [Usuarios y atributos](/es/popup-flutter/guides/users-and-attributes/): login, logout y segmentación.
+- [Troubleshooting](/es/popup-flutter/reference/troubleshooting/): no aparece ningún popup, errores de enlazado en iOS.

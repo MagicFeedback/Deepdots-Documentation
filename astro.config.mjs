@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
+import sitemap from '@astrojs/sitemap';
+import { isUnlistedPath } from './src/unlisted.mjs';
 
 // Served at the root of the custom domain (docs.deepdots.com), so there is no base path.
 // All absolute links (`/popup-web/…`) resolve correctly without a prefix.
@@ -11,6 +13,12 @@ export default defineConfig({
   site,
   base,
   integrations: [
+    // Same as Starlight's built-in sitemap (i18n from `locales`), minus unlisted topics.
+    // Declared here, Starlight skips adding its own.
+    sitemap({
+      i18n: { defaultLocale: 'root', locales: { root: 'en', es: 'es', da: 'da' } },
+      filter: (page) => !isUnlistedPath(new URL(page).pathname),
+    }),
     starlight({
       title: 'Deepdots Documentation',
       description: 'Official documentation for the Deepdots SDK ecosystem.',
@@ -55,6 +63,17 @@ export default defineConfig({
               { label: 'Getting Started', autogenerate: { directory: 'popup-native/getting-started' } },
               { label: 'Guides', autogenerate: { directory: 'popup-native/guides' } },
               { label: 'Reference', autogenerate: { directory: 'popup-native/reference' } },
+            ],
+          },
+          {
+            // Early access: unlisted (see src/unlisted.mjs).
+            label: { en: 'Popup Flutter (early access)', es: 'Popup Flutter (acceso anticipado)', da: 'Popup Flutter (tidlig adgang)' },
+            link: '/popup-flutter/',
+            icon: 'phone',
+            items: [
+              { label: 'Getting Started', autogenerate: { directory: 'popup-flutter/getting-started' } },
+              { label: 'Guides', autogenerate: { directory: 'popup-flutter/guides' } },
+              { label: 'Reference', autogenerate: { directory: 'popup-flutter/reference' } },
             ],
           },
           {

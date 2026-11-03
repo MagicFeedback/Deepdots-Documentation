@@ -1,0 +1,116 @@
+---
+title: Analytics
+description: Send adfærdsanalyse, custom events, metrics og fejl fra en Flutter-app til Deepdots.
+sidebar:
+  order: 5
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+Det native SDK indeholder et analyselag, der registrerer skærme, sessioner, engagement-tid og dine egne events og sender dem til en analytics-integration i dit Deepdots-workspace.
+
+## Opsætning
+
+Send public key'en og id'et for din analytics-integration til `init()`. Begge er påkrævet:
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: 'YOUR_PUBLIC_KEY',
+  analyticsPublicKey: 'YOUR_ANALYTICS_PUBLIC_KEY',
+  analyticsIntegration: 'YOUR_INTEGRATION_ID',
+);
+```
+
+Uden dem kører SDK'et i **dry-run-tilstand**: med `debug: true` printer det hvert analytics-batch til loggen, men sender intet. Det er nyttigt til at tjekke dataene under udvikling.
+
+## Hvad registreres automatisk
+
+Med pluginet initialiseret og tracking slået til:
+
+| Data | Kilde |
+|---|---|
+| Skærmvisninger og tid pr. skærm | `DeepdotsNavigatorObserver` eller `setPath()` ([Navigation](/da/popup-flutter/guides/navigation/)) |
+| Sessioner og engagement-tid | App-livscyklussen, håndteret af pluginet ([Livscyklus og sessioner](/da/popup-flutter/guides/lifecycle-and-sessions/)) |
+| Vedvarende anonymt bruger-id | Genereres ved første start |
+| Enhedstype, OS-version, enhedsmodel, app-version | Platformen |
+| Sprog | `language` i `init()`, eller enhedens sprog |
+
+## Custom events
+
+```dart
+await DeepdotsPopups.track('add_to_cart', {'product_id': 'p-123', 'value': 49.9});
+```
+
+Brug navne i snake_case med små bogstaver. Parameterværdier kan være `String`, `num`, `bool` eller `null`.
+
+## Specialiserede events
+
+| Metode | Registrerer |
+|---|---|
+| `trackSearch(query, resultsCount, [params])` | En søgning og dens antal resultater. `has_results` udledes af antallet. |
+| `trackFindabilityFriction(frictionTopic, [params])` | Brugeren havde svært ved at finde noget, grupperet efter emne. |
+| `trackFunnelStep(funnel, step, taskId, [params])` | Et trin i en funnel. Trin med samme `taskId` korreleres for konvertering, frafald og tid. |
+| `trackMeaningfulInteraction(interactionType, [params])` | Et øjeblik, hvor brugeren fik reel værdi, fx `get_help` eller `contact_support`. En tom type kasseres. |
+| `trackMessage(stage:, id:, title:, channel:, ...)` | Et trin for en af dine notifikationer (`delivered`, `clicked`, `converted`), på `push` eller `in_app`. |
+| `enterMiniService(name, [entryPointType])` / `exitMiniService(name)` | Indgang til og udgang fra et afgrænset flow, fx checkout. Surveys, der vises imens, tagges med det. |
+
+```dart
+await DeepdotsPopups.trackSearch('running shoes', 0);
+await DeepdotsPopups.trackFunnelStep('onboarding', 'account_created', 'TASK_ID');
+await DeepdotsPopups.trackMessage(
+  stage: 'delivered',
+  id: 'MESSAGE_ID',
+  title: 'Summer sale',
+  channel: 'push',
+  campaign: 'summer_sale',
+);
+```
+
+For `trackMessage` skal du bruge samme `id` for hvert trin af én besked, én kanal pr. `id` og ét kald pr. trin. SDK'et kasserer kald, der bryder disse regler, og logger en advarsel.
+
+## Metrics
+
+`setMetric` registrerer en målbar værdi, fx kurvens værdi. Den gensendes med hvert batch, og samme nøgle overskriver den forrige værdi. En `null`-værdi ignoreres.
+
+```dart
+await DeepdotsPopups.setMetric('cart_value', 49.99);
+```
+
+Metrics ligger kun i hukommelsen og kasseres ved et brugerskift.
+
+## Fejl
+
+Rapportér app-fejl med `reportError`. De vises som `deepdots_app_crash`-events. For at fange Flutter-fejl skal du kalde den fra `FlutterError.onError` og `PlatformDispatcher.instance.onError`:
+
+```dart
+FlutterError.onError = (details) {
+  FlutterError.presentError(details);
+  DeepdotsPopups.reportError(details.exception, stackTrace: details.stack, handled: false);
+};
+PlatformDispatcher.instance.onError = (error, stack) {
+  DeepdotsPopups.reportError(error, stackTrace: stack, severity: 'fatal', handled: false);
+  return true;
+};
+```
+
+| Parameter | Standard | Beskrivelse |
+|---|---|---|
+| `severity` | `'error'` | `'fatal'` markerer fejlen som fatal. |
+| `handled` | `true` | Om din kode fangede fejlen. |
+| `context` | `null` | Ekstra nøgle/værdi-par, fx skærmen. Dart-fejltypen tilføjes som `dart_error_type`. |
+
+## Send nu
+
+SDK'et sender selv batches (periodisk, efter størrelse, og når appen går i background). For at sende det ventende med det samme:
+
+```dart
+await DeepdotsPopups.flushAnalytics();
+```
+
+Hvis netværket fejler, sættes batchet i kø igen.
+
+Alle analytics-metoder gør ingenting, mens tracking er slået fra.

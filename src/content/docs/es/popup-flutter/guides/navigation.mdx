@@ -1,0 +1,84 @@
+---
+title: Navegación
+description: Reporta la pantalla actual a Deepdots con DeepdotsNavigatorObserver o setPath.
+sidebar:
+  order: 1
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+El SDK necesita saber en qué pantalla está el usuario. El path actual determina:
+
+- los popups segmentados por pantalla,
+- los triggers de tiempo en pantalla y de salida,
+- los eventos `page_view` y el tiempo por pantalla en la analítica.
+
+## Con rutas con nombre: `DeepdotsNavigatorObserver`
+
+Añade el observer a tu app y se reporta cada ruta con nombre (`RouteSettings.name`), como `/checkout`:
+
+```dart
+MaterialApp(
+  navigatorObservers: [DeepdotsNavigatorObserver()],
+  routes: {
+    '/home': (_) => const HomeScreen(),
+    '/checkout': (_) => const CheckoutScreen(),
+  },
+);
+```
+
+El observer reporta la nueva ruta en push y replace, y la ruta de debajo en pop.
+
+- **Solo se reportan las rutas de página con nombre.** Los diálogos, los bottom sheets y las rutas sin nombre se ignoran: no son pantallas, y reportarlos cortaría la visita de la pantalla de debajo.
+- **La primera ruta puede llegar antes de que termine `init()`.** El plugin la guarda y la envía en cuanto el SDK está listo.
+
+## Sin rutas con nombre: `setPath`
+
+Con un router que no usa rutas con nombre, o con pantallas que cambian dentro de una misma ruta (pestañas, por ejemplo), reporta tú el path cuando cambia la pantalla:
+
+```dart
+await DeepdotsPopups.setPath('/checkout');
+```
+
+Usa paths estables y legibles que coincidan con los configurados para tus popups en Deepdots. No pongas datos del usuario (ids, emails) en el path.
+
+## Triggers de salida
+
+Los popups con un trigger de **salida** se encolan contra la pantalla que el usuario abandona y se muestran, tras su retardo, en la siguiente pantalla. Con `DeepdotsNavigatorObserver` o `setPath` esto funciona solo: reportar la nueva pantalla ya encola los popups de salida de la anterior.
+
+`DeepdotsPopups.onExit()` solo hace falta para empezar la cuenta atrás antes, cuando el usuario muestra la intención de salir. Por ejemplo, en tu propio botón de volver, llámalo **antes** de navegar:
+
+```dart
+onPressed: () async {
+  await DeepdotsPopups.onExit();
+  if (context.mounted) Navigator.of(context).pop();
+},
+```
+
+Si el retardo se agota y la pantalla no ha cambiado, el SDK descarta el popup. Antes de `init()`, `onExit()` no hace nada.
+
+## Triggers de scroll
+
+Envuelve el cuerpo con scroll de una pantalla en `DeepdotsScrollListener`:
+
+```dart
+Scaffold(
+  body: DeepdotsScrollListener(
+    child: ListView(children: items),
+  ),
+);
+```
+
+Reporta al SDK el porcentaje de scroll (0–100) del scrollable vertical principal, solo cuando cambia el número entero. Las listas horizontales y anidadas se ignoran, y también el contenido que cabe en la pantalla sin hacer scroll. Un popup de scroll se dispara una vez por pantalla: reportar una pantalla nueva lo vuelve a armar.
+
+Si gestionas el scroll por tu cuenta, reporta tú el porcentaje:
+
+```dart
+await DeepdotsPopups.onScroll(75);
+```
+
+Antes de `init()`, `onScroll()` no hace nada.

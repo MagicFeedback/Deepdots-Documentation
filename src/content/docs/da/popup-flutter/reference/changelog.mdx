@@ -1,0 +1,23 @@
+---
+title: Changelog
+description: Udgivne versioner af Flutter-pluginet deepdots_popups.
+sidebar:
+  order: 3
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+Alle udgivelser, nyeste først.
+
+## 0.1.0-beta.1
+
+Første beta. Installér den med `ref: v0.1.0-beta.1`.
+
+- Bygget på det native Deepdots SDK `0.7.6`: Android fra Maven Central (`com.deepdots.sdk:shared-android`), iOS via Swift Package Manager eller CocoaPods (samme XCFramework, med et sha256-tjek).
+- Dart-API oven på det native SDK: `init`, navigation (`DeepdotsNavigatorObserver`, `setPath`), triggers (`triggerEvent`, `triggerClick`, `triggerSurvey`, scroll med `DeepdotsScrollListener`, exit), manuel `show`, `showByPopupId` og `close`, sprog, bruger- og kontaktattributter, analytics samt `events`- og `feedbackSessions`-streams.
+- App-livscyklus (foreground og background) håndteres af pluginet.
+- Pluginet erklærer `INTERNET`-tilladelsen på Android, så release-builds når Deepdots.

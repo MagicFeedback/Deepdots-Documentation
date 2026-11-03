@@ -1,0 +1,137 @@
+---
+title: API reference
+description: Every public class, method and type of the deepdots_popups Flutter plugin.
+sidebar:
+  order: 1
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+```dart
+import 'package:deepdots_popups/deepdots_popups.dart';
+```
+
+All methods are static on `DeepdotsPopups` and return a `Future`.
+
+## `DeepdotsPopups`
+
+### Setup
+
+| Method | Description |
+|---|---|
+| `init({required String publicKey, ...})` | Initializes the native SDK and the lifecycle handling. Idempotent. Options in [Quickstart](/popup-flutter/getting-started/quickstart/#init-options). |
+| `setLanguage(String? language)` | Language for targeting, the survey and the popup's texts, from the next popup. `null` = device language. Can be called before `init()`. |
+| `setTrackingEnabled(bool enabled)` | Switches analytics and contact tracking on or off. |
+
+### Navigation and triggers
+
+| Method | Description |
+|---|---|
+| `setPath(String path)` | Current screen. Called for you by `DeepdotsNavigatorObserver`. Before `init()`, it is kept and sent when `init()` finishes. |
+| `triggerEvent(String name)` | Fires popups with an event trigger of that name. |
+| `triggerClick(String targetId)` | Fires popups with a click trigger on that target. |
+| `onScroll(int percentage)` | Scroll percentage (0–100) of the current screen. Called for you by `DeepdotsScrollListener`. Does nothing before `init()`. |
+| `onExit()` | Starts the exit countdown before navigating. Not needed with `DeepdotsNavigatorObserver`. Does nothing before `init()`. |
+
+### Display
+
+These methods need a visible screen and fail with `PlatformException(no_context)` before the app's first frame.
+
+| Method | Description |
+|---|---|
+| `show(String surveyId, String productId, [Map<String, Object?>? data])` | Shows the survey's popup, skipping triggers and segmentation. `data` comes back in the `extra` of `popup_shown`. `productId` is not used today. |
+| `showByPopupId(String popupId)` | Shows that popup, skipping triggers and segmentation. |
+| `triggerSurvey(String surveyId, [String? popupId])` | Shows the survey's popup only if it passes segmentation and cooldown. |
+| `close()` | Closes the open popup. |
+| `markSurveyAnswered(String surveyId)` | Marks the survey as answered. The SDK already does it when the survey is completed. |
+
+### Users and attributes
+
+| Method | Description |
+|---|---|
+| `setUserId([String? userId])` | Login, logout or account switch. Without an argument, back to the anonymous id. Closes the current session and opens a new one. |
+| `getUserId()` → `String?` | Current user id, yours or the anonymous one. `null` while tracking is off. |
+| `setUserAttributes(Map<String, Object?> attributes)` | Analytics dimensions, sent with every batch. In memory only. |
+| `setContactAttributes(Map<String, Object?> attributes)` → `bool` | Stores attributes on the user's contact. Needs `userId`. `true` if sent. |
+| `setMetric(String key, Object? value)` | Measurable value, re-sent with every batch. |
+
+### Sessions
+
+| Method | Description |
+|---|---|
+| `endSession()` | Closes the current session. |
+| `getSessionId()` → `String?` | Id Deepdots gave the current analytics session. `null` until it arrives or while tracking is off. |
+| `getFeedbackSessionId()` → `String?` | Id of the feedback the open session will become. `null` until the first batch is accepted, after the session closes, or without analytics. |
+
+### Analytics
+
+| Method | Description |
+|---|---|
+| `track(String name, [Map<String, Object?>? params])` | Custom event. |
+| `trackSearch(String query, int resultsCount, [params])` | Search and its number of results. |
+| `trackFindabilityFriction(String frictionTopic, [params])` | Difficulty finding something. |
+| `trackFunnelStep(String funnel, String step, String taskId, [params])` | Funnel step. |
+| `trackMeaningfulInteraction(String interactionType, [params])` | Meaningful interaction. |
+| `trackMessage({required stage, required id, required title, required channel, campaign, value, currency, params})` | Stage of a push or in-app message. |
+| `enterMiniService(String name, [String? entryPointType])` | Entry into a bounded flow. |
+| `exitMiniService(String name)` | Exit from that flow, with its duration. |
+| `reportError(Object error, {StackTrace? stackTrace, String severity = 'error', bool handled = true, Map<String, Object?>? context})` | App error. |
+| `flushAnalytics()` | Sends the pending batch now. |
+
+See [Analytics](/popup-flutter/guides/analytics/).
+
+### Streams
+
+| Getter | Type | Description |
+|---|---|---|
+| `events` | `Stream<DeepdotsEvent>` | `popup_shown`, `popup_clicked` and `survey_completed`. Broadcast. |
+| `feedbackSessions` | `Stream<DeepdotsFeedbackSession>` | Opening and closing of each analytics session. Needs analytics. Broadcast. |
+
+## `DeepdotsNavigatorObserver`
+
+`NavigatorObserver` that calls `setPath()` with the name of each page route on push, replace and pop. Routes without a name, dialogs and bottom sheets are ignored.
+
+```dart
+MaterialApp(navigatorObservers: [DeepdotsNavigatorObserver()]);
+```
+
+## `DeepdotsScrollListener`
+
+Widget that reports the scroll percentage of its main vertical scrollable with `onScroll()`.
+
+```dart
+DeepdotsScrollListener(child: ListView(children: items));
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `child` | `Widget` | The scrollable content. Required. |
+
+## `DeepdotsEvent`
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | `String` | `popup_shown`, `popup_clicked` or `survey_completed`. |
+| `popupId` | `String` | Popup id, or empty. |
+| `surveyId` | `String` | Survey id, or empty. |
+| `productId` | `String` | Product id, or empty. |
+| `extra` | `Map<String, Object?>` | Extra data of the event. Empty if none. |
+| `timestamp` | `DateTime?` | When the native SDK emitted the event. |
+
+## `DeepdotsFeedbackSession`
+
+| Field | Type | Description |
+|---|---|---|
+| `sessionId` | `String` | Id of the feedback the session becomes. |
+| `closed` | `bool` | `false` when the session's first batch is accepted; `true` when its closing batch is. |
+
+## `DeepdotsEnvironment`
+
+| Value | Backend |
+|---|---|
+| `production` (default) | `https://api.deepdots.com` |
+| `development` | `https://api-dev.deepdots.com` |

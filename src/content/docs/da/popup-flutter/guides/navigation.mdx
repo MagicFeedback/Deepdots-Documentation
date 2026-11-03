@@ -1,0 +1,84 @@
+---
+title: Navigation
+description: Rapportér den aktuelle skærm til Deepdots med DeepdotsNavigatorObserver eller setPath.
+sidebar:
+  order: 1
+pagefind: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+---
+
+SDK'et skal vide, hvilken skærm brugeren er på. Den aktuelle path styrer:
+
+- popups med targeting på en skærm,
+- tid-på-skærmen- og exit-triggers,
+- `page_view`-events og tid pr. skærm i analytics.
+
+## Med navngivne routes: `DeepdotsNavigatorObserver`
+
+Tilføj observeren til din app, så rapporteres hver route med et navn (`RouteSettings.name`), fx `/checkout`:
+
+```dart
+MaterialApp(
+  navigatorObservers: [DeepdotsNavigatorObserver()],
+  routes: {
+    '/home': (_) => const HomeScreen(),
+    '/checkout': (_) => const CheckoutScreen(),
+  },
+);
+```
+
+Observeren rapporterer den nye route ved push og replace, og den underliggende route ved pop.
+
+- **Kun page routes med et navn rapporteres.** Dialoger, bottom sheets og routes uden navn ignoreres: de er ikke skærme, og at rapportere dem ville afbryde besøget på den underliggende skærm.
+- **Den første route kan ankomme, før `init()` er færdig.** Pluginet gemmer den og sender den, så snart SDK'et er klar.
+
+## Uden navngivne routes: `setPath`
+
+Med en router, der ikke bruger navngivne routes, eller med skærme, der skifter inden for én route (fx faner), skal du selv rapportere path'en, når skærmen skifter:
+
+```dart
+await DeepdotsPopups.setPath('/checkout');
+```
+
+Brug stabile, læsbare paths, der matcher dem, der er konfigureret for dine popups i Deepdots. Læg ikke brugerdata (id'er, e-mails) i path'en.
+
+## Exit-triggers
+
+Popups med en **exit**-trigger sættes i kø mod den skærm, brugeren forlader, og vises efter deres forsinkelse på den næste skærm. Med `DeepdotsNavigatorObserver` eller `setPath` virker det af sig selv: når den nye skærm rapporteres, sættes den forrige skærms exit-popups allerede i kø.
+
+`DeepdotsPopups.onExit()` er kun nødvendig for at starte nedtællingen tidligere, når brugeren viser hensigt om at forlade skærmen. Kald den fx i din egen tilbage-knap **før** navigeringen:
+
+```dart
+onPressed: () async {
+  await DeepdotsPopups.onExit();
+  if (context.mounted) Navigator.of(context).pop();
+},
+```
+
+Hvis forsinkelsen udløber, og skærmen ikke har skiftet, kasserer SDK'et popuppen. Før `init()` gør `onExit()` ingenting.
+
+## Scroll-triggers
+
+Pak den scrollbare krop på en skærm ind i `DeepdotsScrollListener`:
+
+```dart
+Scaffold(
+  body: DeepdotsScrollListener(
+    child: ListView(children: items),
+  ),
+);
+```
+
+Den rapporterer scroll-procenten (0–100) for den primære lodrette scrollable til SDK'et, kun når heltallet ændrer sig. Vandrette og indlejrede lister ignoreres, og det samme gør indhold, der passer på skærmen uden at scrolle. En scroll-popup udløses én gang pr. skærm: når en ny skærm rapporteres, aktiveres den igen.
+
+Med din egen scroll-håndtering skal du selv rapportere procenten:
+
+```dart
+await DeepdotsPopups.onScroll(75);
+```
+
+Før `init()` gør `onScroll()` ingenting.
