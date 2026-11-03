@@ -21,7 +21,7 @@ result = client.crm.upsert_objects("match", [
         "externalId": "8449",
         "startsAt": "2026-10-18T16:00:00Z",
         "sourceUpdatedAt": "2026-10-07T00:00:00Z",
-        "data": {"name": "F.C. København - AGF", "venue": "Parken"},
+        "data": {"name": "Northside - Riverside", "venue": "City Arena"},
     },
 ])
 print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
@@ -92,34 +92,6 @@ try:
 except requests.RequestException as e:
     print("Not sent, try again:", e)
 ```
-
-## Connectors
-
-A connector takes another system's records exactly as that system produces them, and maps them to contacts and objects on our side. You don't have to transform anything. Connectors are set up for a specific client's systems, so ask your Deepdots contact if you'd like one for yours.
-
-### FCK users
-
-```python
-result = client.crm.sync_fck_users(users)
-# {"count": 1, "created": 1, "updated": 0, "failed": []}
-```
-
-Each FCK user object becomes a contact.
-- **Matching:** users are matched by `roboticket_id` first and by email second, so the first load and later changes are the same call. Each user needs an email.
-- **Last version wins:** never send an older export after newer changes.
-- **Failures:** each `failed` entry has the user's `index`, their FCK `id` and the `error`.
-
-### Roboticket
-
-```python
-result = client.crm.ingest_roboticket(lines)
-# {"count": 2, "applied": 2, "ignored": 0, "failed": []}
-```
-
-- **What a line updates:** each line updates its ticket or membership and the match or product it belongs to.
-- **Returns and transfers:** both are handled. A cancelled ticket stays cancelled, and an older line never overwrites a newer one.
-- **`AccessToken`:** the field is dropped and never stored.
-- **`ignored`:** counts lines that are neither a sale nor a return. They are kept in the log only.
 
 ## Link survey answers to objects
 
