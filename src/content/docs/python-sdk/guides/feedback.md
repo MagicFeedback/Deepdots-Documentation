@@ -17,6 +17,7 @@ feedback = client.feedbacks.create({
         {"key": "reason", "value": "Fast and reliable"},
     ],
     "integrationId": "YOUR_INTEGRATION_ID",
+    # Optional from SDK 1.0.25: taken from the integration when left out
     "companyId": "YOUR_COMPANY_ID",
     "productId": "YOUR_PRODUCT_ID",
     # Optional: where the feedback comes from (see "Source-system fields" below)
@@ -36,8 +37,8 @@ The SDK sends the dict as the JSON body of `POST /feedbacks` with your key names
 | `type` | string | Source type: `"APP"`, `"SURVEY"` or `"DOCUMENT"` |
 | `identity` | string | Source identity — use the identity of the integration the feedback belongs to (e.g. `"MAGICFORM"`). It decides whether and how the feedback is analysed |
 | `integrationId` | string | UUID of the integration this feedback belongs to |
-| `companyId` | string | Your company identifier |
-| `productId` | string | The product this feedback is associated with |
+
+From SDK 1.0.25, `companyId` and `productId` are optional: when you leave either out or send it empty, the SDK reads the integration and copies the value from it (see [Optional fields](#optional-fields)). Earlier versions require both. If you already send `productId`, keep sending the same value: deduplication on `external_id` matches company, product and integration, so with a different product, re-sent feedbacks would be created again.
 
 `type` and `identity` are uppercase values; any other spelling is rejected. Some accepted `identity` values are not analysed at all, so don't pick one just because it names your source tool. The identity also decides what is analysed: survey identities such as `MAGICFORM`, `MAGICSURVEY` and `CSV` analyse `answers`, while most others, such as `GENERAL` and `CUSTOM`, analyse only `text`. If you don't know your integration's identity, ask your Deepdots contact.
 
@@ -45,17 +46,21 @@ The SDK sends the dict as the JSON body of `POST /feedbacks` with your key names
 
 | Field | Type | Description |
 |---|---|---|
+| `companyId` | string | Your company identifier. Taken from the integration if you leave it out or send it empty (SDK 1.0.25) |
+| `productId` | string | The product this feedback is associated with. Taken from the integration if you leave it out or send it empty (SDK 1.0.25) |
 | `answers` | Answer[] | Answers as `{"key": …, "value": [...]}` pairs. `key` is the question's `ref` (see `integrations_questions.get()`) |
 | `text` | string | Free text of the feedback — e.g. a review or a support conversation |
 | `metadata` | Metadata[] | Custom key/value entries (see [Update metrics and metadata](#update-metrics-and-metadata)) |
 | `metrics` | Metric[] | Named metric values |
-| `crmContactId` | string | ID of the CRM contact who gave the feedback. The contact must belong to the same company |
+| `crmContactId` | string | ID of the CRM contact who gave the feedback. The contact must be active and belong to the same company |
 | `external_id` | string | ID of the record in the source system. Re-sending it for the same company, product and integration returns the existing feedback instead of a duplicate |
 | `externalGeneratedAt` | string | When the feedback was created in the source system — the date the dashboard uses. UTC ISO 8601 ending in `Z`; defaults to the time of the request. See [The feedback date](#the-feedback-date-externalgeneratedat) |
 | `externalUpdatedAt` | string | When the record was last changed in the source system |
 | `externalUrl` | string | Link to the original record |
 
-Field names are case-sensitive. `external_id` is the only snake_case field; every other field is camelCase (it is `companyId`, not `company_id`). The API rejects any key it does not know: an unknown or misspelled key such as `externalId` fails the whole request with HTTP 422, and nothing is created. The same happens if you send `status` or `createdAt`, which the API sets itself. A misspelled required key such as `company_id` is caught before anything is sent: `create()` raises `ValueError: Missing required field: companyId`. See [Error handling](/python-sdk/reference/api/#error-handling).
+Field names are case-sensitive. `external_id` is the only snake_case field; every other field is camelCase (it is `companyId`, not `company_id`). The API rejects any key it does not know: an unknown or misspelled key such as `externalId` or `company_id` fails the whole request with HTTP 422, and nothing is created. The same happens if you send `status` or `createdAt`, which the API sets itself. A misspelled required key such as `integration_id` is caught before anything is sent: `create()` raises `ValueError: Missing required field: integrationId`.
+
+When the SDK has to read the integration, nothing is created if that fails: `create()` raises `requests.exceptions.HTTPError` if the API refuses the read (HTTP 406 when the integration doesn't exist, was deleted or your user can't see it; HTTP 405 when your role can't read integrations), and `ValueError` if the integration has no company, has no product and you didn't pass `productId`, or belongs to another company than the `companyId` you passed. Passing `companyId` and `productId` yourself skips the lookup. The SDK keeps what it read for the life of the client (an integration without a company or product is read again on every call), so after moving an integration to another product, create a new client. See [Error handling](/python-sdk/reference/api/#error-handling).
 
 ### Answer value wrapping
 

@@ -17,11 +17,11 @@ Deepdots Python SDK er en synkron HTTP-klient til Deepdots REST API. Brug den fr
 
 ## Hvad du ikke behøver at bygge
 
-SDK'en håndterer autentificering (email + adgangskode → bearer token via Google Identity), request-konstruktion, fejlpropagering og JSON-parsing. Din kode skal blot sende de rigtige data-dicts og læse svarene.
+SDK'en håndterer autentificering (email + adgangskode → bearer token fra Deepdots API'et), request-konstruktion, fejlpropagering og JSON-parsing. Din kode skal blot sende de rigtige data-dicts og læse svarene.
 
 ## Pakkedetaljer
 
-- **PyPI-navn:** `deepdots` (det oprindelige `magicfeedback` er stadig udgivet og virker stadig)
+- **PyPI-navn:** `deepdots`, som installerer det oprindelige `magicfeedback`. Opgrader og fastlås `magicfeedback` (se [Installation](/da/python-sdk/getting-started/installation/#opgradering))
 - **Importnavn:** `deepdots_sdk` (eller `magicfeedback_sdk` — de samme objekter)
 - **Python:** ≥ 3.8
 - **Afhængigheder:** `requests`, `google-cloud-pubsub`, `google-cloud-datastore` (installeres automatisk)

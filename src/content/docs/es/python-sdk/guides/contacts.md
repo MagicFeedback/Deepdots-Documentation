@@ -26,11 +26,17 @@ print(contact["id"])
 | `email` | string | Dirección de correo |
 | `companyId` | string | Tu identificador de empresa |
 
-`create()` siempre agrega un contacto nuevo, aunque la empresa ya tenga uno con el mismo email. Para evitar duplicados, usa [`upsert()`](#crear-o-actualizar-por-email).
+Si la empresa ya tiene un contacto con el `externalId` que envías, `create()` no agrega uno nuevo: actualiza ese contacto con los campos que envías (incluido `email`; `customFields` se fusiona) y lo retorna. Un contacto eliminado vuelve a estar activo; uno dado de baja sigue dado de baja. Si tu rol no permite actualizar contactos, el contacto se retorna sin cambios. La API funciona así desde noviembre de 2026, con cualquier versión del SDK.
+
+En cualquier otro caso, `create()` siempre agrega un contacto nuevo, aunque la empresa ya tenga uno con el mismo email. Para buscar el contacto por email, usa [`upsert()`](#crear-o-actualizar-por-email).
+
+Aun así, varios contactos pueden tener el mismo `externalId`, por ejemplo contactos creados antes del cambio de noviembre de 2026, o dos contactos creados por llamadas enviadas al mismo tiempo. En ese caso, `create()`, y `upsert()` cuando ningún contacto activo tiene tu email, actualizan solo uno de ellos: el activo más antiguo; si no hay ninguno activo, el dado de baja más antiguo, y si no, el eliminado más antiguo.
 
 ## Crear o actualizar por email
 
-`upsert()` actualiza el contacto activo de la empresa que tenga el mismo email (sin distinguir mayúsculas ni espacios al principio o al final), o crea uno si no existe. Disponible a partir del SDK 1.0.22.
+`upsert()` actualiza el contacto activo de la empresa que tenga el mismo email (sin distinguir mayúsculas ni espacios al principio o al final). Si no hay ninguno, actualiza el contacto con el `externalId` que envías, que pasa a tener tu email y vuelve a estar activo si estaba eliminado; uno dado de baja sigue dado de baja. Si tampoco hay ningún contacto con ese `externalId`, crea uno. Disponible a partir del SDK 1.0.22.
+
+Por email solo se buscan los contactos activos: un contacto dado de baja o eliminado solo se encuentra a través de su `externalId`. Si no lo envías, `upsert()` crea un contacto activo nuevo con el mismo email. Un contacto dado de baja no se puede enviar como `crmContactId` de un feedback, así que comprueba el `status` que retornan `create()` o `upsert()` antes de usar su `id` así.
 
 ```python
 contact = client.contacts.upsert({
@@ -72,15 +78,19 @@ contacts = client.contacts.get({
 })
 ```
 
+`get()` solo retorna contactos activos, salvo que tu `where` tenga una clave `status` en su primer nivel, por ejemplo `{"where": {"externalId": "C-1001", "status": "UNSUBSCRIBED"}}`. Así que no lo uses para decidir si crear un contacto: `create()` y `upsert()` también encuentran por su `externalId` los contactos dados de baja o eliminados.
+
 ## Actualizar un contacto
 
 Pasa solo los campos que quieras cambiar:
 
 ```python
-updated = client.contacts.update(contact["id"], {
+client.contacts.update(contact["id"], {
     "name": "Janet",
 })
 ```
+
+`update()` retorna un dict vacío (`{}`). `update()`, `update_fields()` y `delete()` solo funcionan con contactos activos: con un contacto dado de baja o eliminado lanzan `requests.HTTPError` con HTTP 406.
 
 ## Actualizar campos personalizados
 

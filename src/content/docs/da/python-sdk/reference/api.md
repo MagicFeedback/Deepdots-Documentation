@@ -26,7 +26,7 @@ client = Deepdots(
 | `base_url` | string | `"https://api.magicfeedback.io"` | API-rod-URL (produktion) |
 | `auth_source` | string | `"datastore"` | Hvor tokenet kommer fra. Send `"identity"` for at logge ind med `user` og `password` gennem API'et (`POST /auth/token`), hvilket er det du skal bruge uden for Deepdots' egen Google Cloud. Standarden leder først efter et token cachet i Deepdots' Google Cloud Datastore og logger ind med `user` og `password`, når der ikke er noget |
 
-Konstruktøren logger ind med det samme. Login-tokens gælder i en time.
+Konstruktøren logger ind med det samme. Mislykkes det, kaster den `requests.HTTPError` (SDK 1.0.25): `401` ved forkert e-mail eller adgangskode, `403`, hvis login-kontoen er deaktiveret, `429` efter for mange mislykkede forsøg, `502`, hvis identitetsudbyderen ikke kan nås. Login-tokens gælder i en time.
 
 ### Egenskaber
 
@@ -39,7 +39,7 @@ Konstruktøren logger ind med det samme. Login-tokens gælder i en time.
 | `metrics` | `MetricsAPI` | Metrics-hentning |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Spørgsmål for en integration |
 | `reports` | `ReportsAPI` | Rapporterings-endpoints |
-| `crm` | `CrmAPI` | CRM-objekter (SDK 1.0.24) |
+| `crm` | `CrmAPI` | CRM-objekter (SDK 1.0.25) |
 | `companies` | `CompaniesAPI` | Virksomhedslisting |
 | `requests` | `RequestsAPI` | Research-requests |
 | `signals` | `SignalsAPI` | Signals |
@@ -71,7 +71,7 @@ Adgang via `client.feedbacks`.
 
 ### `create(feedback)`
 
-Kontrollerer at de påkrævede nøgler er til stede (og kaster `ValueError`, hvis en af dem mangler), pakker `value`-værdier der ikke er lister, ind i lister (se [Automatisk indpakning af svarværdier](/da/python-sdk/guides/feedback/#automatisk-indpakning-af-svarværdier)) og sender `feedback` som JSON-body i `POST /feedbacks` uden at ændre dine nøgler. Returnerer det oprettede feedback-objekt. Hvis `external_id` matcher et feedback der allerede findes for samme virksomhed, produkt og integration, og som ikke er slettet, returneres i stedet det eksisterende feedback uændret. Se [Administration af Feedback](/da/python-sdk/guides/feedback/).
+Kontrollerer at de påkrævede nøgler er til stede (og kaster `ValueError`, hvis en af dem mangler). Fra SDK 1.0.25 kopieres et manglende eller tomt `companyId` eller `productId` fra integrationen, som SDK'en læser én gang per `integrationId` og klient (`GET /integrations/{id}`; en integration uden virksomhed eller produkt læses ved hvert kald). Afviser API'en opslaget, kastes `requests.exceptions.HTTPError`; `ValueError` kastes, hvis integrationen ikke har nogen virksomhed, hvis den ikke har noget produkt og du ikke har sendt `productId`, eller hvis den hører til en anden virksomhed end det `companyId` du har sendt (se [Påkrævede felter](/da/python-sdk/guides/feedback/#påkrævede-felter)). I begge tilfælde bliver intet oprettet. Pakker derefter `value`-værdier der ikke er lister, ind i lister (se [Automatisk indpakning af svarværdier](/da/python-sdk/guides/feedback/#automatisk-indpakning-af-svarværdier)) og sender `feedback` som JSON-body i `POST /feedbacks` uden at ændre dine nøgler. Returnerer det oprettede feedback-objekt. Hvis `external_id` matcher et feedback der allerede findes for samme virksomhed, produkt og integration, og som ikke er slettet, returneres i stedet det eksisterende feedback uændret. Se [Administration af Feedback](/da/python-sdk/guides/feedback/).
 
 ### `get(filter=None)`
 
@@ -119,15 +119,15 @@ Adgang via `client.contacts`.
 
 ### `create(contact)`
 
-Returnerer det oprettede kontaktobjekt. Se [Kontakter](/da/python-sdk/guides/contacts/).
+Returnerer det oprettede kontaktobjekt. Har virksomheden allerede en kontakt med det `externalId` du sender, tilføjes der ingen kontakt: den eksisterende bliver opdateret med de felter du sender, og returneret. Se [Opret en kontakt](/da/python-sdk/guides/contacts/#opret-en-kontakt).
 
 ### `get(filter=None)`
 
-Returnerer en liste af kontaktobjekter.
+Returnerer en liste af kontaktobjekter: kun de aktive, medmindre dit filters `where` har en `status`-nøgle på øverste niveau.
 
 ### `update(contact_id, contact)`
 
-Returnerer det opdaterede kontaktobjekt.
+Returnerer et tomt dict (`{}`), fordi API'en svarer `204 No Content`.
 
 ### `upsert(contact)`
 
@@ -135,7 +135,7 @@ Returnerer det opdaterede kontaktobjekt.
 |---|---|---|
 | `contact` | dict | Kontakt-payload; `name`, `email` og `companyId` er påkrævede |
 
-Opdaterer virksomhedens aktive kontakt med samme e-mail, eller opretter en. Ved en opdatering overskrives de felter du sender, og `customFields` flettes. Returnerer kontakten. Se [Opret eller opdater ud fra e-mail](/da/python-sdk/guides/contacts/#opret-eller-opdater-ud-fra-e-mail). SDK 1.0.22.
+Opdaterer virksomhedens aktive kontakt med samme e-mail; findes der ingen, opdaterer den kontakten med det `externalId` du sender; ellers opretter den en. Ved en opdatering overskrives de felter du sender, og `customFields` flettes. Returnerer kontakten. Se [Opret eller opdater ud fra e-mail](/da/python-sdk/guides/contacts/#opret-eller-opdater-ud-fra-e-mail). SDK 1.0.22.
 
 ### `upsert_batch(items, chunk_size=500)`
 
@@ -158,15 +158,15 @@ Tilføjer eller ændrer de brugerdefinerede felter du sender, og bevarer de øvr
 
 ### `delete(contact_id)`
 
-Returnerer det slettede kontaktobjekt.
+Returnerer et tomt dict (`{}`). Kontaktens status bliver `DEPRECATED`.
 
 ---
 
 ## CrmAPI
 
-Adgang via `client.crm`. SDK 1.0.24. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
+Adgang via `client.crm`. SDK 1.0.25. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
 
-Alle metoder sender 500 poster per request, sender en request der fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout efter 300 sekunder) igen op til 3 gange og logger ind igen én gang, når tokenet er udløbet. Fejler en request stadig, kastes en `requests.RequestException`. Skrivemetoder returnerer totaler over alle requests, og hver `failed`-posts `index` peger ind i den liste du sendte.
+Alle metoder sender 500 poster per request, sender en request der fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout efter 300 sekunder) igen op til 3 gange og fornyer tokenet én gang, som `refresh_token()` gør, når det er udløbet. Fejler en request stadig, kastes en `requests.RequestException`. Skrivemetoder returnerer totaler over alle requests, og hver `failed`-posts `index` peger ind i den liste du sendte.
 
 ### `upsert_objects(object_type, items, company_id=None, chunk_size=500)`
 
@@ -308,9 +308,9 @@ Statuskoder du kan støde på:
 | `400` | Requesten er forkert opbygget eller ikke tilladt — for eksempel en filterværdi der indeholder `&` eller `#` (se [Forespørgsler](/da/python-sdk/guides/querying/)), eller en kontakt i `crmContactId` fra en anden virksomhed end feedbackets, når din bruger har adgang til begge virksomheder (en kontakt i en virksomhed du ikke har adgang til, giver `404`) |
 | `401` | Tokenet mangler, er ugyldigt eller er udløbet, eller din bruger er deaktiveret. Tokens udløber efter cirka en time: i langvarige jobs som en import skal du oprette en ny klient (eller, fra SDK 1.0.17, kalde `client.refresh_token()`) og prøve igen |
 | `403` | Du har filtreret på en virksomhed som din bruger ikke har adgang til, for eksempel et forkert `companyId` i `where` |
-| `404` | Noget som requesten henviser til, findes ikke eller er ikke synligt for dig — for eksempel en kontakt i `crmContactId`, en kampagne eller en rapport |
-| `405` | Din brugers rolle tillader ikke denne operation (f.eks. opdatering af feedback) |
-| `406` | Posten findes ikke, er blevet slettet eller tilhører en virksomhed du ikke har adgang til — for eksempel `feedbacks.get_id()`, `update()` eller `delete()` på sådan et feedback (de returnerer 406, ikke 404) |
+| `404` | Noget som requesten henviser til, findes ikke eller er ikke synligt for dig — for eksempel et `crmContactId`, der ikke er en aktiv kontakt, du kan se, en kampagne eller en rapport |
+| `405` | Din brugers rolle tillader ikke denne operation (f.eks. opdatering af feedback eller læsning af integrationen, når `feedbacks.create()` skal slå `companyId`/`productId` op) |
+| `406` | Posten findes ikke, er blevet slettet eller tilhører en virksomhed du ikke har adgang til — for eksempel `feedbacks.get_id()`, `update()` eller `delete()` på sådan et feedback (de returnerer 406, ikke 404), `contacts.update()`, `update_fields()` eller `delete()` på en kontakt, der ikke er aktiv (afmeldt eller slettet), eller den integration `feedbacks.create()` skal slå op |
 | `422` | Request-body'en er ugyldig — et ukendt eller fejlstavet felt, en forkert type eller en værdi der ikke er blandt de tilladte |
 
 Et `422`-svar oplister alle problemer i `details`; med SDK'en læser du listen fra undtagelsen som `e.response.json()["error"]["details"]`. Hvis du f.eks. sender `externalId` i stedet for `external_id`, returneres:

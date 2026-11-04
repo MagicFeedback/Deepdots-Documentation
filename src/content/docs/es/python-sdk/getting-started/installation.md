@@ -16,38 +16,50 @@ pip instala automáticamente las dependencias en tiempo de ejecución: `requests
 pip install deepdots
 ```
 
-Esto instala siempre la última versión publicada.
+Esto instala la última versión publicada. `deepdots` no tiene código propio: instala `magicfeedback`, el paquete que contiene el SDK y su número de versión. Para actualizar el SDK o fijar su versión, usa `magicfeedback`.
+
+### Actualizar
+
+`pip install --upgrade deepdots` no actualiza un SDK que ya está instalado. Actualiza `magicfeedback` en su lugar:
+
+```bash
+pip install --upgrade magicfeedback
+```
 
 ### Instalar una versión concreta
 
 Para fijar una versión exacta — sustituye `X.Y.Z` por la que quieras:
 
 ```bash
-pip install "deepdots==X.Y.Z"
+pip install "magicfeedback==X.Y.Z"
 ```
 
 O define una versión mínima en tu `requirements.txt`:
 
 ```text
-deepdots>=X.Y.Z
+magicfeedback>=X.Y.Z
 ```
+
+No fijes `deepdots`: su última versión es la 1.0.19, y la versión de `deepdots` no determina qué versión del SDK obtienes.
 
 El [Changelog](/es/python-sdk/reference/changelog/) lista todas las versiones publicadas con su fecha.
 
 ## ¿Vienes de `MagicFeedback`?
 
-El SDK se publicaba como `MagicFeedback` antes de que la empresa pasara a llamarse Deepdots. **El código existente sigue funcionando igual** — no hay nada que migrar.
+El SDK se publicó primero como `MagicFeedback`, antes de que la empresa pasara a llamarse Deepdots, y su código se sigue publicando con ese nombre, como `magicfeedback`. **El código existente sigue funcionando igual** — no hay nada que migrar.
 
-Ambas distribuciones están publicadas e instalan el mismo código:
+Los dos nombres instalan el mismo código:
 
 ```bash
-pip install deepdots        # nombre actual
-pip install magicfeedback   # nombre original, sigue soportado
+pip install deepdots        # instala magicfeedback
+pip install magicfeedback   # el paquete que actualizas y cuya versión fijas
 ```
+
+Si ya instalas `magicfeedback`, sigue haciéndolo.
 
 Con los nombres de importación pasa lo mismo. `deepdots_sdk` y `magicfeedback_sdk` exponen exactamente los mismos objetos, y la clase `Deepdots` *es* la clase `MagicFeedback` — el mismo objeto de Python bajo dos nombres, así que las comprobaciones con `isinstance()` se comportan igual.
 
-En código nuevo, usa los nombres de Deepdots.
+En código nuevo, importa `deepdots_sdk` y usa la clase `Deepdots`.
 
 ## Verificar
 

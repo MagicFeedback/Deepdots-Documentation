@@ -7,11 +7,16 @@ Todas las versiones publicadas, de más reciente a más antigua. Las fechas son 
 
 Para instalar una versión concreta, consulta [Instalación](/es/python-sdk/getting-started/installation/).
 
-## 1.0.24 — sin publicar
+## 1.0.25 — 2026-11-04
 
-- **El inicio de sesión pasa por la API de Deepdots** (`POST /auth/token`) en lugar de llamar directamente a Google Identity Platform. El argumento `ip_key` ya no se usa: se ignora, con un `DeprecationWarning`.
-- `refresh_token()` renueva un token de inicio de sesión con su token de refresco (`POST /auth/token/refresh`), y solo vuelve a iniciar sesión si el token de refresco se rechaza.
-- Nuevo `client.crm` para objetos de CRM: `upsert_objects()` y `get_objects()`. Cada request de `client.crm` se reenvía cuando falla de forma temporal (502, 503, 504, un error de conexión o un timeout), y el cliente vuelve a iniciar sesión una vez si el token ha caducado. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
+Las versiones 1.0.23 y 1.0.24 nunca se publicaron, así que esta es la primera versión publicada desde la 1.0.22.
+
+Desde noviembre de 2026, la API también busca los contactos por `externalId`, con cualquier versión del SDK: `contacts.create()` con un `externalId` que la empresa ya tiene actualiza ese contacto en lugar de agregar uno, y `upsert()` actualiza el contacto con tu `externalId` cuando ningún contacto activo tiene el email. Ver [Contactos](/es/python-sdk/guides/contacts/#crear-un-contacto).
+
+- **`feedbacks.create()` ya no necesita `companyId` ni `productId`.** Si omites uno de los dos o lo envías vacío, el SDK lo copia de la integración. Ver [Gestión de Feedback](/es/python-sdk/guides/feedback/#campos-requeridos).
+- **El inicio de sesión pasa por la API de Deepdots** (`POST /auth/token`) en lugar de llamar directamente a Google Identity Platform. El argumento `ip_key` ya no se usa: se ignora, con un `DeprecationWarning`. Un inicio de sesión fallido lanza `requests.HTTPError` con los códigos de estado de la API: 401 si el email o la contraseña son incorrectos, 403 si la cuenta de inicio de sesión está deshabilitada, 429 tras demasiados intentos fallidos y 502 si no se puede contactar con el proveedor de identidad. Las versiones anteriores lanzaban la respuesta de Identity Platform: un 400 con el motivo en el cuerpo de la respuesta.
+- Con `auth_source="identity"`, `refresh_token()` renueva el token con el token de refresco del último inicio de sesión (`POST /auth/token/refresh`), y solo vuelve a iniciar sesión si ese token de refresco se rechaza. Con el `auth_source` por defecto, obtiene un token igual que el constructor.
+- Nuevo `client.crm` para objetos de CRM: `upsert_objects()` y `get_objects()`. Cada request de `client.crm` se reenvía cuando falla de forma temporal (502, 503, 504, un error de conexión o un timeout), y el cliente obtiene un token nuevo una vez, como hace `refresh_token()`, si el token ha caducado. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
 
 ## 1.0.22 — 2026-09-25
 

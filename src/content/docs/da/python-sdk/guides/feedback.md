@@ -17,6 +17,7 @@ feedback = client.feedbacks.create({
         {"key": "reason", "value": "Hurtig og pålidelig"},
     ],
     "integrationId": "DIT_INTEGRATION_ID",
+    # Valgfrit fra SDK 1.0.25: hentes fra integrationen, hvis de udelades
     "companyId": "DIT_COMPANY_ID",
     "productId": "DIT_PRODUCT_ID",
     # Valgfrit: hvor feedbacket kommer fra (se "Kildesystemfelter" nedenfor)
@@ -36,8 +37,8 @@ SDK'en sender dict'et som JSON-body i `POST /feedbacks` med dine nøglenavne pr�
 | `type` | string | Kildetype: `"APP"`, `"SURVEY"` eller `"DOCUMENT"` |
 | `identity` | string | Kildeidentitet — brug identiteten for den integration feedbacket tilhører (f.eks. `"MAGICFORM"`). Den afgør om og hvordan feedbacket analyseres |
 | `integrationId` | string | UUID for den integration dette feedback tilhører |
-| `companyId` | string | Din virksomhedsidentifikator |
-| `productId` | string | Det produkt dette feedback er tilknyttet |
+
+Fra SDK 1.0.25 er `companyId` og `productId` valgfrie: udelader du et af dem eller sender det tomt, læser SDK'en integrationen og kopierer værdien derfra (se [Valgfrie felter](#valgfrie-felter)). Tidligere versioner kræver begge. Sender du allerede `productId`, så bliv ved med at sende den samme værdi: dedupliceringen på `external_id` matcher på virksomhed, produkt og integration, og med et andet produkt ville gensendte feedbacks derfor blive oprettet igen.
 
 Værdierne i `type` og `identity` skrives med store bogstaver; enhver anden stavemåde afvises. Nogle accepterede `identity`-værdier bliver slet ikke analyseret, så vælg ikke en værdi, bare fordi den har samme navn som det værktøj feedbacket kommer fra. Identiteten afgør også hvad der analyseres: for spørgeskemaidentiteter som `MAGICFORM`, `MAGICSURVEY` og `CSV` er det `answers`, mens det for de fleste andre, som `GENERAL` og `CUSTOM`, kun er `text`. Hvis du ikke kender identiteten for din integration, så spørg din kontaktperson hos Deepdots.
 
@@ -45,17 +46,21 @@ Værdierne i `type` og `identity` skrives med store bogstaver; enhver anden stav
 
 | Felt | Type | Beskrivelse |
 |---|---|---|
+| `companyId` | string | Din virksomhedsidentifikator. Hentes fra integrationen, hvis du udelader feltet eller sender det tomt (SDK 1.0.25) |
+| `productId` | string | Det produkt dette feedback er tilknyttet. Hentes fra integrationen, hvis du udelader feltet eller sender det tomt (SDK 1.0.25) |
 | `answers` | Answer[] | Svar som `{"key": …, "value": [...]}`-par. `key` er spørgsmålets `ref` (se `integrations_questions.get()`) |
 | `text` | string | Fritekst for feedbacket — f.eks. en anmeldelse eller en supportsamtale |
 | `metadata` | Metadata[] | Brugerdefinerede nøgle/værdi-poster (se [Opdater metrics og metadata](#opdater-metrics-og-metadata)) |
 | `metrics` | Metric[] | Navngivne metric-værdier |
-| `crmContactId` | string | ID på den CRM-kontakt der har givet feedbacket. Kontakten skal tilhøre samme virksomhed |
+| `crmContactId` | string | ID på den CRM-kontakt der har givet feedbacket. Kontakten skal være aktiv og tilhøre samme virksomhed |
 | `external_id` | string | ID på posten i kildesystemet. Sender du det igen for samme virksomhed, produkt og integration, returneres det eksisterende feedback i stedet for en dublet |
 | `externalGeneratedAt` | string | Hvornår feedbacket blev oprettet i kildesystemet — den dato dashboardet bruger. UTC ISO 8601 der ender på `Z`; standard er tidspunktet for requesten. Se [Feedbackdatoen](#feedbackdatoen-externalgeneratedat) |
 | `externalUpdatedAt` | string | Hvornår posten sidst blev ændret i kildesystemet |
 | `externalUrl` | string | Link til den oprindelige post |
 
-Feltnavne skelner mellem store og små bogstaver. `external_id` er det eneste felt i snake_case; alle andre felter er i camelCase (det hedder `companyId`, ikke `company_id`). API'en afviser enhver nøgle den ikke kender: en ukendt eller fejlstavet nøgle som `externalId` får hele requesten til at fejle med HTTP 422, og intet bliver oprettet. Det samme sker, hvis du sender `status` eller `createdAt`, som API'en selv sætter. En fejlstavet påkrævet nøgle som `company_id` bliver fanget, før noget bliver sendt: `create()` kaster `ValueError: Missing required field: companyId`. Se [Fejlhåndtering](/da/python-sdk/reference/api/#fejlhåndtering).
+Feltnavne skelner mellem store og små bogstaver. `external_id` er det eneste felt i snake_case; alle andre felter er i camelCase (det hedder `companyId`, ikke `company_id`). API'en afviser enhver nøgle den ikke kender: en ukendt eller fejlstavet nøgle som `externalId` eller `company_id` får hele requesten til at fejle med HTTP 422, og intet bliver oprettet. Det samme sker, hvis du sender `status` eller `createdAt`, som API'en selv sætter. En fejlstavet påkrævet nøgle som `integration_id` bliver fanget, før noget bliver sendt: `create()` kaster `ValueError: Missing required field: integrationId`.
+
+Når SDK'en skal læse integrationen, bliver intet oprettet, hvis det mislykkes: `create()` kaster en `requests.exceptions.HTTPError`, hvis API'en afviser opslaget (HTTP 406, når integrationen ikke findes, er blevet slettet eller din bruger ikke kan se den; HTTP 405, når din rolle ikke har lov til at læse integrationer), og en `ValueError`, hvis integrationen ikke har nogen virksomhed, hvis den ikke har noget produkt og du ikke har sendt `productId`, eller hvis den hører til en anden virksomhed end det `companyId` du har sendt. Sender du selv `companyId` og `productId`, springes opslaget over. SDK'en beholder det den har læst, i hele klientens levetid (en integration uden virksomhed eller produkt læses igen ved hvert kald), så opret en ny klient, når du har flyttet en integration til et andet produkt. Se [Fejlhåndtering](/da/python-sdk/reference/api/#fejlhåndtering).
 
 ### Automatisk indpakning af svarværdier
 

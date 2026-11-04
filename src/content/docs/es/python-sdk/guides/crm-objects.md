@@ -11,14 +11,14 @@ Además de los [contactos](/es/python-sdk/guides/contacts/), tu CRM puede conten
 
 Un objeto puede pertenecer a un contacto (`contactKey`) y a otro objeto (`parentType` + `parentKey`). Por ejemplo, un ticket pertenece a un aficionado y a un partido. Cuando un enlace de encuesta indica un objeto, cada respuesta dada a través de ese enlace recibe la información de ese objeto. Ver [Vincular respuestas de encuesta a objetos](#vincular-respuestas-de-encuesta-a-objetos).
 
-Disponible a partir del SDK 1.0.24, como `client.crm`.
+Disponible a partir del SDK 1.0.25, como `client.crm`.
 
 ## Guardar objetos
 
 ```python
 result = client.crm.upsert_objects("match", [
     {
-        "externalId": "8449",
+        "externalId": "1001",
         "startsAt": "2026-10-18T16:00:00Z",
         "sourceUpdatedAt": "2026-10-07T00:00:00Z",
         "data": {"name": "Northside - Riverside", "venue": "City Arena"},
@@ -34,7 +34,7 @@ print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
 | `externalId` | string o número | **Obligatorio.** Tu id para el objeto, único por tipo (hasta 255 caracteres) |
 | `status` | string | Cualquier estado que uses, como `active` o `cancelled` |
 | `contactKey` | string | El `externalId` del contacto al que pertenece el objeto |
-| `parentType`, `parentKey` | string | El tipo y el `externalId` del objeto al que pertenece este, ej. `"match"` y `"8449"` |
+| `parentType`, `parentKey` | string | El tipo y el `externalId` del objeto al que pertenece este, ej. `"match"` y `"1001"` |
 | `startsAt`, `endsAt` | string | Fechas ISO 8601, ej. cuándo empieza un partido o cuándo termina una membresía |
 | `sourceUpdatedAt` | string | Cuándo cambió el registro por última vez en tu sistema (ver más abajo) |
 | `data` | dict | Cualquier otro campo |
@@ -48,7 +48,7 @@ print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
 ## Leer objetos
 
 ```python
-tickets = client.crm.get_objects("ticket", contact_key="1058531")
+tickets = client.crm.get_objects("ticket", contact_key="C-1001")
 ```
 
 `get_objects(object_type, ...)` retorna los objetos de un tipo, ordenados por `externalId`. Los objetos eliminados nunca se retornan. Cada filtro busca una coincidencia exacta:
@@ -80,7 +80,7 @@ Estas reglas se aplican a todos los métodos de `client.crm`:
 - **Listas de cualquier longitud.** Pasa una lista de cualquier longitud, o un solo registro como dict. El SDK envía 500 registros por request y retorna los totales de todos los requests.
 - **Fallos por registro.** Un registro que la API no puede guardar aparece en `failed` con su `index` en la lista que pasaste, y los demás registros se guardan igualmente. Si uno no es un dict, `upsert_objects()` lanza `ValueError` antes de enviar nada.
 - **Tamaño del request.** Un request debe quedar por debajo del límite de 1 MB de la API; 500 registros normales quedan muy por debajo. Para registros grandes, pasa un `chunk_size` más pequeño.
-- **Reenvíos automáticos.** Un request que falla de forma temporal (502, 503 o 504, un error de conexión o ninguna respuesta en 300 segundos) se reenvía hasta 3 veces, tras 2, 4 y 8 segundos. Si el token ha caducado, el cliente vuelve a iniciar sesión una vez y reenvía el request.
+- **Reenvíos automáticos.** Un request que falla de forma temporal (502, 503 o 504, un error de conexión o ninguna respuesta en 300 segundos) se reenvía hasta 3 veces, tras 2, 4 y 8 segundos. Si el token ha caducado, el cliente lo renueva una vez, como hace `refresh_token()`, y reenvía el request.
 - **Errores.** Si un request sigue fallando, la llamada lanza una `requests.RequestException`: `HTTPError` para una respuesta de error, `ConnectionError` o `Timeout` para la red. Los requests enviados antes ya se han aplicado.
 - **Sin duplicados.** Reenviar registros nunca crea duplicados, porque se identifican por su propio id. Tras un fallo, reenvía la misma lista enseguida.
 
@@ -98,7 +98,7 @@ except requests.RequestException as e:
 Puedes vincular una respuesta de encuesta a un objeto agregando al enlace un parámetro de URL con el nombre del tipo del objeto y su `externalId` como valor:
 
 ```text
-https://<tu enlace de encuesta>?ticket=21522673
+https://<tu enlace de encuesta>?ticket=T-5001
 ```
 
 Cada respuesta dada a través de ese enlace recibe la información del objeto como datos de la encuesta: para un ticket, por ejemplo, la grada, el partido y las membresías del aficionado. Después puedes filtrar los resultados por ella. Si el feedback aún no está vinculado a un contacto, también se vincula al contacto al que pertenece el objeto. Deepdots configura, para cada empresa, qué tipos de objeto aportan información de esta forma y qué campos de esos objetos se convierten en datos de la encuesta. Un enlace que indica un tipo de objeto no configurado solo registra el id del objeto.

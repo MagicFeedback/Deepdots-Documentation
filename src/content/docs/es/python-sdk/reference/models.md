@@ -57,7 +57,7 @@ Defines `external_id`, `externalGeneratedAt`, `externalUpdatedAt` y `externalUrl
 
 ## Contacto
 
-Retornado por `contacts.create()`, `contacts.get()` y `contacts.update()`.
+Retornado por `contacts.create()`, `contacts.get()` y `contacts.upsert()`. (`contacts.update()` y `contacts.delete()` retornan un dict vacío.)
 
 | Campo | Tipo | Descripción |
 |---|---|---|
@@ -66,6 +66,8 @@ Retornado por `contacts.create()`, `contacts.get()` y `contacts.update()`.
 | `lastname` | string | Apellido |
 | `email` | string | Dirección de correo |
 | `companyId` | string | Identificador de empresa |
+| `externalId` | string | Tu propio id para el contacto |
+| `status` | string | `"ACTIVE"`; `"UNSUBSCRIBED"` cuando el contacto se ha dado de baja; `"DEPRECATED"` cuando se ha eliminado. `contacts.get()` solo retorna contactos activos, salvo que tu `where` tenga una clave `status` en su primer nivel. Solo un contacto activo se puede enviar como `crmContactId` de un feedback |
 | `createdAt` | string | Timestamp de creación ISO 8601 |
 | `updatedAt` | string | Timestamp de última actualización ISO 8601 |
 
