@@ -57,7 +57,7 @@ Du angiver `external_id`, `externalGeneratedAt`, `externalUpdatedAt` og `externa
 
 ## Kontakt
 
-Returneret af `contacts.create()`, `contacts.get()` og `contacts.update()`.
+Returneret af `contacts.create()`, `contacts.get()` og `contacts.upsert()`. (`contacts.update()` og `contacts.delete()` returnerer et tomt dict.)
 
 | Felt | Type | Beskrivelse |
 |---|---|---|
@@ -66,6 +66,8 @@ Returneret af `contacts.create()`, `contacts.get()` og `contacts.update()`.
 | `lastname` | string | Efternavn |
 | `email` | string | E-mailadresse |
 | `companyId` | string | Virksomhedsidentifikator |
+| `externalId` | string | Dit eget id for kontakten |
+| `status` | string | `"ACTIVE"`; `"UNSUBSCRIBED"` når kontakten har afmeldt sig; `"DEPRECATED"` når den er slettet. `contacts.get()` returnerer kun aktive kontakter, medmindre dit `where` har en `status`-nøgle på øverste niveau. Kun en aktiv kontakt kan sendes som et feedbacks `crmContactId` |
 | `createdAt` | string | ISO 8601 oprettelsestidsstempel |
 | `updatedAt` | string | ISO 8601 senest-opdateret tidsstempel |
 

@@ -26,11 +26,17 @@ print(contact["id"])
 | `email` | string | Email address |
 | `companyId` | string | Your company identifier |
 
-`create()` always adds a new contact, even when the company already has one with the same email. To avoid duplicates, use [`upsert()`](#create-or-update-by-email).
+If the company already has a contact with the `externalId` you send, `create()` doesn't add one: it updates that contact with the fields you send (`email` included, `customFields` merged) and returns it. A deleted contact becomes active again; an unsubscribed one stays unsubscribed. If your role can't update contacts, the contact comes back unchanged. The API has worked this way since November 2026, with every SDK version.
+
+Otherwise, `create()` always adds a new contact, even when the company already has one with the same email. To match by email, use [`upsert()`](#create-or-update-by-email).
+
+Several contacts can still have the same `externalId`, for example contacts created before the change of November 2026, or two contacts created by calls sent at the same time. Then `create()`, and `upsert()` when no active contact has your email, update only one of them: the oldest active one, or else the oldest unsubscribed one, or else the oldest deleted one.
 
 ## Create or update by email
 
-`upsert()` updates the company's active contact with the same email (case and surrounding spaces don't matter), or creates one when there is none. Available from SDK 1.0.22.
+`upsert()` updates the company's active contact with the same email (case and surrounding spaces don't matter). If there is none, it updates the contact with the `externalId` you send, which then takes your email and becomes active again if it was deleted; an unsubscribed one stays unsubscribed. If no contact has that `externalId` either, it creates one. Available from SDK 1.0.22.
+
+Only active contacts are matched by email: an unsubscribed or deleted contact is found only through its `externalId`. If you don't send it, `upsert()` creates a new active contact with the same email. An unsubscribed contact can't be sent as a feedback's `crmContactId`, so check the `status` that `create()` or `upsert()` returns before you use its `id` that way.
 
 ```python
 contact = client.contacts.upsert({
@@ -72,15 +78,19 @@ contacts = client.contacts.get({
 })
 ```
 
+`get()` returns only active contacts unless your `where` has a `status` key at its top level, for example `{"where": {"externalId": "C-1001", "status": "UNSUBSCRIBED"}}`. So don't use it to decide whether to create a contact: `create()` and `upsert()` also find unsubscribed and deleted contacts by their `externalId`.
+
 ## Update a contact
 
 Pass only the fields you want to change:
 
 ```python
-updated = client.contacts.update(contact["id"], {
+client.contacts.update(contact["id"], {
     "name": "Janet",
 })
 ```
+
+`update()` returns an empty dict (`{}`). `update()`, `update_fields()` and `delete()` only work on active contacts: on an unsubscribed or deleted contact they raise `requests.HTTPError` with HTTP 406.
 
 ## Update custom fields
 

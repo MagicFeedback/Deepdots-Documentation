@@ -11,14 +11,14 @@ Besides [contacts](/python-sdk/guides/contacts/), your CRM can hold any other re
 
 An object can belong to a contact (`contactKey`) and to another object (`parentType` + `parentKey`). For example, a ticket belongs to a fan and to a match. When a survey link names an object, every answer given through that link gets that object's information. See [Link survey answers to objects](#link-survey-answers-to-objects).
 
-Available from SDK 1.0.24, as `client.crm`.
+Available from SDK 1.0.25, as `client.crm`.
 
 ## Store objects
 
 ```python
 result = client.crm.upsert_objects("match", [
     {
-        "externalId": "8449",
+        "externalId": "1001",
         "startsAt": "2026-10-18T16:00:00Z",
         "sourceUpdatedAt": "2026-10-07T00:00:00Z",
         "data": {"name": "Northside - Riverside", "venue": "City Arena"},
@@ -34,7 +34,7 @@ print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
 | `externalId` | string or number | **Required.** Your id for the object, unique per type (up to 255 characters) |
 | `status` | string | Any status you use, such as `active` or `cancelled` |
 | `contactKey` | string | The `externalId` of the contact the object belongs to |
-| `parentType`, `parentKey` | string | The type and `externalId` of the object this one belongs to, e.g. `"match"` and `"8449"` |
+| `parentType`, `parentKey` | string | The type and `externalId` of the object this one belongs to, e.g. `"match"` and `"1001"` |
 | `startsAt`, `endsAt` | string | ISO 8601 dates, e.g. when a match starts or a membership ends |
 | `sourceUpdatedAt` | string | When the record last changed in your system (see below) |
 | `data` | dict | Any other fields |
@@ -48,7 +48,7 @@ print(result)  # {"count": 1, "created": 1, "updated": 0, "failed": []}
 ## Read objects
 
 ```python
-tickets = client.crm.get_objects("ticket", contact_key="1058531")
+tickets = client.crm.get_objects("ticket", contact_key="C-1001")
 ```
 
 `get_objects(object_type, ...)` returns the objects of one type, ordered by `externalId`. Deleted objects are never returned. Every filter is an exact match:
@@ -80,7 +80,7 @@ These rules apply to every `client.crm` method:
 - **Any list length.** Pass a list of any length, or a single record as a dict. The SDK sends 500 records per request and returns the totals over all requests.
 - **Per-record failures.** A record the API can't store is listed in `failed` with its `index` in the list you passed, and the other records still land. One that isn't a dict makes `upsert_objects()` raise `ValueError` before anything is sent.
 - **Request size.** A request must stay under the API's 1 MB limit; 500 typical records are well under it. For large records, pass a smaller `chunk_size`.
-- **Automatic resends.** A request that fails temporarily (502, 503 or 504, a connection error, or no answer within 300 seconds) is resent up to 3 times, after 2, 4 and 8 seconds. If the token has expired, the client logs in again once and resends.
+- **Automatic resends.** A request that fails temporarily (502, 503 or 504, a connection error, or no answer within 300 seconds) is resent up to 3 times, after 2, 4 and 8 seconds. If the token has expired, the client renews it once, as `refresh_token()` does, and resends.
 - **Errors.** If a request still fails, the call raises a `requests.RequestException`: `HTTPError` for an error answer, `ConnectionError` or `Timeout` for the network. The requests sent before it have already been applied.
 - **No duplicates.** Resending records never creates duplicates, because they are matched by their own id. After a failure, resend the same list straight away.
 
@@ -98,7 +98,7 @@ except requests.RequestException as e:
 You can link a survey answer to an object by adding a URL parameter named after the object's type, with its `externalId` as the value:
 
 ```text
-https://<your survey link>?ticket=21522673
+https://<your survey link>?ticket=T-5001
 ```
 
 Every answer given through that link gets the object's information as survey data: for a ticket, for example, the stand, the match and the fan's memberships. You can then filter results by it. If the feedback isn't linked to a contact yet, it is also linked to the contact who owns the object. Deepdots sets up, per company, which object types add information this way and which of their fields become survey data. A link that names an object type that isn't set up only records the object's id.

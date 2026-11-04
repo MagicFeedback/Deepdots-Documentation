@@ -47,6 +47,7 @@ feedback = client.feedbacks.create({
         {"key": "comment", "value": "Fungerer fantastisk!"},
     ],
     "integrationId": "<dit-integration-id>",
+    # Valgfrit fra SDK 1.0.25: hentes fra integrationen, hvis de udelades
     "companyId": "<dit-company-id>",
     "productId": "<dit-product-id>",
 })
@@ -54,7 +55,7 @@ print(feedback["id"])
 ```
 
 :::tip
-`integrationId`, `companyId` og `productId` kommer fra dit Deepdots-dashboard. Brug `client.products.get()` til at hente dem programmatisk.
+`integrationId`, `companyId` og `productId` kommer fra dit Deepdots-dashboard; `client.products.get()` returnerer også hvert produkts `id` og `companyId`. Fra SDK 1.0.25 kan du udelade `companyId` og `productId`: SDK'en henter dem fra integrationen.
 :::
 
 ## Næste skridt

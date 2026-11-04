@@ -1,15 +1,15 @@
 ---
 title: Administrer kontakter
-description: Opret eller opdater CRM-kontakter ud fra e-mail, hold deres brugerdefinerede felter synkroniseret, og knyt dem til feedback.
+description: Opret eller opdater CRM-kontakter ud fra e-mail eller dit eget id, hold deres brugerdefinerede felter synkroniseret, og knyt dem til feedback.
 sidebar:
   order: 2
 ---
 
-Kontakter er personerne bag din feedback. Hver kontakt hører til din virksomhed og identificeres ved sin **e-mail**.
+Kontakter er personerne bag din feedback. Hver kontakt hører til din virksomhed og findes ud fra sin **e-mail** eller ud fra dit eget `externalId`.
 
 ## Opret eller opdater en kontakt
 
-Brug `POST /crm/contacts/upsert`. Hvis der allerede findes en kontakt med den e-mail i din virksomhed, bliver den opdateret, ellers bliver den oprettet:
+Brug `POST /crm/contacts/upsert`. Den opdaterer din virksomheds aktive kontakt med den e-mail, ellers den med det `externalId`, du sender, og opretter en kontakt, når ingen af dem findes:
 
 ```bash
 curl -X POST "https://api.deepdots.com/crm/contacts/upsert" \
@@ -20,7 +20,7 @@ curl -X POST "https://api.deepdots.com/crm/contacts/upsert" \
     "name": "Anna",
     "lastname": "Jensen",
     "externalId": "SF-0035g00000XyZ12",
-    "country": "DK",
+    "country": "dk",
     "customFields": {
       "tier": "gold",
       "customer_since": "2019-04-01",
@@ -34,23 +34,27 @@ Svaret er kontakten med dens Deepdots-`id`.
 
 ### Sådan virker opdateringer
 
-- E-mailen er opslagsnøglen. Den gemmes uden mellemrum og med små bogstaver, så `Anna.Jensen@Example.com` og `anna.jensen@example.com` er den samme kontakt.
+- E-mailen matches først. Den gemmes uden mellemrum og med små bogstaver, så `Anna.Jensen@Example.com` og `anna.jensen@example.com` er den samme kontakt. Kun aktive kontakter matches på e-mail.
+- Når ingen aktiv kontakt har den e-mail, opdateres kontakten med det `externalId`, du sender, i stedet, uanset dens status: den får den nye e-mail og bliver aktiv igen, hvis den var slettet. En afmeldt kontakt forbliver afmeldt: svaret har `"status": "UNSUBSCRIBED"`, og kontakten kan ikke knyttes til feedback.
+- Når ingen kontakt har det `externalId`, du sender, eller du ikke sender et, oprettes der en ny kontakt, også selvom en afmeldt eller slettet kontakt har den e-mail. Send dit `externalId`, når du har et, så en person, der har afmeldt sig, bliver fundet i stedet for at komme tilbage som en ny, aktiv kontakt.
+- Flere kontakter kan have samme `externalId`, fx kontakter oprettet før ændringen i november 2026, eller to kontakter oprettet af forespørgsler, der blev sendt samtidig. Så opdateres kun én af dem: den ældste aktive, ellers den ældste afmeldte, ellers den ældste slettede.
 - Felter, du sender, overskrives. Felter, du udelader, bevares.
 - `customFields` **flettes**: de nøgler, du sender, tilføjes eller opdateres, en nøgle sendt som `null` fjernes, og alle andre brugerdefinerede felter bevares.
 
 :::caution
-`POST /crm/contacts` findes også, men den **opretter altid** en ny kontakt, også selvom e-mailen allerede findes. Brug upsert, så du aldrig får dubletter.
+`POST /crm/contacts` findes også. Når din virksomhed allerede har en kontakt med det `externalId`, du sender, opretter den ikke en ny, men opdaterer og returnerer kontakten på samme måde; må din API-bruger oprette kontakter, men ikke opdatere dem, returneres kontakten uændret. Ellers **opretter den altid** en ny kontakt, også selvom e-mailen allerede findes. Brug upsert for at undgå dubletter.
 :::
 
 ### Felter
 
 | Felt | Type | Beskrivelse |
 |---|---|---|
-| `email` | string | **Påkrævet.** Kontaktens e-mail og nøglen, der bruges til at finde den. |
-| `name`, `lastname` | string | Kontaktens navn. |
-| `externalId` | string | Dit eget id for kontakten, fx dens id i dit CRM. |
+| `email` | string | **Påkrævet.** Kontaktens e-mail og den første nøgle, der bruges til at finde den. |
+| `name` | string | **Påkrævet.** Kontaktens fornavn. |
+| `lastname` | string | Kontaktens efternavn. |
+| `externalId` | string | Dit eget id for kontakten, fx dens id i dit CRM. Bruges til at finde kontakten, når ingen aktiv kontakt har e-mailen. |
 | `phone`, `address`, `city`, `state`, `postalCode` | string | Kontaktoplysninger. |
-| `country` | string | ISO 3166-1 alpha-2-kode, fx `DK`. |
+| `country` | string | ISO 3166-1 alpha-2-kode med små bogstaver, fx `dk`. En værdi, API'et ikke accepterer, fx `DK`, afvises med `422`. |
 | `customFields` | object | Dine egne felter. Hver værdi er en string, et tal eller en boolean. |
 
 ## Mange kontakter på én gang
@@ -63,13 +67,13 @@ curl -X POST "https://api.deepdots.com/crm/contacts/upsert/batch" \
   -H "Content-Type: application/json" \
   -d '{
     "items": [
-      {"email": "anna.jensen@example.com", "customFields": {"tier": "gold"}},
-      {"email": "lars.nielsen@example.com", "customFields": {"tier": "silver"}}
+      {"email": "anna.jensen@example.com", "name": "Anna", "customFields": {"tier": "gold"}},
+      {"email": "lars.nielsen@example.com", "name": "Lars", "customFields": {"tier": "silver"}}
     ]
   }'
 ```
 
-Hver kontakt behandles som en enkelt upsert. Ét fejlbehæftet element stopper ikke resten: det rapporteres i `failed` med sin position i listen.
+Hver kontakt behandles som en enkelt upsert. En kontakt, der fejler for sig selv, fx på grund af en ugyldig e-mail, rapporteres i `failed` med sin position i listen, og resten gemmes. En kontakt, der ikke passer til felterne ovenfor, fx en uden `name`, får hele forespørgslen til at fejle med `422`, og intet gemmes.
 
 ```json
 {
@@ -94,7 +98,7 @@ curl -X PATCH "https://api.deepdots.com/crm/contacts/<contact-id>/fields" \
   }'
 ```
 
-Svaret er kontaktens `id` og dens `customFields` efter fletningen. Dette endpoint ændrer ikke `email` eller `externalId`.
+Svaret er kontaktens `id` og dens `customFields` efter fletningen. Dette endpoint ændrer ikke `email` eller `externalId` og virker kun på en aktiv kontakt: for en afmeldt eller slettet kontakt svarer det `406`.
 
 ## Find en kontakt
 
@@ -105,6 +109,8 @@ curl -G "https://api.deepdots.com/crm/contacts" \
   -H "Authorization: Bearer $DEEPDOTS_TOKEN" \
   --data-urlencode 'filter={"where": {"externalId": "SF-0035g00000XyZ12"}, "limit": 1}'
 ```
+
+Den returnerer kun aktive kontakter, medmindre dit `where` har en `status`-nøgle på øverste niveau (`ACTIVE`, `UNSUBSCRIBED` eller `DEPRECATED` for en slettet kontakt), så brug den ikke til at afgøre, om du skal oprette en kontakt: upsert finder også afmeldte og slettede kontakter ud fra deres `externalId`.
 
 ## Knyt feedback til en kontakt
 
@@ -122,9 +128,9 @@ curl -X POST "https://api.deepdots.com/feedbacks" \
   }'
 ```
 
-Kontakten skal høre til samme virksomhed som feedbacken. Deepdots gemmer en kopi af kontaktens felter, som de var, da feedbacken blev givet, så senere ændringer på kontakten omskriver ikke tidligere feedback.
+Kontakten skal være aktiv og høre til samme virksomhed som feedbacken. Deepdots gemmer en kopi af kontaktens felter, som de var, da feedbacken blev givet, så senere ændringer på kontakten omskriver ikke tidligere feedback.
 
-Et typisk flow: lav upsert af kontakten, gem det `id`, den returnerer, og send derefter feedbacken med det `crmContactId`.
+Et typisk flow: lav upsert af kontakten, gem det `id`, den returnerer, og send derefter feedbacken med det `crmContactId`. Kun en aktiv kontakt kan knyttes, så tjek den `status`, upsert returnerer.
 
 ## Næste skridt
 

@@ -14,7 +14,7 @@ Alle endpoints modtager og returnerer JSON. Alle undtagen de to `/auth/token`-en
 | `POST` | `/feedbacks` | Sender én feedback |
 | `POST` | `/feedbacks/bulk` | Sender mange feedbacks for én virksomhed og ét produkt |
 | `GET` | `/feedbacks/{id}` | Læser én feedback |
-| `POST` | `/crm/contacts/upsert` | Opretter eller opdaterer én kontakt ud fra e-mail |
+| `POST` | `/crm/contacts/upsert` | Opretter eller opdaterer én kontakt ud fra e-mail eller `externalId` |
 | `POST` | `/crm/contacts/upsert/batch` | Opretter eller opdaterer op til 500 kontakter |
 | `PATCH` | `/crm/contacts/{id}/fields` | Opdaterer en kontakts brugerdefinerede felter og oplysninger |
 | `GET` | `/crm/contacts` | Finder kontakter |
@@ -79,11 +79,11 @@ Sender én feedback.
 | `externalGeneratedAt` | ISO 8601-string | Nej | Standard er nu |
 | `externalUpdatedAt` | ISO 8601-string | Nej | Standard er nu |
 | `externalUrl` | string | Nej | |
-| `crmContactId` | string | Nej | En kontakt i samme virksomhed |
+| `crmContactId` | string | Nej | En aktiv kontakt i samme virksomhed |
 
 **Svar `200`:** feedbacken, inklusive `id`, `status` (`REGISTERED`, når den er ny) og `createdAt`.
 
-**Fejl:** `404`, når integrationen ikke kan læses, `400`, når den hører til en anden virksomhed, `422`, når body'en ikke er gyldig.
+**Fejl:** `404`, når integrationen ikke kan læses, eller `crmContactId` ikke er en aktiv kontakt, du kan se, `400`, når integrationen, eller kontakten i `crmContactId`, hører til en anden virksomhed, `422`, når body'en ikke er gyldig.
 
 ---
 
@@ -101,7 +101,7 @@ Sender mange feedbacks for én virksomhed og ét produkt.
 
 **Svar `200`:** listen over oprettede feedbacks. Feedbacks, hvis `external_id` allerede findes for samme integration, springes over og returneres ikke.
 
-**Fejl:** `400`, når `company` eller `product` mangler eller ikke findes, eller en feedback angiver en anden virksomhed eller et andet produkt. `422`, når body'en ikke er gyldig.
+**Fejl:** `400`, når `company` eller `product` er tom eller ikke findes, en feedback angiver en anden virksomhed eller et andet produkt, eller et `crmContactId` hører til en anden virksomhed. `404`, når et `crmContactId` ikke er en aktiv kontakt, du kan se, og så gemmes ingen af forespørgslens feedbacks. `422`, når body'en ikke er gyldig, fx uden `company` eller `product`.
 
 ---
 
@@ -115,22 +115,23 @@ Læser én feedback ud fra dens Deepdots-`id`.
 
 ## `POST /crm/contacts/upsert`
 
-Opretter eller opdaterer én kontakt, fundet ud fra e-mail i din virksomhed.
+Opretter eller opdaterer én kontakt i din virksomhed, fundet ud fra e-mail blandt aktive kontakter, ellers ud fra `externalId`.
 
 **Body**
 
 | Felt | Type | Påkrævet | Noter |
 |---|---|---|---|
-| `email` | string | Ja | Uden mellemrum og med små bogstaver. Opslagsnøglen; ændres aldrig ved en opdatering |
-| `name`, `lastname` | string | Nej | |
-| `externalId` | string | Nej | Dit id for kontakten |
+| `email` | string | Ja | Uden mellemrum og med små bogstaver. Slås op først, blandt aktive kontakter. En kontakt, der er fundet ud fra `externalId`, får denne e-mail |
+| `name` | string | Ja | |
+| `lastname` | string | Nej | |
+| `externalId` | string | Nej | Dit id for kontakten. Slås op, når ingen aktiv kontakt har e-mailen |
 | `phone`, `address`, `city`, `state`, `postalCode` | string | Nej | |
-| `country` | string | Nej | ISO 3166-1 alpha-2 |
+| `country` | string | Nej | ISO 3166-1 alpha-2, med små bogstaver (`dk`) |
 | `customFields` | object | Nej | Værdier er strings, tal eller booleans. Flettes ved opdatering; `null` fjerner en nøgle |
 
-**Svar `200`:** kontakten, inklusive `id`.
+**Svar `200`:** kontakten, inklusive `id` og `status`. En kontakt, der er fundet ud fra `externalId`, kan være `UNSUBSCRIBED`.
 
-**Fejl:** `400` ved en ugyldig e-mail, `406`, når virksomheden ikke er din, `422`, når body'en ikke er gyldig.
+**Fejl:** `400` ved en ugyldig e-mail, `406`, når virksomheden ikke er din, `422`, når body'en ikke er gyldig (fx et manglende `name` eller et `country` med store bogstaver).
 
 ---
 
@@ -141,7 +142,7 @@ Opretter eller opdaterer op til 500 kontakter i én forespørgsel.
 **Body**
 
 ```json
-{ "items": [ { "email": "...", "customFields": { } } ] }
+{ "items": [ { "email": "...", "name": "...", "customFields": { } } ] }
 ```
 
 Hvert element har de samme felter som `POST /crm/contacts/upsert`.
@@ -157,7 +158,7 @@ Hvert element har de samme felter som `POST /crm/contacts/upsert`.
 }
 ```
 
-**Fejl:** `400`, når `items` er tom eller har mere end 500 elementer. Fejl på enkelte elementer returneres i `failed`.
+**Fejl:** `400`, når `items` er tom eller har mere end 500 elementer, `422`, når et element ikke passer til felterne i `POST /crm/contacts/upsert`; så gemmes intet. Andre fejl på enkelte elementer, fx en ugyldig e-mail, returneres i `failed`, og resten gemmes.
 
 ---
 
@@ -180,7 +181,7 @@ Alle andre felter afvises med `400`. `email` og `externalId` kan ikke ændres he
 { "id": "<contact-id>", "customFields": { "tier": "platinum" } }
 ```
 
-**Fejl:** `406`, når kontakten ikke findes eller ikke er din.
+**Fejl:** `406`, når kontakten ikke findes, ikke er din eller ikke er aktiv (afmeldt eller slettet).
 
 ---
 
@@ -195,4 +196,4 @@ Finder kontakter med en `filter`-forespørgselsparameter (JSON):
 | `skip` | `{"skip": 100}` |
 | `order` | `{"order": ["createdAt DESC"]}` |
 
-**Svar `200`:** en liste af kontakter. Kun aktive kontakter i din virksomhed returneres.
+**Svar `200`:** en liste af din virksomheds kontakter. Kun de aktive returneres, medmindre dit `where` har en `status`-nøgle på øverste niveau. `status` er `ACTIVE`, `UNSUBSCRIBED` eller `DEPRECATED` (slettet).

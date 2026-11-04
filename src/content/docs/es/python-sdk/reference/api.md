@@ -26,7 +26,7 @@ client = Deepdots(
 | `base_url` | string | `"https://api.magicfeedback.io"` | URL raíz de la API (producción) |
 | `auth_source` | string | `"datastore"` | De dónde sale el token. Pasa `"identity"` para iniciar sesión con `user` y `password` a través de la API (`POST /auth/token`), que es lo que necesitas fuera del propio Google Cloud de Deepdots. El valor por defecto busca primero un token cacheado en el Google Cloud Datastore de Deepdots e inicia sesión con `user` y `password` cuando no lo hay |
 
-El constructor inicia sesión de inmediato. Los tokens de inicio de sesión duran una hora.
+El constructor inicia sesión de inmediato. Si falla, lanza `requests.HTTPError` (SDK 1.0.25): `401` si el email o la contraseña son incorrectos, `403` si la cuenta de inicio de sesión está deshabilitada, `429` tras demasiados intentos fallidos, `502` si no se puede contactar con el proveedor de identidad. Los tokens de inicio de sesión duran una hora.
 
 ### Propiedades
 
@@ -39,7 +39,7 @@ El constructor inicia sesión de inmediato. Los tokens de inicio de sesión dura
 | `metrics` | `MetricsAPI` | Recuperación de métricas |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Preguntas para una integración |
 | `reports` | `ReportsAPI` | Endpoints de reportes |
-| `crm` | `CrmAPI` | Objetos CRM (SDK 1.0.24) |
+| `crm` | `CrmAPI` | Objetos CRM (SDK 1.0.25) |
 | `companies` | `CompaniesAPI` | Listado de empresas |
 | `requests` | `RequestsAPI` | Solicitudes de investigación |
 | `signals` | `SignalsAPI` | Signals |
@@ -71,7 +71,7 @@ Acceso via `client.feedbacks`.
 
 ### `create(feedback)`
 
-Comprueba que las claves requeridas estén presentes (lanza `ValueError` si falta alguna), envuelve en una lista cada `value` que no sea una lista (ver [Envoltura de valores de respuesta](/es/python-sdk/guides/feedback/#envoltura-de-valores-de-respuesta)) y envía `feedback` como cuerpo JSON de `POST /feedbacks` con tus claves sin cambios. Retorna el objeto de feedback creado. Si `external_id` coincide con un feedback que ya existe para la misma empresa, producto e integración y que no se ha eliminado, retorna en su lugar ese feedback existente, sin cambios. Ver [Gestión de Feedback](/es/python-sdk/guides/feedback/).
+Comprueba que las claves requeridas estén presentes (lanza `ValueError` si falta alguna). A partir del SDK 1.0.25, un `companyId` o `productId` que falte o esté vacío se copia de la integración, que el SDK lee una vez por cada `integrationId` y cliente (`GET /integrations/{id}`; una integración sin empresa o sin producto se lee en cada llamada). Si la API rechaza la lectura, se lanza `requests.exceptions.HTTPError`; si la integración no tiene empresa, no tiene producto y no pasaste `productId`, o pertenece a una empresa distinta del `companyId` que pasaste, `ValueError` (ver [Campos requeridos](/es/python-sdk/guides/feedback/#campos-requeridos)). En ninguno de los dos casos se crea nada. Después envuelve en una lista cada `value` que no sea una lista (ver [Envoltura de valores de respuesta](/es/python-sdk/guides/feedback/#envoltura-de-valores-de-respuesta)) y envía `feedback` como cuerpo JSON de `POST /feedbacks` con tus claves sin cambios. Retorna el objeto de feedback creado. Si `external_id` coincide con un feedback que ya existe para la misma empresa, producto e integración y que no se ha eliminado, retorna en su lugar ese feedback existente, sin cambios. Ver [Gestión de Feedback](/es/python-sdk/guides/feedback/).
 
 ### `get(filter=None)`
 
@@ -119,15 +119,15 @@ Acceso via `client.contacts`.
 
 ### `create(contact)`
 
-Retorna el objeto de contacto creado. Ver [Contactos](/es/python-sdk/guides/contacts/).
+Retorna el objeto de contacto creado. Si la empresa ya tiene un contacto con el `externalId` que envías, no se agrega ningún contacto: se actualiza ese contacto con los campos que envías y se retorna. Ver [Crear un contacto](/es/python-sdk/guides/contacts/#crear-un-contacto).
 
 ### `get(filter=None)`
 
-Retorna una lista de objetos de contacto.
+Retorna una lista de objetos de contacto: solo los activos, salvo que el `where` de tu filtro tenga una clave `status` en su primer nivel.
 
 ### `update(contact_id, contact)`
 
-Retorna el objeto de contacto actualizado.
+Retorna un dict vacío (`{}`), porque la API responde `204 No Content`.
 
 ### `upsert(contact)`
 
@@ -135,7 +135,7 @@ Retorna el objeto de contacto actualizado.
 |---|---|---|
 | `contact` | dict | Payload del contacto; `name`, `email` y `companyId` son obligatorios |
 
-Actualiza el contacto activo de la empresa que tenga el mismo email, o crea uno. En una actualización, los campos que envías se sobrescriben y `customFields` se fusiona. Retorna el contacto. Ver [Crear o actualizar por email](/es/python-sdk/guides/contacts/#crear-o-actualizar-por-email). SDK 1.0.22.
+Actualiza el contacto activo de la empresa que tenga el mismo email; si no hay ninguno, el contacto con el `externalId` que envías; si tampoco lo hay, crea uno. En una actualización, los campos que envías se sobrescriben y `customFields` se fusiona. Retorna el contacto. Ver [Crear o actualizar por email](/es/python-sdk/guides/contacts/#crear-o-actualizar-por-email). SDK 1.0.22.
 
 ### `upsert_batch(items, chunk_size=500)`
 
@@ -158,15 +158,15 @@ Agrega o cambia los campos personalizados que envías y conserva los demás. Ret
 
 ### `delete(contact_id)`
 
-Retorna el objeto de contacto eliminado.
+Retorna un dict vacío (`{}`). El estado del contacto pasa a ser `DEPRECATED`.
 
 ---
 
 ## CrmAPI
 
-Acceso via `client.crm`. SDK 1.0.24. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
+Acceso via `client.crm`. SDK 1.0.25. Ver [Objetos CRM](/es/python-sdk/guides/crm-objects/).
 
-Cada método envía 500 registros por request, reenvía hasta 3 veces un request que falla de forma temporal (502, 503, 504, un error de conexión o un timeout de 300 segundos) y vuelve a iniciar sesión una vez si el token ha caducado. Si un request sigue fallando, lanza una `requests.RequestException`. Los métodos de escritura retornan totales de todos los requests, y el `index` de cada entrada de `failed` indica su posición en la lista que pasaste.
+Cada método envía 500 registros por request, reenvía hasta 3 veces un request que falla de forma temporal (502, 503, 504, un error de conexión o un timeout de 300 segundos) y renueva el token una vez, como hace `refresh_token()`, si ha caducado. Si un request sigue fallando, lanza una `requests.RequestException`. Los métodos de escritura retornan totales de todos los requests, y el `index` de cada entrada de `failed` indica su posición en la lista que pasaste.
 
 ### `upsert_objects(object_type, items, company_id=None, chunk_size=500)`
 
@@ -308,9 +308,9 @@ Códigos de estado que puedes recibir:
 | `400` | El request está mal formado o no está permitido — por ejemplo, un valor de filtro que contiene `&` o `#` (ver [Consultas](/es/python-sdk/guides/querying/)), o un `crmContactId` de una empresa distinta a la del feedback, cuando tu usuario tiene acceso a ambas empresas (un contacto de una empresa a la que no tienes acceso retorna `404`) |
 | `401` | El token falta, no es válido o ha caducado, o tu usuario está desactivado. Los tokens caducan después de aproximadamente una hora: en procesos largos, como una importación, crea un nuevo cliente (o, a partir del SDK 1.0.17, llama a `client.refresh_token()`) y vuelve a intentarlo |
 | `403` | Filtraste por una empresa a la que tu usuario no tiene acceso, por ejemplo con un `companyId` incorrecto en `where` |
-| `404` | Algo a lo que hace referencia el request no existe o no es visible para ti — por ejemplo, un `crmContactId`, una campaña o un reporte |
-| `405` | El rol de tu usuario no permite esta operación (ej. actualizar feedback) |
-| `406` | El registro no existe, fue eliminado o pertenece a una empresa a la que no tienes acceso — por ejemplo, `feedbacks.get_id()`, `update()` o `delete()` sobre un feedback así (estas llamadas retornan 406, no 404) |
+| `404` | Algo a lo que hace referencia el request no existe o no es visible para ti — por ejemplo, un `crmContactId` que no es un contacto activo que puedas ver, una campaña o un reporte |
+| `405` | El rol de tu usuario no permite esta operación (ej. actualizar feedback, o leer la integración cuando `feedbacks.create()` tiene que obtener `companyId`/`productId`) |
+| `406` | El registro no existe, fue eliminado o pertenece a una empresa a la que no tienes acceso — por ejemplo, `feedbacks.get_id()`, `update()` o `delete()` sobre un feedback así (estas llamadas retornan 406, no 404), `contacts.update()`, `update_fields()` o `delete()` sobre un contacto que no está activo (dado de baja o eliminado), o la integración que `feedbacks.create()` tiene que consultar |
 | `422` | El cuerpo del request no es válido — un campo desconocido o mal escrito, un tipo incorrecto o un valor fuera de la lista permitida |
 
 Una respuesta `422` lista todos los problemas en `details`; con el SDK, léelo desde la excepción como `e.response.json()["error"]["details"]`. Por ejemplo, enviar `externalId` en lugar de `external_id` retorna:

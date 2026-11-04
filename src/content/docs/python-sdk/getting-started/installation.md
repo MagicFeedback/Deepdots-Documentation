@@ -16,38 +16,50 @@ pip installs the runtime dependencies automatically: `requests`, `google-cloud-p
 pip install deepdots
 ```
 
-This always gives you the latest release.
+This installs the latest release. `deepdots` has no code of its own: it installs `magicfeedback`, the package that holds the SDK and its version number. To upgrade or pin the SDK, use `magicfeedback`.
+
+### Upgrading
+
+`pip install --upgrade deepdots` doesn't upgrade an SDK that is already installed. Upgrade `magicfeedback` instead:
+
+```bash
+pip install --upgrade magicfeedback
+```
 
 ### Installing a specific version
 
 To pin an exact version — replace `X.Y.Z` with the one you want:
 
 ```bash
-pip install "deepdots==X.Y.Z"
+pip install "magicfeedback==X.Y.Z"
 ```
 
 Or set a minimum in your `requirements.txt`:
 
 ```text
-deepdots>=X.Y.Z
+magicfeedback>=X.Y.Z
 ```
+
+Don't pin `deepdots`: its last version is 1.0.19, and a `deepdots` version doesn't decide which SDK version you get.
 
 The [Changelog](/python-sdk/reference/changelog/) lists every released version with its date.
 
 ## Coming from `MagicFeedback`?
 
-The SDK used to be published as `MagicFeedback`, before the company was renamed to Deepdots. **Existing code keeps working unchanged** — nothing needs migrating.
+The SDK was first published as `MagicFeedback`, before the company was renamed to Deepdots, and its code is still published under that name, as `magicfeedback`. **Existing code keeps working unchanged** — nothing needs migrating.
 
-Both distributions are published, and both install the same code:
+Both names install the same code:
 
 ```bash
-pip install deepdots        # current name
-pip install magicfeedback   # original name, still supported
+pip install deepdots        # installs magicfeedback
+pip install magicfeedback   # the package to upgrade and pin
 ```
+
+If you already install `magicfeedback`, keep it.
 
 The import names work the same way. `deepdots_sdk` and `magicfeedback_sdk` expose the very same objects, and the `Deepdots` class *is* the `MagicFeedback` class — the same Python object under two names, so `isinstance()` checks behave identically.
 
-New code should use the Deepdots names.
+New code should import `deepdots_sdk` and use the `Deepdots` class.
 
 ## Verify
 

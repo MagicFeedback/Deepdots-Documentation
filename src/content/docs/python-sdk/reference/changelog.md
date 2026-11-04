@@ -7,11 +7,16 @@ Every published release, newest first. Dates are the PyPI publication dates.
 
 To install a specific version, see [Installation](/python-sdk/getting-started/installation/).
 
-## 1.0.24 — unreleased
+## 1.0.25 — 2026-11-04
 
-- **Sign-in goes through the Deepdots API** (`POST /auth/token`) instead of calling Google Identity Platform directly. The `ip_key` argument is no longer used: it is ignored, with a `DeprecationWarning`.
-- `refresh_token()` renews a signed-in token with its refresh token (`POST /auth/token/refresh`), signing in again only if the refresh token was rejected.
-- New `client.crm` for CRM objects: `upsert_objects()` and `get_objects()`. Every `client.crm` request is resent when it fails temporarily (502, 503, 504, a connection error or a timeout), and signs in again once when the token has expired. See [CRM objects](/python-sdk/guides/crm-objects/).
+1.0.23 and 1.0.24 were never published, so this is the first release since 1.0.22.
+
+Since November 2026 the API also matches contacts by `externalId`, with every SDK version: `contacts.create()` with an `externalId` the company already has updates that contact instead of adding one, and `upsert()` updates the contact with your `externalId` when no active contact has the email. See [Contacts](/python-sdk/guides/contacts/#create-a-contact).
+
+- **`feedbacks.create()` no longer needs `companyId` and `productId`.** When you leave one out or send it empty, the SDK copies it from the integration. See [Managing Feedback](/python-sdk/guides/feedback/#required-fields).
+- **Sign-in goes through the Deepdots API** (`POST /auth/token`) instead of calling Google Identity Platform directly. The `ip_key` argument is no longer used: it is ignored, with a `DeprecationWarning`. A failed sign-in raises `requests.HTTPError` with the API's status codes: 401 for a wrong email or password, 403 if the sign-in account is disabled, 429 after too many failed attempts, 502 if the identity provider can't be reached. Earlier versions raised Identity Platform's answer, a 400 with the reason in the response body.
+- With `auth_source="identity"`, `refresh_token()` renews the token with the refresh token of the last sign-in (`POST /auth/token/refresh`), signing in again only if that refresh token was rejected. With the default `auth_source`, it gets a token the same way the constructor does.
+- New `client.crm` for CRM objects: `upsert_objects()` and `get_objects()`. Every `client.crm` request is resent when it fails temporarily (502, 503, 504, a connection error or a timeout), and gets a new token once, as `refresh_token()` does, when the token has expired. See [CRM objects](/python-sdk/guides/crm-objects/).
 
 ## 1.0.22 — 2026-09-25
 

@@ -7,11 +7,16 @@ Alle udgivne versioner, nyeste først. Datoerne er udgivelsesdatoerne på PyPI.
 
 Se [Installation](/da/python-sdk/getting-started/installation/) for at installere en bestemt version.
 
-## 1.0.24 — ikke udgivet
+## 1.0.25 — 2026-11-04
 
-- **Login går gennem Deepdots API'et** (`POST /auth/token`) i stedet for at kalde Google Identity Platform direkte. Argumentet `ip_key` bruges ikke længere: det ignoreres med en `DeprecationWarning`.
-- `refresh_token()` fornyer et login-token med dets refresh-token (`POST /auth/token/refresh`) og logger kun ind igen, hvis refresh-tokenet afvises.
-- Ny `client.crm` til CRM-objekter: `upsert_objects()` og `get_objects()`. Hver `client.crm`-request sendes igen, når den fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout), og klienten logger ind igen én gang, når tokenet er udløbet. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
+1.0.23 og 1.0.24 blev aldrig udgivet, så dette er den første udgivelse siden 1.0.22.
+
+Siden november 2026 matcher API'et også kontakter på `externalId`, med alle SDK-versioner: `contacts.create()` med et `externalId`, som virksomheden allerede har, opdaterer den kontakt i stedet for at tilføje en ny, og `upsert()` opdaterer kontakten med dit `externalId`, når ingen aktiv kontakt har e-mailen. Se [Kontakter](/da/python-sdk/guides/contacts/#opret-en-kontakt).
+
+- **`feedbacks.create()` kræver ikke længere `companyId` og `productId`.** Udelader du et af dem eller sender det tomt, kopierer SDK'en værdien fra integrationen. Se [Administration af Feedback](/da/python-sdk/guides/feedback/#påkrævede-felter).
+- **Login går gennem Deepdots API'et** (`POST /auth/token`) i stedet for at kalde Google Identity Platform direkte. Argumentet `ip_key` bruges ikke længere: det ignoreres med en `DeprecationWarning`. Et mislykket login kaster `requests.HTTPError` med API'ets statuskoder: 401 ved forkert e-mail eller adgangskode, 403, hvis login-kontoen er deaktiveret, 429 efter for mange mislykkede forsøg og 502, hvis identitetsudbyderen ikke kan nås. Tidligere versioner kastede Identity Platforms svar, en 400 med årsagen i svarets body.
+- Med `auth_source="identity"` fornyer `refresh_token()` tokenet med refresh-tokenet fra sidste login (`POST /auth/token/refresh`) og logger kun ind igen, hvis det refresh-token afvises. Med standardværdien for `auth_source` henter den et token på samme måde som konstruktøren.
+- Ny `client.crm` til CRM-objekter: `upsert_objects()` og `get_objects()`. Hver `client.crm`-request sendes igen, når den fejler midlertidigt (502, 503, 504, en forbindelsesfejl eller en timeout), og klienten henter et nyt token én gang, som `refresh_token()` gør, når tokenet er udløbet. Se [CRM-objekter](/da/python-sdk/guides/crm-objects/).
 
 ## 1.0.22 — 2026-09-25
 
