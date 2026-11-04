@@ -18,13 +18,13 @@ For `POST /feedbacks/bulk`, keep each request under the 1 MB body limit. A few h
 ## Retry safely
 
 - **Feedback:** always send `external_id`. A retried request returns the feedback that already exists instead of creating a second one.
-- **Contacts:** use the upsert endpoints. Sending the same contact twice updates it instead of creating a duplicate.
+- **Contacts:** use the upsert endpoints. Sending the same contact again after the first request has answered updates it instead of creating a duplicate. Don't send the same contact in two requests at the same time: both can create it.
 - **When to retry:** on network errors, timeouts and `5xx` responses, with an increasing wait between attempts (for example 1 s, 2 s, 4 s). Retry a `401` once, after refreshing the token.
 - **When not to retry:** `400`, `404`, `406` and `422` mean the request itself is wrong. Fix it before sending it again.
 
 ## Partial failures
 
-`POST /crm/contacts/upsert/batch` handles each contact on its own. A malformed request (an empty list, or more than 500 items) fails the whole call with `400`. Anything that only affects one contact, such as an invalid email, is listed in `failed` and the rest are saved:
+`POST /crm/contacts/upsert/batch` handles each contact on its own. A malformed request fails the whole call, and nothing is saved: `400` for an empty list or more than 500 items, and `422` when an item doesn't match the contact fields (a missing `name` or `email`, an unknown field, a value of the wrong type, or a `country` the API doesn't accept, such as an uppercase code). An error found while saving one contact, such as an invalid email, is listed in `failed` and the rest are saved:
 
 ```json
 {

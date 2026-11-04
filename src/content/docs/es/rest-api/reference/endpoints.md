@@ -14,7 +14,7 @@ Todos los endpoints reciben y devuelven JSON. Todos salvo los dos de `/auth/toke
 | `POST` | `/feedbacks` | Envía un feedback |
 | `POST` | `/feedbacks/bulk` | Envía muchos feedbacks de una compañía y un producto |
 | `GET` | `/feedbacks/{id}` | Lee un feedback |
-| `POST` | `/crm/contacts/upsert` | Crea o actualiza un contacto por email |
+| `POST` | `/crm/contacts/upsert` | Crea o actualiza un contacto por email o por `externalId` |
 | `POST` | `/crm/contacts/upsert/batch` | Crea o actualiza hasta 500 contactos |
 | `PATCH` | `/crm/contacts/{id}/fields` | Actualiza los campos personalizados y los datos de un contacto |
 | `GET` | `/crm/contacts` | Busca contactos |
@@ -79,11 +79,11 @@ Envía un feedback.
 | `externalGeneratedAt` | string ISO 8601 | No | Por defecto, ahora |
 | `externalUpdatedAt` | string ISO 8601 | No | Por defecto, ahora |
 | `externalUrl` | string | No | |
-| `crmContactId` | string | No | Un contacto de la misma compañía |
+| `crmContactId` | string | No | Un contacto activo de la misma compañía |
 
 **Respuesta `200`:** el feedback, incluidos `id`, `status` (`REGISTERED` si es nuevo) y `createdAt`.
 
-**Errores:** `404` cuando no se puede leer la integración, `400` cuando pertenece a otra compañía, `422` cuando el cuerpo no es válido.
+**Errores:** `404` cuando no se puede leer la integración o `crmContactId` no es un contacto activo que puedas ver, `400` cuando la integración, o el contacto de `crmContactId`, pertenece a otra compañía, `422` cuando el cuerpo no es válido.
 
 ---
 
@@ -101,7 +101,7 @@ Envía muchos feedbacks de una compañía y un producto.
 
 **Respuesta `200`:** la lista de feedbacks creados. Los feedbacks cuyo `external_id` ya existe para la misma integración se omiten y no se devuelven.
 
-**Errores:** `400` cuando falta `company` o `product` o no existen, o un feedback indica otra compañía u otro producto. `422` cuando el cuerpo no es válido.
+**Errores:** `400` cuando `company` o `product` están vacíos o no existen, un feedback indica otra compañía u otro producto, o un `crmContactId` pertenece a otra compañía. `404` cuando un `crmContactId` no es un contacto activo que puedas ver, y entonces no se guarda ningún feedback de la petición. `422` cuando el cuerpo no es válido, por ejemplo sin `company` o `product`.
 
 ---
 
@@ -115,22 +115,23 @@ Lee un feedback por su `id` de Deepdots.
 
 ## `POST /crm/contacts/upsert`
 
-Crea o actualiza un contacto, buscándolo por email dentro de tu compañía.
+Crea o actualiza un contacto de tu compañía, buscándolo por email entre los contactos activos o, en su defecto, por `externalId`.
 
 **Cuerpo**
 
 | Campo | Tipo | Obligatorio | Notas |
 |---|---|---|---|
-| `email` | string | Sí | Sin espacios y en minúsculas. Es la clave de búsqueda; una actualización nunca lo cambia |
-| `name`, `lastname` | string | No | |
-| `externalId` | string | No | Tu id para el contacto |
+| `email` | string | Sí | Sin espacios y en minúsculas. Es la primera clave de búsqueda, entre los contactos activos. Un contacto encontrado por `externalId` toma este email |
+| `name` | string | Sí | |
+| `lastname` | string | No | |
+| `externalId` | string | No | Tu id para el contacto. Es la clave de búsqueda cuando ningún contacto activo tiene el email |
 | `phone`, `address`, `city`, `state`, `postalCode` | string | No | |
-| `country` | string | No | ISO 3166-1 alpha-2 |
+| `country` | string | No | ISO 3166-1 alpha-2, en minúsculas (`dk`) |
 | `customFields` | object | No | Los valores son strings, números o booleanos. Se fusionan al actualizar; `null` elimina una clave |
 
-**Respuesta `200`:** el contacto, incluido `id`.
+**Respuesta `200`:** el contacto, incluidos `id` y `status`. Un contacto encontrado por `externalId` puede estar `UNSUBSCRIBED`.
 
-**Errores:** `400` para un email no válido, `406` cuando la compañía no es tuya, `422` cuando el cuerpo no es válido.
+**Errores:** `400` para un email no válido, `406` cuando la compañía no es tuya, `422` cuando el cuerpo no es válido (por ejemplo, falta `name` o `country` está en mayúsculas).
 
 ---
 
@@ -141,7 +142,7 @@ Crea o actualiza hasta 500 contactos en una sola petición.
 **Cuerpo**
 
 ```json
-{ "items": [ { "email": "...", "customFields": { } } ] }
+{ "items": [ { "email": "...", "name": "...", "customFields": { } } ] }
 ```
 
 Cada elemento tiene los mismos campos que `POST /crm/contacts/upsert`.
@@ -157,7 +158,7 @@ Cada elemento tiene los mismos campos que `POST /crm/contacts/upsert`.
 }
 ```
 
-**Errores:** `400` cuando `items` está vacío o tiene más de 500 elementos. Los errores de elementos individuales se devuelven en `failed`.
+**Errores:** `400` cuando `items` está vacío o tiene más de 500 elementos, `422` cuando algún elemento no se ajusta a los campos de `POST /crm/contacts/upsert`; en ese caso no se guarda nada. Los demás errores de elementos individuales, como un email no válido, se devuelven en `failed`, y el resto se guarda.
 
 ---
 
@@ -180,7 +181,7 @@ Cualquier otro campo se rechaza con `400`. `email` y `externalId` no se pueden c
 { "id": "<contact-id>", "customFields": { "tier": "platinum" } }
 ```
 
-**Errores:** `406` cuando el contacto no existe o no es tuyo.
+**Errores:** `406` cuando el contacto no existe, no es tuyo o no está activo (dado de baja o eliminado).
 
 ---
 
@@ -195,4 +196,4 @@ Busca contactos con un parámetro de consulta `filter` (JSON):
 | `skip` | `{"skip": 100}` |
 | `order` | `{"order": ["createdAt DESC"]}` |
 
-**Respuesta `200`:** una lista de contactos. Solo se devuelven los contactos activos de tu compañía.
+**Respuesta `200`:** una lista de los contactos de tu compañía. Solo se devuelven los activos, salvo que tu `where` tenga una clave `status` en su primer nivel. `status` es `ACTIVE`, `UNSUBSCRIBED` o `DEPRECATED` (eliminado).
