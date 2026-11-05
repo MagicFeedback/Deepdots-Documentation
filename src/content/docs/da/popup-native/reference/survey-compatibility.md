@@ -19,8 +19,8 @@ Fra **popup-SDK web 1.19.0 og native 0.7.10** tegner en popup sin undersøgelse 
 
 | Popup-SDK | Medfølgende survey-SDK | Understøttede survey-SDK'er | Undersøgelsesversioner, det følger |
 |---|---|---|---|
-| Web 1.19.0 og nyere (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.3.0, 3.4.0, 3.4.1 |
-| Native 0.7.10 og nyere (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.3.0, 3.4.0, 3.4.1 |
+| Web 1.19.0 og nyere (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
+| Native 0.7.10 og nyere (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
 | Web 1.18.0 og ældre | 2.2.37 (1.18.0) | Fast | Ingen: altid det medfølgende survey-SDK |
 | Native 0.7.9 og ældre | 2.2.31 (0.7.9) | Fast | Ingen: altid det medfølgende survey-SDK |
 
@@ -29,14 +29,12 @@ Fra **popup-SDK web 1.19.0 og native 0.7.10** tegner en popup sin undersøgelse 
 | Undersøgelsesversion | Survey-SDK | Følges af popups (web 1.19.0+, native 0.7.10+) | Produktion |
 |---|---|---|---|
 | 3.4.1 | 2.2.39 | Ja | Kandidat (kan fastlåses) |
-| 3.4.0 | 2.2.38 | Ja | Ikke udgivet |
-| 3.3.0 | 2.2.38 | Ja | Ikke udgivet |
 | 3.2.1 | 2.2.36 | Nej: medfølgende survey-SDK | Kandidat |
 | 3.2.0 | 2.2.36 | Nej: medfølgende survey-SDK | Stabil (latest) |
 | 3.1.0 | 2.2.35 | Nej: medfølgende survey-SDK | Stabil |
 | 3.0.0 og ældre | Ikke registreret | Nej: medfølgende survey-SDK | Stabil eller udfaset |
 
-Survey-SDK pr. undersøgelsesversion hentet fra versionsregistret den 5. november 2026.
+Produktion ifølge versionsregistret den 5. november 2026. Den aktuelle liste med status for hver undersøgelsesversion i produktion findes på `GET https://api.deepdots.com/sdk/survey-versions` (offentlig, skrivebeskyttet).
 
 ## Hvornår popuppen bruger sit medfølgende survey-SDK
 

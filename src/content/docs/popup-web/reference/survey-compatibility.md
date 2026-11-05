@@ -19,8 +19,8 @@ From **popup SDK web 1.19.0 and native 0.7.10**, a popup draws its survey with t
 
 | Popup SDK | Bundled survey SDK | Supported survey SDKs | Survey versions it follows |
 |---|---|---|---|
-| Web 1.19.0 and later (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.3.0, 3.4.0, 3.4.1 |
-| Native 0.7.10 and later (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.3.0, 3.4.0, 3.4.1 |
+| Web 1.19.0 and later (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
+| Native 0.7.10 and later (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
 | Web 1.18.0 and earlier | 2.2.37 (1.18.0) | Fixed | None: always the bundled survey SDK |
 | Native 0.7.9 and earlier | 2.2.31 (0.7.9) | Fixed | None: always the bundled survey SDK |
 
@@ -29,14 +29,12 @@ From **popup SDK web 1.19.0 and native 0.7.10**, a popup draws its survey with t
 | Survey version | Survey SDK | Followed by popups (web 1.19.0+, native 0.7.10+) | Production |
 |---|---|---|---|
 | 3.4.1 | 2.2.39 | Yes | Candidate (can be pinned) |
-| 3.4.0 | 2.2.38 | Yes | Not released |
-| 3.3.0 | 2.2.38 | Yes | Not released |
 | 3.2.1 | 2.2.36 | No: bundled survey SDK | Candidate |
 | 3.2.0 | 2.2.36 | No: bundled survey SDK | Stable (latest) |
 | 3.1.0 | 2.2.35 | No: bundled survey SDK | Stable |
 | 3.0.0 and earlier | Not recorded | No: bundled survey SDK | Stable or deprecated |
 
-Survey SDK per survey version taken from the version registry on 5 November 2026.
+Production, from the version registry on 5 November 2026. The current list, with the status of each survey version in production, is at `GET https://api.deepdots.com/sdk/survey-versions` (public, read-only).
 
 ## When the popup uses its bundled survey SDK
 

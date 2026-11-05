@@ -19,8 +19,8 @@ Desde **el SDK de popup web 1.19.0 y nativo 0.7.10**, un popup pinta su encuesta
 
 | SDK de popup | SDK de encuestas incluido | SDK de encuestas soportados | Versiones de encuesta que sigue |
 |---|---|---|---|
-| Web 1.19.0 y posteriores (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.3.0, 3.4.0, 3.4.1 |
-| Nativo 0.7.10 y posteriores (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.3.0, 3.4.0, 3.4.1 |
+| Web 1.19.0 y posteriores (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
+| Nativo 0.7.10 y posteriores (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
 | Web 1.18.0 y anteriores | 2.2.37 (1.18.0) | Fijo | Ninguna: siempre el SDK de encuestas incluido |
 | Nativo 0.7.9 y anteriores | 2.2.31 (0.7.9) | Fijo | Ninguna: siempre el SDK de encuestas incluido |
 
@@ -29,14 +29,12 @@ Desde **el SDK de popup web 1.19.0 y nativo 0.7.10**, un popup pinta su encuesta
 | Versión de encuesta | SDK de encuestas | La siguen los popups (web 1.19.0+, nativo 0.7.10+) | Producción |
 |---|---|---|---|
 | 3.4.1 | 2.2.39 | Sí | Candidata (se puede fijar) |
-| 3.4.0 | 2.2.38 | Sí | No publicada |
-| 3.3.0 | 2.2.38 | Sí | No publicada |
 | 3.2.1 | 2.2.36 | No: SDK de encuestas incluido | Candidata |
 | 3.2.0 | 2.2.36 | No: SDK de encuestas incluido | Estable (latest) |
 | 3.1.0 | 2.2.35 | No: SDK de encuestas incluido | Estable |
 | 3.0.0 y anteriores | Sin registrar | No: SDK de encuestas incluido | Estable u obsoleta |
 
-SDK de encuestas de cada versión tomado del registro de versiones el 5 de noviembre de 2026.
+Producción, según el registro de versiones el 5 de noviembre de 2026. La lista al día, con el estado de cada versión de encuesta en producción, está en `GET https://api.deepdots.com/sdk/survey-versions` (pública, de solo lectura).
 
 ## Cuándo usa el popup el SDK de encuestas incluido
 
