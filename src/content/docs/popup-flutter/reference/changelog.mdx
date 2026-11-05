@@ -13,9 +13,16 @@ head:
 
 Every release, newest first.
 
+## 1.0.0
+
+First release, no longer a beta. Install it with `ref: v1.0.0`. Same Dart API as 0.1.0-beta.2.
+
+- Native Deepdots SDK `0.7.9` (was `0.7.6`). Fixes that reach Flutter apps: on iOS a popup triggered right after launch is shown; a time-on-screen popup opens once; no Back button on the first screen after a failed Send; the title and the close button stay visible when the survey is taller than the screen; on iOS a popup at the top stays inside the safe area; the keyboard no longer covers Back and Send (iOS, and Android 8 to 10); Send, Back and close work on old Android WebViews.
+- Validated with the same automated test list as the native SDK 0.7.9 release, on iOS 16.4 to 26.5 and Android 8 to 16.
+
 ## 0.1.0-beta.2
 
-Install it with `ref: v0.1.0-beta.2`. Same Dart API and native SDK (`0.7.6`) as 0.1.0-beta.1.
+Install it with `ref: v1.0.0`. Same Dart API and native SDK (`0.7.6`) as 0.1.0-beta.1.
 
 - Supports Flutter 3.24 or later (Dart 3.5); 0.1.0-beta.1 needed Flutter 3.47.
 - Apps on Android Gradle plugin 8 build: the plugin applies the Kotlin plugin itself when needed. Apps created with Flutter 3.24 to 3.32 need a newer Android toolchain; see [Installation](/popup-flutter/getting-started/installation/#apps-created-with-flutter-324-to-332).

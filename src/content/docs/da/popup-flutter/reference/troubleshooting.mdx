@@ -32,7 +32,7 @@ Indstillingen `EXCLUDED_ARCHS` mangler. Tilføj den som beskrevet i [Installatio
 
 ## `flutter pub get` kan ikke hente pakken
 
-Repositoriet er privat under den tidlige adgang. Tjek, at din Deepdots-kontakt har givet din GitHub-konto adgang, og at git kan nå private repositories fra din maskine og fra CI (en SSH-nøgle eller en credential helper).
+Repositoriet er offentligt, så der kræves ingen credentials. Tjek, at `url` og `ref` svarer til [Installation](/da/popup-flutter/getting-started/installation/) (tagget starter med `v`, for eksempel `v1.0.0`), og at din maskine og CI kan nå github.com.
 
 ## Fejl i Dart SDK-versionen
 
@@ -51,4 +51,3 @@ Swift Package Manager er slået til på en Flutter-version ældre end 3.41. Slå
 - Installeres kun fra git; endnu ikke på pub.dev.
 - Apps oprettet med Flutter 3.24 til 3.32 skal have Android-toolchain-ændringerne fra [Installation](/da/popup-flutter/getting-started/installation/#apps-oprettet-med-flutter-324-til-332).
 - `setLanguage()` ændrer ikke det sprog, der rapporteres i analytics: det sættes én gang, i `init()`.
-- iOS: en popup, der udløses i det første øjeblik efter opstart, kan blive talt som vist uden at blive vist. Udløs events efter første frame, for eksempel med `WidgetsBinding.instance.addPostFrameCallback`.

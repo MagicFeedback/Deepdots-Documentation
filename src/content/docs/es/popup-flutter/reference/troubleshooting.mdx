@@ -32,7 +32,7 @@ Se llamó a `show`, `showByPopupId`, `triggerSurvey` o `close` antes de que la a
 
 ## `flutter pub get` no puede descargar el paquete
 
-El repositorio es privado durante el acceso anticipado. Comprueba que tu contacto de Deepdots dio acceso a tu cuenta de GitHub, y que git puede llegar a repositorios privados desde tu máquina y desde CI (una clave SSH o un credential helper).
+El repositorio es público, así que no hacen falta credenciales. Comprueba que `url` y `ref` coinciden con [Instalación](/es/popup-flutter/getting-started/installation/) (el tag empieza por `v`, por ejemplo `v1.0.0`) y que tu máquina y la CI llegan a github.com.
 
 ## Error de versión del SDK de Dart
 
@@ -51,4 +51,3 @@ Swift Package Manager está activado en una versión de Flutter anterior a la 3.
 - Solo se instala desde git; todavía no está en pub.dev.
 - Las apps creadas con Flutter 3.24 a 3.32 necesitan los cambios de toolchain de Android de [Instalación](/es/popup-flutter/getting-started/installation/#apps-creadas-con-flutter-324-a-332).
 - `setLanguage()` no cambia el idioma reportado en la analítica: se fija una sola vez, en `init()`.
-- iOS: un popup lanzado en el primer instante tras arrancar la app puede contarse como mostrado sin llegar a aparecer. Lanza los eventos después del primer frame, por ejemplo con `WidgetsBinding.instance.addPostFrameCallback`.

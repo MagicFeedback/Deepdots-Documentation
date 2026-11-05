@@ -13,8 +13,8 @@ head:
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="note" title="Tidlig adgang">
-`deepdots_popups` `0.1.0-beta.2` er i tidlig adgang. Den er endnu ikke på pub.dev: den installeres fra git, låst til et release-tag.
+<Aside type="note">
+`deepdots_popups` `1.0.0` installeres fra git, låst til et release-tag. Den er ikke på pub.dev.
 </Aside>
 
 ## Krav
@@ -24,13 +24,13 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 | Flutter | 3.24 eller nyere (Dart 3.5). Builds tjekkes på hver stabil udgivelse fra 3.24 til 3.47. |
 | Android | minSdk 24, compileSdk 36. Android Gradle plugin 8.9.1, Gradle 8.11.1 og Kotlin 2.1 eller nyere. |
 | iOS | 13.0 eller nyere. Swift Package Manager kræver Flutter 3.41 eller nyere; CocoaPods virker på alle understøttede versioner. |
-| Native SDK | `0.7.6`, hentes ind af pluginet (Maven Central på Android; Swift Package Manager eller CocoaPods på iOS) |
+| Native SDK | `0.7.9`, hentes ind af pluginet (Maven Central på Android; Swift Package Manager eller CocoaPods på iOS) |
 
 Apps oprettet med en ældre Flutter-skabelon kan have brug for et par ændringer: se [Android](#3-opsæt-android) og [iOS](#4-opsæt-ios) nedenfor. Hvis din app er på en Flutter-version ældre end 3.24, så sig det til din Deepdots-kontakt.
 
-## 1. Få adgang
+## 1. Repository
 
-Pluginets repository er privat under den tidlige adgang. Bed din Deepdots-kontakt eller Deepdots-support om adgang, og brug de git-credentials, du allerede bruger til private afhængigheder (en SSH-nøgle eller en credential helper). Skriv aldrig et token eller en adgangskode i `pubspec.yaml`.
+Pluginets repository er offentligt ([MagicFeedback/deepdots-popup-flutter-sdk](https://github.com/MagicFeedback/deepdots-popup-flutter-sdk), Apache License 2.0): der skal ikke bedes om adgang, og der kræves ingen git-credentials.
 
 ## 2. Tilføj afhængigheden
 
@@ -42,7 +42,7 @@ dependencies:
   deepdots_popups:
     git:
       url: https://github.com/MagicFeedback/deepdots-popup-flutter-sdk.git
-      ref: v0.1.0-beta.2
+      ref: v1.0.0
 ```
 
 ```bash

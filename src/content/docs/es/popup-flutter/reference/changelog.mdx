@@ -13,9 +13,16 @@ head:
 
 Todas las versiones, de más reciente a más antigua.
 
+## 1.0.0
+
+Primera release, ya no es beta. Instálala con `ref: v1.0.0`. Misma API de Dart que la 0.1.0-beta.2.
+
+- SDK nativo de Deepdots `0.7.9` (antes `0.7.6`). Arreglos que llegan a las apps Flutter: en iOS se muestra un popup lanzado justo al arrancar; un popup por tiempo en pantalla se abre una sola vez; sin botón Atrás en la primera pantalla tras un envío fallido; el título y el botón de cerrar siguen visibles cuando el survey es más alto que la pantalla; en iOS un popup arriba queda dentro del área segura; el teclado ya no tapa Atrás y Enviar (iOS, y Android 8 a 10); Enviar, Atrás y cerrar funcionan en WebViews antiguos de Android.
+- Validada con la misma lista de tests automáticos que la release del SDK nativo 0.7.9, en iOS 16.4 a 26.5 y Android 8 a 16.
+
 ## 0.1.0-beta.2
 
-Instálala con `ref: v0.1.0-beta.2`. Misma API de Dart y mismo SDK nativo (`0.7.6`) que la 0.1.0-beta.1.
+Instálala con `ref: v1.0.0`. Misma API de Dart y mismo SDK nativo (`0.7.6`) que la 0.1.0-beta.1.
 
 - Soporta Flutter 3.24 o posterior (Dart 3.5); la 0.1.0-beta.1 necesitaba Flutter 3.47.
 - Las apps con Android Gradle plugin 8 compilan: el plugin aplica él mismo el plugin de Kotlin cuando hace falta. Las apps creadas con Flutter 3.24 a 3.32 necesitan una toolchain de Android más reciente; consulta [Instalación](/es/popup-flutter/getting-started/installation/#apps-creadas-con-flutter-324-a-332).
