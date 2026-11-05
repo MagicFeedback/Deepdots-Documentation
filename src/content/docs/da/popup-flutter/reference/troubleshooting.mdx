@@ -51,3 +51,4 @@ Swift Package Manager er slået til på en Flutter-version ældre end 3.41. Slå
 - Installeres kun fra git; endnu ikke på pub.dev.
 - Apps oprettet med Flutter 3.24 til 3.32 skal have Android-toolchain-ændringerne fra [Installation](/da/popup-flutter/getting-started/installation/#apps-oprettet-med-flutter-324-til-332).
 - `setLanguage()` ændrer ikke det sprog, der rapporteres i analytics: det sættes én gang, i `init()`.
+- En dialog eller et bottom sheet, som Flutter tegner (`showDialog`, `showModalBottomSheet`), holder ikke en popup tilbage: det native SDK venter kun på native dialoger, så en popup på tid (for eksempel 5 sekunder efter opstart) kan åbne oven på din samtykkedialog. Hvis din app beder om samtykke ved opstart, så kald `DeepdotsPopups.init()`, efter brugeren har svaret.
