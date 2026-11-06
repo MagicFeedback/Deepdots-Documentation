@@ -13,6 +13,21 @@ head:
 
 Alle udgivelser, nyeste først.
 
+## 1.0.0
+
+Første release, ikke længere en beta. Installér den med `ref: v1.0.0`. Samme Dart-API som 0.1.0-beta.2.
+
+- Native Deepdots SDK `0.7.9` (før `0.7.6`). Rettelser, der når Flutter-apps: på iOS vises en popup, der udløses lige efter opstart; en popup på tid på skærmen åbner kun én gang; ingen Tilbage-knap på første skærm efter en mislykket afsendelse; titlen og luk-knappen forbliver synlige, når surveyen er højere end skærmen; på iOS bliver en popup øverst inden for det sikre område; tastaturet dækker ikke længere Tilbage og Send (iOS og Android 8 til 10); Send, Tilbage og luk virker i gamle Android-WebViews.
+- Valideret med samme liste af automatiske tests som native SDK 0.7.9-releasen, på iOS 16.4 til 26.5 og Android 8 til 16.
+
+## 0.1.0-beta.2
+
+Installér den med `ref: v1.0.0`. Samme Dart-API og native SDK (`0.7.6`) som 0.1.0-beta.1.
+
+- Understøtter Flutter 3.24 eller nyere (Dart 3.5); 0.1.0-beta.1 krævede Flutter 3.47.
+- Apps på Android Gradle plugin 8 bygger: pluginet anvender selv Kotlin-pluginet, når det er nødvendigt. Apps oprettet med Flutter 3.24 til 3.32 skal have en nyere Android-toolchain; se [Installation](/da/popup-flutter/getting-started/installation/#apps-oprettet-med-flutter-324-til-332).
+- Apache License 2.0.
+
 ## 0.1.0-beta.1
 
 Første beta. Installér den med `ref: v0.1.0-beta.1`.

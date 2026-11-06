@@ -32,14 +32,23 @@ The `EXCLUDED_ARCHS` setting is missing. Add it as described in [Installation](/
 
 ## `flutter pub get` cannot fetch the package
 
-The repository is private during early access. Check that your Deepdots contact gave your GitHub account access, and that git can reach private repositories from your machine and from CI (an SSH key or a credential helper).
+The repository is public, so no credentials are needed. Check that the `url` and `ref` match [Installation](/popup-flutter/getting-started/installation/) (the tag starts with `v`, for example `v1.0.0`) and that your machine and CI can reach github.com.
 
 ## Dart SDK version error
 
-The plugin needs Dart 3.13.5 or later (Flutter 3.47 or later). If your app is on an older Flutter version, tell your Deepdots contact.
+The plugin needs Flutter 3.24 or later (Dart 3.5). If your app is on an older Flutter version, tell your Deepdots contact.
+
+## Android: "requires Android Gradle plugin 8.9.1 or higher" or "incompatible version of Kotlin"
+
+Your app was created with Flutter 3.32 or earlier and its Android toolchain is older than the native SDK needs. Raise the Android Gradle plugin, Gradle, Kotlin and `compileSdk` as shown in [Installation](/popup-flutter/getting-started/installation/#apps-created-with-flutter-324-to-332).
+
+## iOS: "The folder FlutterFramework doesn't exist"
+
+Swift Package Manager is enabled on a Flutter version older than 3.41. Turn it off with `flutter config --no-enable-swift-package-manager`; the app then builds with CocoaPods.
 
 ## Known limitations
 
 - Installed from git only; not on pub.dev yet.
+- Apps created with Flutter 3.24 to 3.32 need the Android toolchain changes from [Installation](/popup-flutter/getting-started/installation/#apps-created-with-flutter-324-to-332).
 - `setLanguage()` does not change the language reported in analytics: it is set once, in `init()`.
-- iOS: a popup triggered in the first instant after launch can be counted as shown without appearing. Trigger events after the first frame, for example with `WidgetsBinding.instance.addPostFrameCallback`.
+- A dialog or bottom sheet drawn by Flutter (`showDialog`, `showModalBottomSheet`) does not hold a popup back: the native SDK only waits for native dialogs, so a popup on a timer (for example 5 seconds after launch) can open over your own consent dialog. If your app asks for consent at start, call `DeepdotsPopups.init()` after the user answers it.

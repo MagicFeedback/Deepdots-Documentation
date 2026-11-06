@@ -13,24 +13,24 @@ head:
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="note" title="Acceso anticipado">
-`deepdots_popups` `0.1.0-beta.1` está en acceso anticipado. Todavía no está en pub.dev: se instala desde git, fijado a un tag de release.
+<Aside type="note">
+`deepdots_popups` `1.0.0` se instala desde git, fijado a un tag de release. No está en pub.dev.
 </Aside>
 
 ## Requisitos
 
 | | |
 |---|---|
-| Dart / Flutter | Dart 3.13.5 o posterior (Flutter 3.47 o posterior). Probado con Flutter 3.47.6. |
-| Android | minSdk 24, compileSdk 36 |
-| iOS | 13.0 o posterior |
-| SDK nativo | `0.7.6`, lo incorpora el plugin (Maven Central en Android; Swift Package Manager o CocoaPods en iOS) |
+| Flutter | 3.24 o posterior (Dart 3.5). Los builds se comprueban en cada versión estable de la 3.24 a la 3.47. |
+| Android | minSdk 24, compileSdk 36. Android Gradle plugin 8.9.1, Gradle 8.11.1 y Kotlin 2.1 o posteriores. |
+| iOS | 13.0 o posterior. Swift Package Manager necesita Flutter 3.41 o posterior; CocoaPods funciona en todas las versiones soportadas. |
+| SDK nativo | `0.7.9`, lo incorpora el plugin (Maven Central en Android; Swift Package Manager o CocoaPods en iOS) |
 
-Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
+Las apps creadas con una plantilla de Flutter antigua pueden necesitar algunos cambios: consulta [Android](#3-configura-android) e [iOS](#4-configura-ios) más abajo. Si tu app está en una versión de Flutter anterior a la 3.24, díselo a tu contacto de Deepdots.
 
-## 1. Consigue acceso
+## 1. Repositorio
 
-El repositorio del plugin es privado durante el acceso anticipado. Pide acceso a tu contacto de Deepdots o al soporte de Deepdots, y usa las credenciales de git que ya usas para dependencias privadas (una clave SSH o un credential helper). Nunca escribas un token ni una contraseña en `pubspec.yaml`.
+El repositorio del plugin es público ([MagicFeedback/deepdots-popup-flutter-sdk](https://github.com/MagicFeedback/deepdots-popup-flutter-sdk), licencia Apache 2.0): no hace falta pedir acceso ni credenciales de git.
 
 ## 2. Añade la dependencia
 
@@ -42,7 +42,7 @@ dependencies:
   deepdots_popups:
     git:
       url: https://github.com/MagicFeedback/deepdots-popup-flutter-sdk.git
-      ref: v0.1.0-beta.1
+      ref: v1.0.0
 ```
 
 ```bash
@@ -53,16 +53,45 @@ Fija siempre `ref` a un tag. Para actualizar, cambia el tag y vuelve a ejecutar 
 
 ## 3. Configura Android
 
-En la mayoría de apps no hay nada que añadir:
+Las apps creadas con Flutter 3.35 o posterior no necesitan nada más:
 
 - El SDK nativo viene de Maven Central. `mavenCentral()` debe estar en tus repositorios, como lo está en un proyecto Flutter por defecto.
 - El plugin declara el permiso `INTERNET`, que Flutter solo añade a los builds de debug y profile. Sin él, un build de release no podría llegar a Deepdots. No necesitas añadirlo tú.
 - Funciona cualquier `Activity`, incluida la `FlutterActivity` por defecto.
-- Tu app necesita `minSdk` 24 o superior.
+
+### Apps creadas con Flutter 3.24 a 3.32
+
+Su plantilla usa una toolchain de Android más antigua de la que necesitan las librerías del SDK nativo. Súbela:
+
+En `android/settings.gradle` o `android/settings.gradle.kts`:
+
+```kotlin
+id("com.android.application") version "8.9.1" apply false       // o posterior
+id("org.jetbrains.kotlin.android") version "2.1.21" apply false  // 2.1 o posterior
+```
+
+En `android/gradle/wrapper/gradle-wrapper.properties`, Gradle 8.11.1 o posterior:
+
+```properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-all.zip
+```
+
+En `android/app/build.gradle` o `android/app/build.gradle.kts`, dentro de `android { ... }`:
+
+```kotlin
+compileSdk = 36
+defaultConfig {
+    minSdk = 24
+}
+```
+
+Sin estos cambios, el build se detiene con un mensaje que nombra la versión que falta, como "requires Android Gradle plugin 8.9.1 or higher" o "compiled with an incompatible version of Kotlin".
 
 ## 4. Configura iOS
 
-Flutter compila los plugins de iOS con Swift Package Manager cuando está activado, y con CocoaPods en caso contrario. Ambos funcionan.
+Tu app debe tener como target iOS 13.0 o posterior. Las apps creadas con Flutter 3.32 o anterior tienen 12.0: sube **Minimum Deployments** a 13.0 en Xcode (target Runner, pestaña General) y, con CocoaPods, pon `platform :ios, '13.0'` al principio de `ios/Podfile`.
+
+Flutter compila los plugins de iOS con Swift Package Manager cuando está activado, y con CocoaPods en caso contrario. Ambos funcionan, pero Swift Package Manager necesita Flutter 3.41 o posterior. En un Flutter más antiguo con Swift Package Manager activado, el build falla con "The folder FlutterFramework doesn't exist": desactívalo con `flutter config --no-enable-swift-package-manager` y la app usará CocoaPods.
 
 El SDK nativo no incluye un slice de simulador `x86_64`, así que hay que excluir la arquitectura de simulador Intel. Sin este ajuste, `flutter run` en un simulador de Apple Silicon sigue funcionando, pero `flutter build ios --simulator` falla al enlazar.
 
@@ -92,7 +121,6 @@ El SDK nativo no incluye un slice de simulador `x86_64`, así que hay que exclui
   </TabItem>
 </Tabs>
 
-Tu deployment target de iOS debe ser 13.0 o posterior.
 
 ## Siguiente paso
 
