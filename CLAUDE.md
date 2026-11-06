@@ -41,6 +41,10 @@ Each product has exactly three sections: `getting-started/`, `guides/`, `referen
 ## Unlisted (early-access) topics
 A topic listed in `src/unlisted.mjs` is published but hidden: not in the topic selector (unless you
 are on it), not in the sitemap, and its pages set `pagefind: false` plus a robots `noindex` meta.
+Single pages can be unlisted too: add them to `UNLISTED_PAGES` in `src/unlisted.mjs`, set
+`sidebar.hidden`, `pagefind: false` and the robots `noindex` meta in their frontmatter, and map them to
+their topic in the `topics` option of `starlightSidebarTopics` in `astro.config.mjs` (hidden pages
+have no sidebar entry, so the plugin cannot find their topic otherwise).
 Do not add landing cards for it. To launch it, remove it from `UNLISTED_TOPICS`, drop that
 frontmatter, and add the landing cards.
 

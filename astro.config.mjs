@@ -46,6 +46,7 @@ export default defineConfig({
       plugins: [
         starlightSidebarTopics([
           {
+            id: 'popup-web',
             label: { en: 'Popup Web SDK', es: 'SDK Popup Web', da: 'Popup Web SDK' },
             link: '/popup-web/',
             icon: 'rocket',
@@ -56,6 +57,7 @@ export default defineConfig({
             ],
           },
           {
+            id: 'popup-native',
             label: { en: 'Popup Native (KMP)', es: 'Popup Nativo (KMP)', da: 'Popup Native (KMP)' },
             link: '/popup-native/',
             icon: 'phone',
@@ -106,7 +108,14 @@ export default defineConfig({
               { label: 'Reference', autogenerate: { directory: 'rest-api/reference' } },
             ],
           },
-        ]),
+        ], {
+          // Unlisted single pages (src/unlisted.mjs): hidden from the sidebar, so the plugin needs
+          // to be told which topic they belong to.
+          topics: {
+            'popup-web': ['/popup-web/reference/survey-compatibility', '/es/popup-web/reference/survey-compatibility', '/da/popup-web/reference/survey-compatibility'],
+            'popup-native': ['/popup-native/reference/survey-compatibility', '/es/popup-native/reference/survey-compatibility', '/da/popup-native/reference/survey-compatibility'],
+          },
+        }),
       ],
     }),
   ],
