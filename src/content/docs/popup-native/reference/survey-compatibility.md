@@ -13,28 +13,33 @@ head:
 
 Every survey has a **survey version** in the Admin (*Survey frontend version*: **latest** or a pinned version). Each survey version is a release of the survey app built with one version of `@magicfeedback/native`, the **survey SDK** that draws the questions.
 
-From **popup SDK web 1.19.0 and native 0.7.10**, a popup draws its survey with the survey SDK of the survey version assigned in the Admin, like the survey page does, as long as the popup SDK supports that survey SDK. Older popup SDKs always use the survey SDK they ship with.
+From **popup SDK web 1.19.0 and native 0.7.11**, a popup draws its survey with the survey SDK of the survey version assigned in the Admin, like the survey page does, as long as the popup SDK supports that survey SDK. Older popup SDKs always use the survey SDK they ship with.
+
+:::note
+Native 0.7.10 was tagged but never published. Update native apps from 0.7.9 straight to 0.7.11.
+:::
 
 ## Popup SDKs
 
 | Popup SDK | Bundled survey SDK | Supported survey SDKs | Survey versions it follows |
 |---|---|---|---|
-| Web 1.19.0 and later (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
-| Native 0.7.10 and later (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1 |
+| Web 1.19.0 and later (`@magicfeedback/popup-sdk`) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1, 3.6.0 |
+| Native 0.7.11 and later (Android, iOS) | 2.2.39 | 2.2.38, 2.2.39 | 3.4.1, 3.6.0 |
 | Web 1.18.0 and earlier | 2.2.37 (1.18.0) | Fixed | None: always the bundled survey SDK |
 | Native 0.7.9 and earlier | 2.2.31 (0.7.9) | Fixed | None: always the bundled survey SDK |
 
 ## Survey versions
 
-| Survey version | Survey SDK | Followed by popups (web 1.19.0+, native 0.7.10+) | Production |
+| Survey version | Survey SDK | Followed by popups (web 1.19.0+, native 0.7.11+) | Production |
 |---|---|---|---|
+| 3.6.0 | 2.2.39 | Yes | Candidate (can be pinned) |
 | 3.4.1 | 2.2.39 | Yes | Candidate (can be pinned) |
 | 3.2.1 | 2.2.36 | No: bundled survey SDK | Candidate |
 | 3.2.0 | 2.2.36 | No: bundled survey SDK | Stable (latest) |
 | 3.1.0 | 2.2.35 | No: bundled survey SDK | Stable |
 | 3.0.0 and earlier | Not recorded | No: bundled survey SDK | Stable or deprecated |
 
-Production, from the version registry on 5 November 2026. The current list, with the status of each survey version in production, is at `GET https://api.deepdots.com/sdk/survey-versions` (public, read-only).
+Production, from the version registry on 9 November 2026. The current list, with the status of each survey version in production, is at `GET https://api.deepdots.com/sdk/survey-versions` (public, read-only).
 
 ## When the popup uses its bundled survey SDK
 
