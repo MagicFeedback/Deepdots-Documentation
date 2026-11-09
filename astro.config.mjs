@@ -66,8 +66,7 @@ export default defineConfig({
             ],
           },
           {
-            // Early access: unlisted (see src/unlisted.mjs).
-            label: { en: 'Popup Flutter (early access)', es: 'Popup Flutter (acceso anticipado)', da: 'Popup Flutter (tidlig adgang)' },
+            label: { en: 'Popup Flutter', es: 'Popup Flutter', da: 'Popup Flutter' },
             link: '/popup-flutter/',
             icon: 'phone',
             items: [
