@@ -3,12 +3,6 @@ title: Troubleshooting
 description: Problemas comunes al integrar el plugin de Flutter deepdots_popups y cómo solucionarlos.
 sidebar:
   order: 2
-pagefind: false
-head:
-  - tag: meta
-    attrs:
-      name: robots
-      content: noindex
 ---
 
 ## No aparece ningún popup
@@ -32,14 +26,23 @@ Se llamó a `show`, `showByPopupId`, `triggerSurvey` o `close` antes de que la a
 
 ## `flutter pub get` no puede descargar el paquete
 
-El repositorio es privado durante el acceso anticipado. Comprueba que tu contacto de Deepdots dio acceso a tu cuenta de GitHub, y que git puede llegar a repositorios privados desde tu máquina y desde CI (una clave SSH o un credential helper).
+El repositorio es público, así que no hacen falta credenciales. Comprueba que `url` y `ref` coinciden con [Instalación](/es/popup-flutter/getting-started/installation/) (el tag empieza por `v`, por ejemplo `v1.0.0`) y que tu máquina y la CI llegan a github.com.
 
 ## Error de versión del SDK de Dart
 
-El plugin necesita Dart 3.13.5 o posterior (Flutter 3.47 o posterior). Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
+El plugin necesita Flutter 3.24 o posterior (Dart 3.5). Si tu app está en una versión anterior de Flutter, díselo a tu contacto de Deepdots.
+
+## Android: "requires Android Gradle plugin 8.9.1 or higher" o "incompatible version of Kotlin"
+
+Tu app se creó con Flutter 3.32 o anterior y su toolchain de Android es más antigua de lo que necesita el SDK nativo. Sube el Android Gradle plugin, Gradle, Kotlin y `compileSdk` como se indica en [Instalación](/es/popup-flutter/getting-started/installation/#apps-creadas-con-flutter-324-a-332).
+
+## iOS: "The folder FlutterFramework doesn't exist"
+
+Swift Package Manager está activado en una versión de Flutter anterior a la 3.41. Desactívalo con `flutter config --no-enable-swift-package-manager`; la app compilará entonces con CocoaPods.
 
 ## Limitaciones conocidas
 
 - Solo se instala desde git; todavía no está en pub.dev.
+- Las apps creadas con Flutter 3.24 a 3.32 necesitan los cambios de toolchain de Android de [Instalación](/es/popup-flutter/getting-started/installation/#apps-creadas-con-flutter-324-a-332).
 - `setLanguage()` no cambia el idioma reportado en la analítica: se fija una sola vez, en `init()`.
-- iOS: un popup lanzado en el primer instante tras arrancar la app puede contarse como mostrado sin llegar a aparecer. Lanza los eventos después del primer frame, por ejemplo con `WidgetsBinding.instance.addPostFrameCallback`.
+- Un diálogo o bottom sheet dibujado por Flutter (`showDialog`, `showModalBottomSheet`) no retiene un popup: el SDK nativo solo espera a los diálogos nativos, así que un popup por tiempo (por ejemplo, 5 segundos tras arrancar) puede abrirse encima de tu diálogo de consentimiento. Si tu app pide consentimiento al arrancar, llama a `DeepdotsPopups.init()` después de que el usuario responda.
