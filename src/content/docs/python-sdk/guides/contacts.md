@@ -22,9 +22,10 @@ print(contact["id"])
 | Field | Type | Description |
 |---|---|---|
 | `name` | string | First name |
-| `lastname` | string | Last name |
 | `email` | string | Email address |
 | `companyId` | string | Your company identifier |
+
+Every other field (`lastname`, `phone`, `address`...) is optional. Leave out the fields you don't have: `name` can't be empty, and a field sent as `None` is rejected.
 
 If the company already has a contact with the `externalId` you send, `create()` doesn't add one: it updates that contact with the fields you send (`email` included, `customFields` merged) and returns it. A deleted contact becomes active again; an unsubscribed one stays unsubscribed. If your role can't update contacts, the contact comes back unchanged. The API has worked this way since November 2026, with every SDK version.
 

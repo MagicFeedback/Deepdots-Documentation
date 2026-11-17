@@ -22,9 +22,10 @@ print(contact["id"])
 | Felt | Type | Beskrivelse |
 |---|---|---|
 | `name` | string | Fornavn |
-| `lastname` | string | Efternavn |
 | `email` | string | E-mailadresse |
 | `companyId` | string | Dit virksomhedsidentifikator |
+
+Alle andre felter (`lastname`, `phone`, `address`...) er valgfrie. Udelad de felter, du ikke har: `name` må ikke være tomt, og et felt sendt som `None` afvises.
 
 Har virksomheden allerede en kontakt med det `externalId` du sender, tilføjer `create()` ikke en ny: den opdaterer kontakten med de felter du sender (inklusive `email`, og `customFields` flettes) og returnerer den. En slettet kontakt bliver aktiv igen; en afmeldt kontakt forbliver afmeldt. Har din rolle ikke lov til at opdatere kontakter, returneres kontakten uændret. Sådan har API'en virket siden november 2026, med alle SDK-versioner.
 
