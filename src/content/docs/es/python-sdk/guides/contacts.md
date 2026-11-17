@@ -22,9 +22,10 @@ print(contact["id"])
 | Campo | Tipo | Descripción |
 |---|---|---|
 | `name` | string | Nombre |
-| `lastname` | string | Apellido |
 | `email` | string | Dirección de correo |
 | `companyId` | string | Tu identificador de empresa |
+
+El resto de campos (`lastname`, `phone`, `address`...) son opcionales. No envíes los que no tengas: `name` no puede ir vacío, y un campo enviado como `None` se rechaza.
 
 Si la empresa ya tiene un contacto con el `externalId` que envías, `create()` no agrega uno nuevo: actualiza ese contacto con los campos que envías (incluido `email`; `customFields` se fusiona) y lo retorna. Un contacto eliminado vuelve a estar activo; uno dado de baja sigue dado de baja. Si tu rol no permite actualizar contactos, el contacto se retorna sin cambios. La API funciona así desde noviembre de 2026, con cualquier versión del SDK.
 
