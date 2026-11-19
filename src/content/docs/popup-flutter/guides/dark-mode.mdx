@@ -1,0 +1,30 @@
+---
+title: Light and dark mode
+description: Dark survey colours just work, and your app can choose light, dark or the system mode.
+---
+
+# Light and dark mode
+
+The popup and the survey inside it take their colours from the survey **Style** in Deepdots.
+
+- **A dark Style just works:** with dark Style colours the popup switches to light text by itself. No code change.
+- **Follow your app's mode:** set the dark colours in Deepdots (**Survey styling › Dark (optional)**) and pass `appearance`:
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: '<your-public-key>',
+  appearance: DeepdotsAppearance.system, // light | dark | system
+);
+
+// Your app has its own toggle:
+await DeepdotsPopups.setAppearance(DeepdotsAppearance.dark);
+```
+
+| `appearance` | What you get |
+|---|---|
+| `null` (default) | Today's behaviour: the Style colours decide. |
+| `light` | Light popup. The Style's dark colours are ignored. |
+| `dark` | Dark popup with the Style's dark colours, or a default dark palette. |
+| `system` | Follows the phone. |
+
+`setAppearance()` also works before `init()`, and `null` goes back to the Style colours. Needs `deepdots_popups` **1.2.0** or later.

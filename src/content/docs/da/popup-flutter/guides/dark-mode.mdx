@@ -1,0 +1,30 @@
+---
+title: Lys og mørk tilstand
+description: Mørke survey-farver virker af sig selv, og din app kan vælge lys, mørk eller systemets tilstand.
+---
+
+# Lys og mørk tilstand
+
+Popup'en og surveyen i den henter deres farver fra surveyens **Style** i Deepdots.
+
+- **En mørk Style virker af sig selv:** med mørke Style-farver skifter popup'en selv til lys tekst. Ingen kodeændring.
+- **Følg din apps tilstand:** angiv de mørke farver i Deepdots (**Survey styling › Dark (optional)**) og send `appearance` med:
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: '<your-public-key>',
+  appearance: DeepdotsAppearance.system, // light | dark | system
+);
+
+// Din app har sin egen knap:
+await DeepdotsPopups.setAppearance(DeepdotsAppearance.dark);
+```
+
+| `appearance` | Resultat |
+|---|---|
+| `null` (standard) | Som i dag: Style-farverne bestemmer. |
+| `light` | Lys popup. Style'ens mørke farver ignoreres. |
+| `dark` | Mørk popup med Style'ens mørke farver, eller en standard mørk palet. |
+| `system` | Følger telefonen. |
+
+`setAppearance()` virker også før `init()`, og `null` går tilbage til Style-farverne. Kræver `deepdots_popups` **1.2.0** eller nyere.

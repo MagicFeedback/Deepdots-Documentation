@@ -22,6 +22,6 @@ Hvem vælger tilstanden:
 |---|---|
 | Survey-link | Den besøgendes enhed (`prefers-color-scheme`). Tilføj `?mode=dark` eller `?mode=light` til linket for at tvinge en. |
 | Web-popup | Muligheden `appearance` i [popup-SDK'et](/da/popup-web/guides/dark-mode/). |
-| App-popup | Muligheden `appearance` i [native SDK'et](/da/popup-native/guides/dark-mode/). |
+| App-popup | Muligheden `appearance` i [native SDK'et](/da/popup-native/guides/dark-mode/) eller [Flutter-pluginet](/da/popup-flutter/guides/dark-mode/). |
 
 Uden mørke farver tvinges intet: Style bestemmer, som før.

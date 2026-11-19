@@ -22,6 +22,6 @@ Who picks the mode:
 |---|---|
 | Survey link | The visitor's device (`prefers-color-scheme`). Add `?mode=dark` or `?mode=light` to the link to force one. |
 | Web popup | The `appearance` option of the [popup SDK](/popup-web/guides/dark-mode/). |
-| App popup | The `appearance` option of the [native SDK](/popup-native/guides/dark-mode/). |
+| App popup | The `appearance` option of the [native SDK](/popup-native/guides/dark-mode/) or the [Flutter plugin](/popup-flutter/guides/dark-mode/). |
 
 Without dark colours nothing is forced: the Style decides, as before.
