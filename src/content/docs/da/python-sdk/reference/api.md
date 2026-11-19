@@ -37,6 +37,7 @@ Konstruktøren logger ind med det samme. Mislykkes det, kaster den `requests.HTT
 | `campaigns` | `CampaignsAPI` | Kampagne- og sessionsoperationer |
 | `products` | `ProductsAPI` | Produktlisting |
 | `metrics` | `MetricsAPI` | Metrics-hentning |
+| `dashboards` | `DashboardsAPI` | Dine dashboards med deres data (SDK 1.0.26) |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Spørgsmål for en integration |
 | `reports` | `ReportsAPI` | Rapporterings-endpoints |
 | `crm` | `CrmAPI` | CRM-objekter (SDK 1.0.25) |
@@ -233,6 +234,85 @@ Adgang via `client.metrics`.
 ### `get(filter=None)`
 
 Returnerer en liste af metrics-objekter.
+
+### `kpi_ranking(company_id, dimension, formulas, start_date=None, end_date=None, integrations=None, products=None, min_responses=None, limit=None, filters=None, breakdown=None, compare_start_date=None, compare_end_date=None)`
+
+SDK 1.0.26. Returnerer de KPI'er, dine dashboards viser, per værdi af en metric: ét element per agent, team, butik... med hver KPI og KPI'en for dem alle samlet.
+
+```python
+agents = client.metrics.kpi_ranking(
+    "YOUR_COMPANY_ID",
+    dimension="agent",
+    formulas=["csat", "nps"],
+    start_date="2026-11-17",
+    end_date="2026-11-17",
+)
+for agent in agents:
+    csat, nps = agent["kpis"]
+    print(agent["value"], agent["total"], csat["kpi"], nps["kpi"])
+```
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `company_id` | string | Dit virksomheds-ID |
+| `dimension` | string | Navnet på den metric, hvis værdier sammenlignes, f.eks. `"agent"` |
+| `formulas` | list \| string | Navnene på KPI-metrics, f.eks. `["csat", "nps"]` |
+| `start_date`, `end_date` | string \| date \| None | Første og sidste dag, begge inklusive (`"YYYY-MM-DD"`), i UTC, efter den dato feedbacken fandt sted (`externalGeneratedAt`). Uden dem: alle datoer |
+| `integrations`, `products` | list \| None | De integrations-ID'er og produkt-ID'er, der skal med |
+| `min_responses` | int \| None | Udelader værdier med færre svar i den KPI, listen er sorteret efter. De tæller stadig med i den samlede KPI |
+| `limit` | int \| None | Returnerer kun de første N elementer |
+| `filters` | list \| None | Medtager kun feedback med disse metric-værdier, f.eks. `[{"name": "team", "values": ["north", "south"]}]`. En feedback skal matche alle blokke og, i en blok, en af dens værdier. Store og små bogstaver er ens |
+| `breakdown` | string \| None | `"integration"` tilføjer hvert elements KPI'er per integration (`breakdown`) |
+| `compare_start_date`, `compare_end_date` | string \| date \| None | En anden periode at sammenligne med (begge eller ingen). Tilføjer `prev_kpi`, `prev_total` og `change` til hver KPI |
+
+`dimension` og `formulas` er metric-navne: brug `metricName` fra de metrics, som `client.metrics.get()` returnerer. KPI'erne er dem med `type` `FORMULA`.
+
+Returnerer en liste, bedste først efter den første KPI i `formulas`, der har svar. Hvert element har:
+
+| Felt | Beskrivelse |
+|---|---|
+| `value` | Agenten, teamet, butikken... med små bogstaver, som værdien er gemt |
+| `total` | Dens svar med en af KPI'erne, hvert talt én gang |
+| `kpis` | Én post per formel, i din rækkefølge |
+| `kpis[].kpi` | Værdiens KPI; `None` uden svar |
+| `kpis[].total`, `promoters`, `detractors` | Dens svar i denne KPI, og hvor mange der var positive og negative |
+| `kpis[].team_kpi`, `team_total` | KPI'en og svarene for alle værdier samlet, hver feedback talt én gang |
+| `kpis[].delta` | `kpi - team_kpi` |
+| `kpis[].impact` | `delta * total / team_total`: hvor meget værdien flytter den samlede KPI |
+| `kpis[].higher_is_better` | `False` for KPI'er, hvor et lavere tal er bedre |
+
+Tallene er dem bag dashboardets widgets, og de ændrer sig, når dashboardenes data opdateres. Mangler `company_id`, `dimension` eller `formulas`, eller angives kun én sammenligningsdato, kastes en `ValueError`, før der sendes en request; en virksomhed, der ikke er din, svarer `403` (`requests.HTTPError`).
+
+---
+
+## DashboardsAPI
+
+Adgang via `client.dashboards`. SDK 1.0.26.
+
+### `get_data(dashboard_id, start_date=None, end_date=None)`
+
+Returnerer et dashboard med det, hver af dets widgets viser, som én dict: de samme tal, dit team ser på skærmen, for den periode og de filtre, dashboardet åbner med.
+
+```python
+doc = client.dashboards.get_data("YOUR_DASHBOARD_ID")
+for widget in doc["widgets"]:
+    print(widget["title"], widget["type"], widget["data"])
+```
+
+| Parameter | Type | Beskrivelse |
+|---|---|---|
+| `dashboard_id` | string | Dashboardets ID: værdien af `dashboard=` i dets adresse i Deepdots |
+| `start_date`, `end_date` | string \| date \| None | En anden periode end dashboardets egen: første og sidste dag, begge inklusive (`"YYYY-MM-DD"`), i UTC. Begge eller ingen |
+
+Dict'en har `dashboard` (`id`, `name`, `description`, `companyId`), `period` (`name`, `startDate`, `endDate`), `filters`, `generatedAt` og `widgets`, oppefra og ned. Hver widget har `id`, `title`, `type`, `layout`, `config` og `data`, som er `None` for en widget, hvis data ikke er tilgængelige på denne måde. KPI-widgets giver:
+
+| Widgettens `type` | `data` |
+|---|---|
+| `prefab.counter-kpi` | `formula`, `label`, `unit`, `dimension`, `kpi` og `total` (dens svar) |
+| `prefab.kpi-ranking` | `dimension`, `kpis`, `reference` (alle værdier samlet: `kpi` og `total` per formel) og `rows`: hver værdi med `rank`, `value`, `total`, `shown` (om dashboardet viser den, f.eks. top 3) og dens `kpis` (`kpi`, `delta` i forhold til referencen, `total`, `promoters`, `detractors`) |
+| `prefab.kpi-graph` | `formula`, `label`, `unit`, `dimension`, `average` og `rows` (`value`, `kpi`, `total`), i grafens rækkefølge |
+
+Værdier som agentnavne er med små bogstaver, som de er gemt. Din brugers metric-begrænsninger gælder, som i Deepdots. Et dashboard, der ikke findes, eller som du ikke kan se, svarer `404`, og en anden virksomheds `403` (`requests.HTTPError`).
 
 ---
 

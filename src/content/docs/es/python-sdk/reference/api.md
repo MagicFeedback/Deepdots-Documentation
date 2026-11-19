@@ -37,6 +37,7 @@ El constructor inicia sesión de inmediato. Si falla, lanza `requests.HTTPError`
 | `campaigns` | `CampaignsAPI` | Operaciones de campañas y sesiones |
 | `products` | `ProductsAPI` | Listado de productos |
 | `metrics` | `MetricsAPI` | Recuperación de métricas |
+| `dashboards` | `DashboardsAPI` | Tus dashboards con sus datos (SDK 1.0.26) |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Preguntas para una integración |
 | `reports` | `ReportsAPI` | Endpoints de reportes |
 | `crm` | `CrmAPI` | Objetos CRM (SDK 1.0.25) |
@@ -233,6 +234,85 @@ Acceso via `client.metrics`.
 ### `get(filter=None)`
 
 Retorna una lista de objetos de métricas.
+
+### `kpi_ranking(company_id, dimension, formulas, start_date=None, end_date=None, integrations=None, products=None, min_responses=None, limit=None, filters=None, breakdown=None, compare_start_date=None, compare_end_date=None)`
+
+SDK 1.0.26. Retorna los KPIs que muestran tus dashboards, por cada valor de una métrica: un elemento por agente, equipo, tienda... con cada KPI y el KPI de todos juntos.
+
+```python
+agents = client.metrics.kpi_ranking(
+    "YOUR_COMPANY_ID",
+    dimension="agent",
+    formulas=["csat", "nps"],
+    start_date="2026-11-17",
+    end_date="2026-11-17",
+)
+for agent in agents:
+    csat, nps = agent["kpis"]
+    print(agent["value"], agent["total"], csat["kpi"], nps["kpi"])
+```
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `company_id` | string | El ID de tu empresa |
+| `dimension` | string | Nombre de la métrica cuyos valores se comparan, ej. `"agent"` |
+| `formulas` | list \| string | Nombres de las métricas KPI, ej. `["csat", "nps"]` |
+| `start_date`, `end_date` | string \| date \| None | Primer y último día, ambos incluidos (`"YYYY-MM-DD"`), en UTC, según la fecha en que ocurrió el feedback (`externalGeneratedAt`). Sin ellos, todas las fechas |
+| `integrations`, `products` | list \| None | IDs de las integraciones y de los productos a incluir |
+| `min_responses` | int \| None | Omite los valores con menos respuestas en el KPI por el que se ordena la lista. Siguen contando en el KPI global |
+| `limit` | int \| None | Retorna solo los primeros N elementos |
+| `filters` | list \| None | Incluye solo el feedback con estos valores de métrica, ej. `[{"name": "team", "values": ["north", "south"]}]`. Un feedback debe cumplir todos los bloques y, dentro de un bloque, cualquiera de sus valores. No distingue mayúsculas de minúsculas |
+| `breakdown` | string \| None | `"integration"` añade los KPIs de cada elemento por integración (`breakdown`) |
+| `compare_start_date`, `compare_end_date` | string \| date \| None | Un segundo periodo con el que comparar (ambos o ninguno). Añade `prev_kpi`, `prev_total` y `change` a cada KPI |
+
+`dimension` y `formulas` son nombres de métricas: usa el `metricName` de las métricas que retorna `client.metrics.get()`. Los KPIs son las que tienen `type` `FORMULA`.
+
+Retorna una lista, de mejor a peor según el primer KPI de `formulas` que tenga respuestas. Cada elemento tiene:
+
+| Campo | Descripción |
+|---|---|
+| `value` | El agente, equipo, tienda... en minúsculas, tal como está guardado |
+| `total` | Sus respuestas con alguno de los KPIs, cada una contada una vez |
+| `kpis` | Una entrada por fórmula, en tu orden |
+| `kpis[].kpi` | El KPI de este valor; `None` si no hay respuestas |
+| `kpis[].total`, `promoters`, `detractors` | Sus respuestas en este KPI, y cuántas fueron positivas y negativas |
+| `kpis[].team_kpi`, `team_total` | El KPI y las respuestas de todos los valores juntos, con cada feedback contado una vez |
+| `kpis[].delta` | `kpi - team_kpi` |
+| `kpis[].impact` | `delta * total / team_total`: cuánto mueve este valor el KPI global |
+| `kpis[].higher_is_better` | `False` en los KPIs en los que un número más bajo es mejor |
+
+Las cifras son las de los widgets del dashboard, y cambian cuando se actualizan los datos de los dashboards. Si falta `company_id`, `dimension` o `formulas`, o si solo se indica una fecha de comparación, lanza `ValueError` antes de enviar ningún request; una empresa que no es la tuya responde `403` (`requests.HTTPError`).
+
+---
+
+## DashboardsAPI
+
+Acceso via `client.dashboards`. SDK 1.0.26.
+
+### `get_data(dashboard_id, start_date=None, end_date=None)`
+
+Retorna un dashboard con lo que muestra cada uno de sus widgets, en un solo dict: las mismas cifras que ve tu equipo en pantalla, para el periodo y los filtros con los que se abre el dashboard.
+
+```python
+doc = client.dashboards.get_data("YOUR_DASHBOARD_ID")
+for widget in doc["widgets"]:
+    print(widget["title"], widget["type"], widget["data"])
+```
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `dashboard_id` | string | El ID del dashboard: el valor de `dashboard=` en su dirección en Deepdots |
+| `start_date`, `end_date` | string \| date \| None | Otro periodo en lugar del del dashboard: primer y último día, ambos incluidos (`"YYYY-MM-DD"`), en UTC. Ambos o ninguno |
+
+El dict tiene `dashboard` (`id`, `name`, `description`, `companyId`), `period` (`name`, `startDate`, `endDate`), `filters`, `generatedAt` y `widgets`, de arriba abajo. Cada widget tiene `id`, `title`, `type`, `layout`, `config` y `data`, que es `None` en un widget cuyos datos no están disponibles por esta vía. Los widgets de KPI dan:
+
+| `type` del widget | `data` |
+|---|---|
+| `prefab.counter-kpi` | `formula`, `label`, `unit`, `dimension`, `kpi` y `total` (sus respuestas) |
+| `prefab.kpi-ranking` | `dimension`, `kpis`, `reference` (todos los valores juntos: `kpi` y `total` por fórmula) y `rows`: cada valor con `rank`, `value`, `total`, `shown` (si el dashboard lo muestra, p. ej. el top 3) y sus `kpis` (`kpi`, `delta` frente a la referencia, `total`, `promoters`, `detractors`) |
+| `prefab.kpi-graph` | `formula`, `label`, `unit`, `dimension`, `average` y `rows` (`value`, `kpi`, `total`), en el orden del gráfico |
+
+Valores como los nombres de agentes vienen en minúsculas, tal como están guardados. Se aplican las restricciones de métricas de tu usuario, igual que en Deepdots. Un dashboard que no existe o que no puedes ver responde `404`, y el de otra empresa `403` (`requests.HTTPError`).
 
 ---
 

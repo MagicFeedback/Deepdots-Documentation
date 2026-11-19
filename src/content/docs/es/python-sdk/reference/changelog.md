@@ -7,6 +7,11 @@ Todas las versiones publicadas, de más reciente a más antigua. Las fechas son 
 
 Para instalar una versión concreta, consulta [Instalación](/es/python-sdk/getting-started/installation/).
 
+## 1.0.26 — 2026-11-19
+
+- Nuevo `metrics.kpi_ranking()`: los KPIs que muestran tus dashboards, por cada valor de una métrica, por ejemplo el CSAT por agente o por equipo, de un día o de cualquier periodo. Ver [MetricsAPI](/es/python-sdk/reference/api/#metricsapi).
+- Nuevo `dashboards.get_data()`: un dashboard con lo que muestra cada uno de sus widgets, en un solo dict, para el periodo del dashboard u otro. Ver [DashboardsAPI](/es/python-sdk/reference/api/#dashboardsapi).
+
 ## 1.0.25 — 2026-11-04
 
 Las versiones 1.0.23 y 1.0.24 nunca se publicaron, así que esta es la primera versión publicada desde la 1.0.22.

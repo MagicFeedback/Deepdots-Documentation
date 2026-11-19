@@ -37,6 +37,7 @@ The constructor signs in straight away. If that fails, it raises `requests.HTTPE
 | `campaigns` | `CampaignsAPI` | Campaign and session operations |
 | `products` | `ProductsAPI` | Product listing |
 | `metrics` | `MetricsAPI` | Metrics retrieval |
+| `dashboards` | `DashboardsAPI` | Your dashboards with their data (SDK 1.0.26) |
 | `integrations_questions` | `IntegrationsQuestionsAPI` | Questions for an integration |
 | `reports` | `ReportsAPI` | Reporting endpoints |
 | `crm` | `CrmAPI` | CRM objects (SDK 1.0.25) |
@@ -282,6 +283,85 @@ Access via `client.metrics`.
 ### `get(filter=None)`
 
 Returns a list of metric objects.
+
+### `kpi_ranking(company_id, dimension, formulas, start_date=None, end_date=None, integrations=None, products=None, min_responses=None, limit=None, filters=None, breakdown=None, compare_start_date=None, compare_end_date=None)`
+
+SDK 1.0.26. Returns the KPIs your dashboards show, per value of a metric: one item per agent, team, store... with each KPI and the KPI of all of them together.
+
+```python
+agents = client.metrics.kpi_ranking(
+    "YOUR_COMPANY_ID",
+    dimension="agent",
+    formulas=["csat", "nps"],
+    start_date="2026-11-17",
+    end_date="2026-11-17",
+)
+for agent in agents:
+    csat, nps = agent["kpis"]
+    print(agent["value"], agent["total"], csat["kpi"], nps["kpi"])
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `company_id` | string | Your company ID |
+| `dimension` | string | Name of the metric whose values are compared, e.g. `"agent"` |
+| `formulas` | list \| string | Names of the KPI metrics, e.g. `["csat", "nps"]` |
+| `start_date`, `end_date` | string \| date \| None | First and last day, both included (`"YYYY-MM-DD"`), in UTC, of the date the feedback happened (`externalGeneratedAt`). Without them, all dates |
+| `integrations`, `products` | list \| None | Integration IDs and product IDs to keep |
+| `min_responses` | int \| None | Leaves out the values with fewer responses in the KPI the list is sorted by. They still count in the overall KPI |
+| `limit` | int \| None | Returns only the first N items |
+| `filters` | list \| None | Keeps only the feedback with these metric values, e.g. `[{"name": "team", "values": ["north", "south"]}]`. A feedback must match every block and, in a block, any of its values. Upper and lower case are the same |
+| `breakdown` | string \| None | `"integration"` adds each item's KPIs per integration (`breakdown`) |
+| `compare_start_date`, `compare_end_date` | string \| date \| None | A second period to compare with (both or neither). Adds `prev_kpi`, `prev_total` and `change` to each KPI |
+
+`dimension` and `formulas` are metric names: use the `metricName` of the metrics that `client.metrics.get()` returns. The KPIs are the ones with `type` `FORMULA`.
+
+Returns a list, best first by the first KPI in `formulas` that has responses. Each item has:
+
+| Field | Description |
+|---|---|
+| `value` | The agent, team, store... in lower case, as it is stored |
+| `total` | Its responses with any of the KPIs, each counted once |
+| `kpis` | One entry per formula, in your order |
+| `kpis[].kpi` | The KPI of this value; `None` without responses |
+| `kpis[].total`, `promoters`, `detractors` | Its responses in this KPI, and how many were positive and negative |
+| `kpis[].team_kpi`, `team_total` | The KPI and the responses of all values together, each feedback counted once |
+| `kpis[].delta` | `kpi - team_kpi` |
+| `kpis[].impact` | `delta * total / team_total`: how much this value moves the overall KPI |
+| `kpis[].higher_is_better` | `False` for KPIs where a lower number is better |
+
+The figures are the ones behind the dashboard widgets, and they change when the dashboards' data is refreshed. A missing `company_id`, `dimension` or `formulas`, or only one comparison date, raises `ValueError` before any request; a company that is not yours answers `403` (`requests.HTTPError`).
+
+---
+
+## DashboardsAPI
+
+Access via `client.dashboards`. SDK 1.0.26.
+
+### `get_data(dashboard_id, start_date=None, end_date=None)`
+
+Returns a dashboard with what each of its widgets shows, as one dict: the same figures your team sees on screen, for the period and filters the dashboard opens on.
+
+```python
+doc = client.dashboards.get_data("YOUR_DASHBOARD_ID")
+for widget in doc["widgets"]:
+    print(widget["title"], widget["type"], widget["data"])
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `dashboard_id` | string | The dashboard's ID: the `dashboard=` value in its address in Deepdots |
+| `start_date`, `end_date` | string \| date \| None | Another period instead of the dashboard's own: first and last day, both included (`"YYYY-MM-DD"`), in UTC. Both or neither |
+
+The dict has `dashboard` (`id`, `name`, `description`, `companyId`), `period` (`name`, `startDate`, `endDate`), `filters`, `generatedAt` and `widgets`, top to bottom. Each widget has `id`, `title`, `type`, `layout`, `config` and `data`, which is `None` for a widget whose data is not available this way. The KPI widgets give:
+
+| Widget `type` | `data` |
+|---|---|
+| `prefab.counter-kpi` | `formula`, `label`, `unit`, `dimension`, `kpi` and `total` (its responses) |
+| `prefab.kpi-ranking` | `dimension`, `kpis`, `reference` (every value together: `kpi` and `total` per formula) and `rows`: every value with `rank`, `value`, `total`, `shown` (whether the dashboard displays it, e.g. the top 3) and its `kpis` (`kpi`, `delta` against the reference, `total`, `promoters`, `detractors`) |
+| `prefab.kpi-graph` | `formula`, `label`, `unit`, `dimension`, `average` and `rows` (`value`, `kpi`, `total`), in the chart's order |
+
+Values such as agent names are in lower case, as they are stored. Your user's metric restrictions apply, as in Deepdots. A dashboard that doesn't exist or that you can't see answers `404`, another company's `403` (`requests.HTTPError`).
 
 ---
 

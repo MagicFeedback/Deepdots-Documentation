@@ -7,6 +7,11 @@ Alle udgivne versioner, nyeste først. Datoerne er udgivelsesdatoerne på PyPI.
 
 Se [Installation](/da/python-sdk/getting-started/installation/) for at installere en bestemt version.
 
+## 1.0.26 — 2026-11-19
+
+- Ny `metrics.kpi_ranking()`: de KPI'er, dine dashboards viser, per værdi af en metric, f.eks. CSAT per agent eller per team, for én dag eller en vilkårlig periode. Se [MetricsAPI](/da/python-sdk/reference/api/#metricsapi).
+- Ny `dashboards.get_data()`: et dashboard med det, hver af dets widgets viser, som én dict, for dashboardets egen periode eller en anden. Se [DashboardsAPI](/da/python-sdk/reference/api/#dashboardsapi).
+
 ## 1.0.25 — 2026-11-04
 
 1.0.23 og 1.0.24 blev aldrig udgivet, så dette er den første udgivelse siden 1.0.22.
