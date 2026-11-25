@@ -1,0 +1,30 @@
+---
+title: Modo claro y oscuro
+description: Los colores oscuros del survey funcionan solos, y tu app puede elegir claro, oscuro o el del sistema.
+---
+
+# Modo claro y oscuro
+
+El popup y el survey que lleva dentro toman sus colores del **Style** del survey en Deepdots.
+
+- **Un Style oscuro funciona solo:** con colores oscuros en el Style, el popup pasa a texto claro por sí solo. Sin cambios de código.
+- **Seguir el modo de tu app:** configura los colores oscuros en Deepdots (**Survey styling › Dark (optional)**) y pasa `appearance`:
+
+```dart
+await DeepdotsPopups.init(
+  publicKey: '<your-public-key>',
+  appearance: DeepdotsAppearance.system, // light | dark | system
+);
+
+// Tu app tiene su propio interruptor:
+await DeepdotsPopups.setAppearance(DeepdotsAppearance.dark);
+```
+
+| `appearance` | Resultado |
+|---|---|
+| `null` (por defecto) | Como hasta ahora: deciden los colores del Style. |
+| `light` | Popup claro. Los colores oscuros del Style se ignoran. |
+| `dark` | Popup oscuro con los colores oscuros del Style, o una paleta oscura por defecto. |
+| `system` | Sigue al móvil. |
+
+`setAppearance()` funciona también antes de `init()`, y `null` vuelve a los colores del Style. Necesita `deepdots_popups` **1.2.0** o posterior.

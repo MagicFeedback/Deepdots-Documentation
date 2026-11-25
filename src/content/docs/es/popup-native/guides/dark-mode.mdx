@@ -1,0 +1,50 @@
+---
+title: Modo claro y oscuro
+description: Los colores oscuros del survey funcionan solos, y tu app puede elegir claro, oscuro o el del sistema.
+---
+
+# Modo claro y oscuro
+
+El popup y el survey que lleva dentro toman sus colores del **Style** del survey en Deepdots. El modo oscuro funciona de dos formas.
+
+## 1. Un Style oscuro funciona solo
+
+Si los colores del Style son oscuros (por ejemplo un *Survey box background color* oscuro), el popup pasa a texto claro por sí solo: título, botón de cerrar, progreso, preguntas, respuestas y botones. Sin cambios de código, solo un SDK nativo con soporte de modo oscuro.
+
+## 2. Seguir el modo claro u oscuro de tu app
+
+Si tu app tiene modo claro y oscuro, configura los colores oscuros en Deepdots (**Survey styling › Dark (optional)**) e indica al SDK qué modo usar.
+
+Android (Kotlin):
+
+```kotlin
+val sdk = DeepdotsPopups().apply {
+    initialize(
+        InitOptions(
+            popupOptions = PopupOptions(publicKey = "<your-public-key>"),
+            appearance = Appearance.System, // Light | Dark | System
+        )
+    )
+}
+
+// Tu app tiene su propio interruptor:
+sdk.setAppearance(Appearance.Dark)
+```
+
+iOS (Swift):
+
+```swift
+popups.setAppearance(appearance: .dark)   // .light, .dark o .system
+```
+
+| `appearance` | Resultado |
+|---|---|
+| `null` (por defecto) | Como hasta ahora: deciden los colores del Style. |
+| `Light` | Popup claro. Los colores oscuros del Style se ignoran. |
+| `Dark` | Popup oscuro con los colores oscuros del Style. Sin ellos usa el color del Style si ya es oscuro, o una paleta oscura por defecto. |
+| `System` | Sigue al dispositivo (Android `uiMode`, iOS `traitCollection`). |
+
+- `setAppearance(null)` vuelve a los colores del Style. `getAppearance()` devuelve el valor actual.
+- Con `System` el marco del popup sigue un cambio con el popup abierto; el survey mantiene el modo con el que se abrió.
+- En una tarjeta oscura, un botón de marca claro lleva texto oscuro para que se lea.
+- Desde Swift se pasan todos los parámetros de `InitOptions`, así que lo más sencillo es llamar a `setAppearance(appearance:)` justo después de `initialize`.
