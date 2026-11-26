@@ -286,3 +286,43 @@ popups.init({
   contactAttributes: { language: 'es', plan: 'premium' },
 });
 ```
+
+### Contact fields and custom fields
+
+Most keys are stored as **custom fields** on the contact. A few reserved keys fill the contact's own fields instead (keys are case-sensitive):
+
+| Key | Contact field |
+| --- | --- |
+| `name` | Name |
+| `lastname` | Last name |
+| `email` | Email |
+| `phone` | Phone |
+| `address`, `city`, `state`, `postalCode` | Address |
+
+- The contact is always matched by `userId`. The email never links the user to another contact, so use the id of the logged-in **user**, not a customer or account number shared by several users.
+- A contact created before you send a name or email shows `Contact <userId>` and `contact_<userId>@example.com`. They are replaced as soon as real values arrive, and a real value is never replaced by those placeholders.
+- An invalid email does not fail the call: it is kept as the custom field `email`, and the contact's email stays as it was.
+- `null` removes a custom field, or clears `lastname`, `phone` and the address fields. `name` and `email` can't be cleared.
+- Other values are stored as sent (`string`, `number` or `boolean`).
+
+Example: B2B customer data sent when the user logs in.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  userId: 'user-8841',                   // the logged-in user's id in your system
+  contactAttributes: {
+    name: 'Jens Hansen',                 // contact person
+    email: 'jens.hansen@example.dk',
+    kundenavn: 'Hansen Byg ApS',
+    kundenummer: '100234',
+    hovedmarkedssegment: 'Byggeri',
+    markedssegment: 'Renovering',
+    kundesegment: 'A',
+    brugerprofil: 'admin',               // inactive | user | admin
+  },
+});
+```
+
+`name` and `email` go to the contact's fields; `kundenavn`, `kundenummer`, the segments and `brugerprofil` become custom fields you can segment popups on.
+

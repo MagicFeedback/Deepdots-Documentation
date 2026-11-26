@@ -260,6 +260,8 @@ val sent = sdk.setContactAttributes(mapOf("language" to "da", "age" to 34, "plan
 
 Du kan også sende `contactAttributes` i `InitOptions` for at udløse opdateringen ved opstart.
 
+Reserverede nøgler (`name`, `lastname`, `email`, `phone`, `address`, `city`, `state`, `postalCode`) udfylder kontaktens egne felter; alle andre nøgler bliver brugerdefinerede felter. SDK'et sender værdierne som tekst og udelader `null`. Se [Kontaktfelter og brugerdefinerede felter](/da/popup-web/reference/api/#kontaktfelter-og-brugerdefinerede-felter) for reglerne og et fuldt eksempel.
+
 ---
 
 ## Metrics

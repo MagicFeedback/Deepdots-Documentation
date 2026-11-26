@@ -286,3 +286,43 @@ popups.init({
   contactAttributes: { language: 'es', plan: 'premium' },
 });
 ```
+
+### Campos del contacto y campos personalizados
+
+La mayoría de claves se guardan como **campos personalizados** del contacto. Unas pocas claves reservadas rellenan los campos propios del contacto (distinguen mayúsculas):
+
+| Clave | Campo del contacto |
+| --- | --- |
+| `name` | Nombre |
+| `lastname` | Apellidos |
+| `email` | Email |
+| `phone` | Teléfono |
+| `address`, `city`, `state`, `postalCode` | Dirección |
+
+- El contacto se busca siempre por `userId`. El email nunca enlaza al usuario con otro contacto, así que usa el id del **usuario** logueado, no un número de cliente o cuenta que compartan varios usuarios.
+- Un contacto creado antes de enviar nombre o email aparece como `Contact <userId>` y `contact_<userId>@example.com`. Se sustituyen en cuanto llegan valores reales, y un valor real nunca se sustituye por ellos.
+- Un email no válido no hace fallar la llamada: se guarda como campo personalizado `email` y el email del contacto no cambia.
+- `null` borra un campo personalizado, o vacía `lastname`, `phone` y los campos de dirección. `name` y `email` no se pueden vaciar.
+- El resto de valores se guardan tal cual (`string`, `number` o `boolean`).
+
+Ejemplo: datos de cliente B2B enviados cuando el usuario inicia sesión.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  userId: 'user-8841',                   // id del usuario logueado en tu sistema
+  contactAttributes: {
+    name: 'Jens Hansen',                 // contact person
+    email: 'jens.hansen@example.dk',
+    kundenavn: 'Hansen Byg ApS',
+    kundenummer: '100234',
+    hovedmarkedssegment: 'Byggeri',
+    markedssegment: 'Renovering',
+    kundesegment: 'A',
+    brugerprofil: 'admin',               // inactive | user | admin
+  },
+});
+```
+
+`name` y `email` van a los campos del contacto; `kundenavn`, `kundenummer`, los segmentos y `brugerprofil` quedan como campos personalizados para segmentar popups.
+
