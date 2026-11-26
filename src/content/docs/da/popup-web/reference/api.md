@@ -286,3 +286,43 @@ popups.init({
   contactAttributes: { language: 'es', plan: 'premium' },
 });
 ```
+
+### Kontaktfelter og brugerdefinerede felter
+
+De fleste nøgler gemmes som **brugerdefinerede felter** på kontakten. Nogle få reserverede nøgler udfylder i stedet kontaktens egne felter (der skelnes mellem store og små bogstaver):
+
+| Nøgle | Kontaktfelt |
+| --- | --- |
+| `name` | Navn |
+| `lastname` | Efternavn |
+| `email` | E-mail |
+| `phone` | Telefon |
+| `address`, `city`, `state`, `postalCode` | Adresse |
+
+- Kontakten matches altid på `userId`. E-mailen knytter aldrig brugeren til en anden kontakt, så brug id'et for den indloggede **bruger**, ikke et kunde- eller kontonummer, som flere brugere deler.
+- En kontakt, der oprettes før du sender navn eller e-mail, vises som `Contact <userId>` og `contact_<userId>@example.com`. De erstattes, så snart rigtige værdier kommer, og en rigtig værdi erstattes aldrig af dem.
+- En ugyldig e-mail får ikke kaldet til at fejle: den gemmes som det brugerdefinerede felt `email`, og kontaktens e-mail forbliver uændret.
+- `null` fjerner et brugerdefineret felt eller rydder `lastname`, `phone` og adressefelterne. `name` og `email` kan ikke ryddes.
+- Andre værdier gemmes som de sendes (`string`, `number` eller `boolean`).
+
+Eksempel: B2B-kundedata sendt, når brugeren logger ind.
+
+```ts
+popups.init({
+  apiKey: 'YOUR_PUBLIC_API_KEY',
+  userId: 'user-8841',                   // den indloggede brugers id i dit system
+  contactAttributes: {
+    name: 'Jens Hansen',                 // contact person
+    email: 'jens.hansen@example.dk',
+    kundenavn: 'Hansen Byg ApS',
+    kundenummer: '100234',
+    hovedmarkedssegment: 'Byggeri',
+    markedssegment: 'Renovering',
+    kundesegment: 'A',
+    brugerprofil: 'admin',               // inactive | user | admin
+  },
+});
+```
+
+`name` og `email` går til kontaktens felter; `kundenavn`, `kundenummer`, segmenterne og `brugerprofil` bliver brugerdefinerede felter, som popups kan segmenteres på.
+

@@ -260,6 +260,8 @@ val sent = sdk.setContactAttributes(mapOf("language" to "es", "age" to 34, "plan
 
 También puedes pasar `contactAttributes` en `InitOptions` para disparar la actualización en el arranque.
 
+Las claves reservadas (`name`, `lastname`, `email`, `phone`, `address`, `city`, `state`, `postalCode`) rellenan los campos propios del contacto; el resto son campos personalizados. El SDK envía los valores como texto y descarta los `null`. Ver [Campos del contacto y campos personalizados](/es/popup-web/reference/api/#campos-del-contacto-y-campos-personalizados) para las reglas y un ejemplo completo.
+
 ---
 
 ## Métricas

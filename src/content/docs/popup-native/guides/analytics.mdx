@@ -260,6 +260,8 @@ val sent = sdk.setContactAttributes(mapOf("language" to "en", "age" to 34, "plan
 
 You can also pass `contactAttributes` in `InitOptions` to fire the update on startup.
 
+Reserved keys (`name`, `lastname`, `email`, `phone`, `address`, `city`, `state`, `postalCode`) fill the contact's own fields; every other key is a custom field. The SDK sends values as strings and drops `null` ones. See [Contact fields and custom fields](/popup-web/reference/api/#contact-fields-and-custom-fields) for the rules and a full example.
+
 ---
 
 ## Metrics

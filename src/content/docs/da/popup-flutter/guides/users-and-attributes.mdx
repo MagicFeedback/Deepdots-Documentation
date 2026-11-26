@@ -67,6 +67,8 @@ final sent = await DeepdotsPopups.setContactAttributes({
 
 Den returnerer `true`, når attributterne blev sendt, og `false`, når de ikke var ændret, der ikke er noget `userId`, eller tracking er slået fra. For at sende dem ved opstart skal du sende `contactAttributes` sammen med `userId` til `init()`.
 
+Reserverede nøgler (`name`, `lastname`, `email`, `phone`, `address`, `city`, `state`, `postalCode`) udfylder kontaktens egne felter; alle andre nøgler bliver brugerdefinerede felter. SDK'et sender værdierne som tekst og udelader `null`. Se [Kontaktfelter og brugerdefinerede felter](/da/popup-web/reference/api/#kontaktfelter-og-brugerdefinerede-felter) for reglerne og et fuldt eksempel.
+
 ## Survey-metadata
 
 `metadata` i `init()` sendes med hvert survey-svar, fx for at vide, hvilken plan en bruger var på, da vedkommende svarede:

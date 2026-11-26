@@ -67,6 +67,8 @@ final sent = await DeepdotsPopups.setContactAttributes({
 
 Devuelve `true` cuando los atributos se enviaron, y `false` cuando no habían cambiado, no hay `userId` o el tracking está desactivado. Para enviarlos en el arranque, pasa `contactAttributes` junto con `userId` a `init()`.
 
+Las claves reservadas (`name`, `lastname`, `email`, `phone`, `address`, `city`, `state`, `postalCode`) rellenan los campos propios del contacto; el resto son campos personalizados. El SDK envía los valores como texto y descarta los `null`. Ver [Campos del contacto y campos personalizados](/es/popup-web/reference/api/#campos-del-contacto-y-campos-personalizados) para las reglas y un ejemplo completo.
+
 ## Metadata de la encuesta
 
 `metadata` en `init()` se envía con cada respuesta de encuesta, por ejemplo para saber en qué plan estaba un usuario cuando respondió:
